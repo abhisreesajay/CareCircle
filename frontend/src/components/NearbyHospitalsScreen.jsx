@@ -1,72 +1,29 @@
-import { useState } from "react";
-function VoiceCheckInScreen({ onBack }) {
-  const [language, setLanguage] = useState("en-US");
-  const [listening, setListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [message, setMessage] = useState("");
-  const startVoiceCheckIn = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      setMessage(
-        "Voice recognition is not supported. Please use Google Chrome."
+function NearbyHospitalsScreen({ onBack }) {
+  const findHospitals = () => {
+    if (!navigator.geolocation) {
+      alert(
+        "Location is not available on this device."
       );
       return;
     }
+    navigator.geolocation.getCurrentPosition(
 
-    const recognition = new SpeechRecognition();
+      (position) => {
+        const { latitude, longitude } =
+          position.coords;
 
-    recognition.lang = language;
-    recognition.continuous = false;
-    recognition.interimResults = false;
+        const url =
+          `https://www.google.com/maps/search/hospitals/@${latitude},${longitude},14z`;
+        window.open(url, "_blank");
+      },
 
-    setListening(true);
-    setTranscript("");
-    setMessage("");
+      () => {
 
-    try {
-      recognition.start();
-    } catch (error) {
-      setListening(false);
-      setMessage("Unable to start microphone. Please try again.");
-      return;
-    }
-
-    recognition.onresult = (event) => {
-      const speech = event.results[0][0].transcript;
-
-      setTranscript(speech);
-      setListening(false);
-      console.log("Voice response:", speech);
-
-      setMessage(
-        "Your voice response has been recorded successfully."
-      );
-    };
-
-    recognition.onerror = (event) => {
-      setListening(false);
-
-      if (event.error === "not-allowed") {
-        setMessage(
-          "Microphone permission was denied. Please allow microphone access."
-        );
-      } else if (event.error === "no-speech") {
-        setMessage(
-          "No speech was detected. Please speak clearly and try again."
-        );
-      } else {
-        setMessage(
-          "Voice recognition failed. Please try again."
+        alert(
+          "Unable to access your location. Please allow location access."
         );
       }
-    };
-
-    recognition.onend = () => {
-      setListening(false);
-    };
+    );
   };
 
   return (
@@ -78,79 +35,17 @@ function VoiceCheckInScreen({ onBack }) {
 
       <div className="screen-content">
 
-        <h2>Voice Check-in</h2>
+        <h2>Nearby Hospitals</h2>
 
         <p className="screen-question">
-          Speak to complete your daily check-in.
+          Find hospitals near your current location.
         </p>
-
-        <div className="language-section">
-
-          <h3>Select Language</h3>
-
-          <div className="language-buttons">
-
-            <button
-              className={
-                language === "en-US"
-                  ? "language-btn selected"
-                  : "language-btn"
-              }
-              onClick={() => setLanguage("en-US")}
-            >
-              English
-            </button>
-
-            <button
-              className={
-                language === "ml-IN"
-                  ? "language-btn selected"
-                  : "language-btn"
-              }
-              onClick={() => setLanguage("ml-IN")}
-            >
-              മലയാളം
-            </button>
-
-          </div>
-
-        </div>
-
-        <button
-          className="microphone-btn"
-          onClick={startVoiceCheckIn}
-          disabled={listening}
-        >
-          {listening ? "LISTENING..." : "TAP TO SPEAK"}
-        </button>
-
-        <p className="voice-instruction">
-          {listening
-            ? "Please speak clearly."
-            : "Tap the button and speak"}
-        </p>
-
-        {transcript && (
-          <div className="transcript-box">
-            <strong>You said:</strong>
-            <p>{transcript}</p>
-          </div>
-        )}
-
-        {message && (
-          <div className="voice-message">
-            {message}
-          </div>
-        )}
 
         <button
           className="big-action-btn"
-          onClick={startVoiceCheckIn}
-          disabled={listening}
+          onClick={findHospitals}
         >
-          {listening
-            ? "LISTENING..."
-            : "START VOICE CHECK-IN"}
+          FIND NEARBY HOSPITALS
         </button>
 
       </div>
@@ -159,4 +54,4 @@ function VoiceCheckInScreen({ onBack }) {
   );
 }
 
-export default VoiceCheckInScreen;
+export default NearbyHospitalsScreen;
