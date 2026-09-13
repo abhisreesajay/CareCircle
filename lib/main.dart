@@ -26,7 +26,17 @@ class CareCircleApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: const Color(0xFF738F52),
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF7F9F3),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF738F52),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        cardTheme: const CardThemeData(
+          color: Colors.white,
+          elevation: 2,
         ),
         useMaterial3: true,
       ),

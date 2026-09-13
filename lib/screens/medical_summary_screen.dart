@@ -10,28 +10,64 @@ class MedicalSummaryScreen extends StatelessWidget {
     required this.elderId,
   });
 
+  static const Color primaryGreen = Color(0xFF738F52);
+  static const Color darkGreen = Color(0xFF536B3A);
+  static const Color lightGreen = Color(0xFFE8EFDF);
+  static const Color backgroundColor = Color(0xFFF7F9F3);
+  static const Color textColor = Color(0xFF26301F);
+
   @override
   Widget build(BuildContext context) {
     final service = MedicalSummaryService();
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text('Medical Summary'),
+        title: const Text(
+          'Medical Summary',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: primaryGreen,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: FutureBuilder<MedicalSummary?>(
         future: service.getMedicalSummary(elderId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: primaryGreen,
+              ),
             );
           }
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                'Unable to load medical summary',
-                style: const TextStyle(fontSize: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 55,
+                      color: darkGreen,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Unable to load medical summary',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -39,15 +75,34 @@ class MedicalSummaryScreen extends StatelessWidget {
           final summary = snapshot.data;
 
           if (summary == null) {
-            return const Center(
-              child: Text(
-                'No medical summary available',
-                style: TextStyle(fontSize: 16),
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.medical_information_outlined,
+                      size: 65,
+                      color: primaryGreen,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No medical summary available',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }
 
-          return Padding(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
@@ -59,7 +114,7 @@ class MedicalSummaryScreen extends StatelessWidget {
                 _infoCard(
                   'Allergies',
                   summary.allergies,
-                  Icons.warning,
+                  Icons.warning_amber_rounded,
                 ),
                 _infoCard(
                   'Medical Conditions',
@@ -85,21 +140,60 @@ class MedicalSummaryScreen extends StatelessWidget {
     IconData icon,
   ) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Icon(
-          icon,
-          size: 30,
+      margin: const EdgeInsets.only(bottom: 14),
+      elevation: 2,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
         ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(value),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: lightGreen,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                icon,
+                size: 28,
+                color: darkGreen,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: darkGreen,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: textColor,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
