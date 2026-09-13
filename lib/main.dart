@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'firebase_options.dart';
-import 'screens/caregiver_dashboard.dart';
+import 'screens/elder/elder_home.dart';
+import 'screens/elder/check_in_screen.dart';
+import 'screens/elder/voice_check_in_screen.dart';
 
 const String configuredElderId = String.fromEnvironment('ELDER_ID');
 
@@ -22,53 +24,29 @@ class CareCircleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CareCircle',
       debugShowCheckedModeBanner: false,
+      title: 'CareCircle',
+
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF738F52),
-        ),
-        scaffoldBackgroundColor: const Color(0xFFF7F9F3),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF738F52),
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-        cardTheme: const CardThemeData(
-          color: Colors.white,
-          elevation: 2,
-        ),
         useMaterial3: true,
-      ),
-      home: configuredElderId.isEmpty
-          ? const ElderIdRequiredScreen()
-          : const CaregiverDashboard(
-              elderId: configuredElderId,
-            ),
-    );
-  }
-}
-
-class ElderIdRequiredScreen extends StatelessWidget {
-  const ElderIdRequiredScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            'Elder ID is not configured.\n\n'
-            'Run the app with:\n'
-            '--dart-define=ELDER_ID=<elder-id>',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-            ),
-          ),
+        fontFamily: 'Arial',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF164A63),
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF4F8FA),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF164A63),
+          foregroundColor: Colors.white,
+          centerTitle: false,
         ),
       ),
+
+      home: const ElderHome(),
+
+      routes: {
+        '/checkin': (context) => const CheckInScreen(),
+        '/voice-checkin': (context) => const VoiceCheckInScreen(),
+      },
     );
   }
 }
