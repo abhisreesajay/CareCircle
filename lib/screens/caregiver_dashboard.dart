@@ -11,9 +11,12 @@ import 'medical_summary_screen.dart';
 import 'alerts_screen.dart';
 
 class CaregiverDashboard extends StatelessWidget {
-  const CaregiverDashboard({super.key});
+  final String elderId;
 
-  static const String elderId = 'test_elder_001';
+  const CaregiverDashboard({
+    super.key,
+    required this.elderId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +38,14 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      const MedicinesScreen(elderId: elderId),
+                  builder: (context) => MedicinesScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },
           ),
+
           _dashboardCard(
             context,
             title: 'Appointments',
@@ -49,12 +54,14 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      const AppointmentsScreen(elderId: elderId),
+                  builder: (context) => AppointmentsScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },
           ),
+
           _dashboardCard(
             context,
             title: 'Emergency Contacts',
@@ -63,12 +70,14 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      const EmergencyContactsScreen(elderId: elderId),
+                  builder: (context) => EmergencyContactsScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },
           ),
+
           _dashboardCard(
             context,
             title: 'Elder Status',
@@ -77,11 +86,14 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ElderStatusScreen(),
+                  builder: (context) => ElderStatusScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },
           ),
+
           _dashboardCard(
             context,
             title: 'Nearby Services',
@@ -90,12 +102,14 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      const NearbyServicesScreen(elderId: elderId),
+                  builder: (context) => NearbyServicesScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },
           ),
+
           _dashboardCard(
             context,
             title: 'Check-in History',
@@ -104,11 +118,14 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const CheckInHistoryScreen(),
+                  builder: (context) => CheckInHistoryScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },
           ),
+
           _dashboardCard(
             context,
             title: 'Activity History',
@@ -117,11 +134,14 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ActivityHistoryScreen(),
+                  builder: (context) => ActivityHistoryScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },
           ),
+
           _dashboardCard(
             context,
             title: 'Medical Summary',
@@ -130,11 +150,14 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const MedicalSummaryScreen(),
+                  builder: (context) => MedicalSummaryScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },
           ),
+
           _dashboardCard(
             context,
             title: 'Alerts',
@@ -143,7 +166,9 @@ class CaregiverDashboard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const AlertsScreen(),
+                  builder: (context) => AlertsScreen(
+                    elderId: elderId,
+                  ),
                 ),
               );
             },

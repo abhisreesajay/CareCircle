@@ -1,7 +1,10 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 import 'firebase_options.dart';
 import 'screens/caregiver_dashboard.dart';
+
+const String configuredElderId = String.fromEnvironment('ELDER_ID');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +30,35 @@ class CareCircleApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const CaregiverDashboard(),
+      home: configuredElderId.isEmpty
+          ? const ElderIdRequiredScreen()
+          : const CaregiverDashboard(
+              elderId: configuredElderId,
+            ),
+    );
+  }
+}
+
+class ElderIdRequiredScreen extends StatelessWidget {
+  const ElderIdRequiredScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Elder ID is not configured.\n\n'
+            'Run the app with:\n'
+            '--dart-define=ELDER_ID=<elder-id>',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

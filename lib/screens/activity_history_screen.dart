@@ -1,57 +1,69 @@
 import 'package:flutter/material.dart';
 import '../models/activity_history_model.dart';
+import '../services/activity_history_service.dart';
 
 class ActivityHistoryScreen extends StatelessWidget {
-  const ActivityHistoryScreen({super.key});
+  final String elderId;
+
+  const ActivityHistoryScreen({
+    super.key,
+    required this.elderId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final activities = [
-      ActivityHistory(
-        id: '1',
-        activity: 'Check-in completed',
-        date: '12 Sep 2026',
-        time: '09:05 AM',
-      ),
-      ActivityHistory(
-        id: '2',
-        activity: 'Medicine acknowledged',
-        date: '12 Sep 2026',
-        time: '09:10 AM',
-      ),
-      ActivityHistory(
-        id: '3',
-        activity: 'Check-in completed',
-        date: '11 Sep 2026',
-        time: '09:03 AM',
-      ),
-      ActivityHistory(
-        id: '4',
-        activity: 'Check-in missed',
-        date: '10 Sep 2026',
-        time: '09:30 AM',
-      ),
-    ];
+    final service = ActivityHistoryService();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Activity History'),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: activities.length,
-        itemBuilder: (context, index) {
-          final activity = activities[index];
+      body: StreamBuilder<List<ActivityHistory>>(
+        stream: service.getActivityHistory(elderId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 10),
-            child: ListTile(
-              leading: const Icon(Icons.history),
-              title: Text(activity.activity),
-              subtitle: Text(
-                '${activity.date} • ${activity.time}',
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                'Unable to load activity history',
+                style: TextStyle(fontSize: 16),
               ),
-            ),
+            );
+          }
+
+          final activities = snapshot.data ?? [];
+
+          if (activities.isEmpty) {
+            return const Center(
+              child: Text(
+                'No activity history available',
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: activities.length,
+            itemBuilder: (context, index) {
+              final activity = activities[index];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: const Icon(Icons.history),
+                  title: Text(activity.activity),
+                  subtitle: Text(
+                    '${activity.date} • ${activity.time}',
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
