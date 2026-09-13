@@ -1,67 +1,79 @@
 import 'package:flutter/material.dart';
 import '../models/check_in_history_model.dart';
+import '../services/check_in_history_service.dart';
 
 class CheckInHistoryScreen extends StatelessWidget {
-  const CheckInHistoryScreen({super.key});
+  final String elderId;
+
+  const CheckInHistoryScreen({
+    super.key,
+    required this.elderId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final history = [
-      CheckInHistory(
-        id: '1',
-        date: '12 Sep 2026',
-        scheduledTime: '09:00 AM',
-        status: 'COMPLETED',
-      ),
-      CheckInHistory(
-        id: '2',
-        date: '11 Sep 2026',
-        scheduledTime: '09:00 AM',
-        status: 'COMPLETED',
-      ),
-      CheckInHistory(
-        id: '3',
-        date: '10 Sep 2026',
-        scheduledTime: '09:00 AM',
-        status: 'MISSED',
-      ),
-      CheckInHistory(
-        id: '4',
-        date: '09 Sep 2026',
-        scheduledTime: '09:00 AM',
-        status: 'COMPLETED',
-      ),
-    ];
+    final service = CheckInHistoryService();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Check-in History'),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: history.length,
-        itemBuilder: (context, index) {
-          final checkIn = history[index];
+      body: StreamBuilder<List<CheckInHistory>>(
+        stream: service.getCheckInHistory(elderId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 10),
-            child: ListTile(
-              leading: Icon(
-                checkIn.status == 'COMPLETED'
-                    ? Icons.check_circle
-                    : Icons.cancel,
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                'Unable to load check-in history',
+                style: TextStyle(fontSize: 16),
               ),
-              title: Text(checkIn.date),
-              subtitle: Text(
-                'Scheduled: ${checkIn.scheduledTime}',
+            );
+          }
+
+          final history = snapshot.data ?? [];
+
+          if (history.isEmpty) {
+            return const Center(
+              child: Text(
+                'No check-in history available',
+                style: TextStyle(fontSize: 16),
               ),
-              trailing: Text(
-                checkIn.status,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: history.length,
+            itemBuilder: (context, index) {
+              final checkIn = history[index];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: Icon(
+                    checkIn.status == 'COMPLETED'
+                        ? Icons.check_circle
+                        : Icons.cancel,
+                  ),
+                  title: Text(checkIn.date),
+                  subtitle: Text(
+                    'Scheduled: ${checkIn.scheduledTime}',
+                  ),
+                  trailing: Text(
+                    checkIn.status,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),

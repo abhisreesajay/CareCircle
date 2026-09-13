@@ -1,70 +1,85 @@
 import 'package:flutter/material.dart';
 import '../models/alert_model.dart';
+import '../services/alert_service.dart';
 
 class AlertsScreen extends StatelessWidget {
-  const AlertsScreen({super.key});
+  final String elderId;
+
+  const AlertsScreen({
+    super.key,
+    required this.elderId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final alerts = [
-      CareAlert(
-        id: '1',
-        title: 'Missed Check-in',
-        message: 'The elder missed the scheduled check-in.',
-        date: '12 Sep 2026, 09:30 AM',
-        type: 'checkin',
-      ),
-      CareAlert(
-        id: '2',
-        title: 'Medicine Reminder',
-        message: 'Medicine acknowledgement is pending.',
-        date: '12 Sep 2026, 10:00 AM',
-        type: 'medicine',
-      ),
-      CareAlert(
-        id: '3',
-        title: 'SOS Alert',
-        message: 'An SOS alert was received.',
-        date: '11 Sep 2026, 06:20 PM',
-        type: 'sos',
-      ),
-    ];
+    final service = AlertService();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Alerts'),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: alerts.length,
-        itemBuilder: (context, index) {
-          final alert = alerts[index];
+      body: StreamBuilder<List<CareAlert>>(
+        stream: service.getAlerts(elderId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              leading: Icon(
-                alert.type == 'sos'
-                    ? Icons.warning
-                    : alert.type == 'checkin'
-                        ? Icons.check_circle
-                        : Icons.medication,
-                size: 32,
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                'Unable to load alerts',
+                style: TextStyle(fontSize: 16),
               ),
-              title: Text(
-                alert.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+            );
+          }
+
+          final alerts = snapshot.data ?? [];
+
+          if (alerts.isEmpty) {
+            return const Center(
+              child: Text(
+                'No alerts available',
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: alerts.length,
+            itemBuilder: (context, index) {
+              final alert = alerts[index];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  leading: Icon(
+                    alert.type == 'sos'
+                        ? Icons.warning
+                        : alert.type == 'checkin'
+                            ? Icons.check_circle
+                            : Icons.medication,
+                    size: 32,
+                  ),
+                  title: Text(
+                    alert.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      '${alert.message}\n${alert.date}',
+                    ),
+                  ),
+                  isThreeLine: true,
                 ),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Text(
-                  '${alert.message}\n${alert.date}',
-                ),
-              ),
-              isThreeLine: true,
-            ),
+              );
+            },
           );
         },
       ),
