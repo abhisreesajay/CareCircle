@@ -13,13 +13,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _selectedRole = 'elder'; // Default role
 
   void _signUp() async {
-    final email = _emailController.text;
-    final password = _passwordController.text;
-    
-    // TODO: Call your AuthService here
-    // await AuthService().registerUser(email, password, _selectedRole);
-    print('Signing up $email as $_selectedRole');
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
+
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please fill in all fields')),
+    );
+    return;
   }
+
+  try {
+    await AuthService().registerUser(
+      email: email,
+      password: password,
+      role: _selectedRole, // 'elder' or 'caregiver'
+    );
+    // Success: AuthWrapper in main.dart automatically navigates to RoleRouter
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Registration Error: ${e.toString()}')),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
