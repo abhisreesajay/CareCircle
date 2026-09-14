@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/caregiver_dashboard.dart';
+import 'screens/elder/elder_home.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,15 +79,10 @@ class RoleRouter extends StatelessWidget {
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final role = data['role'] ?? 'elder';
 
-          // Routes to team member entry points once PRs are merged
           if (role == 'caregiver') {
-            return const Scaffold(
-              body: Center(child: Text('Caregiver Dashboard (Person 5)')),
-            );
+            return const CaregiverDashboard();
           } else {
-            return const Scaffold(
-              body: Center(child: Text('Elder Interface (Person 2)')),
-            );
+            return const ElderHome();
           }
         }
 
