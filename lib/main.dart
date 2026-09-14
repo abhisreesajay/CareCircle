@@ -3,10 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
-import 'screens/auth/login_screen.dart';
+import 'screen/auth/login_screen.dart';
 import 'screens/caregiver_dashboard.dart';
 import 'screens/elder/elder_home.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,19 +40,16 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // 1. Connection loading state
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // 2. User logged in -> Route by Role
         if (snapshot.hasData) {
           return RoleRouter(uid: snapshot.data!.uid);
         }
 
-        // 3. User logged out -> Direct to Login UI
         return LoginScreen();
       },
     );
