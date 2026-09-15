@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'screens/auth/login_screen.dart';
-import 'screens/caregiver_dashboard.dart';
 import 'screens/elder/elder_home.dart';
 
 void main() async {
@@ -24,8 +23,8 @@ class CareCircleApp extends StatelessWidget {
       title: 'CareCircle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2A9D8F)),
       ),
       home: const AuthWrapper(),
     );
@@ -45,12 +44,10 @@ class AuthWrapper extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           return RoleRouter(uid: snapshot.data!.uid);
         }
-
-        return LoginScreen();
+        return const LoginScreen();
       },
     );
   }
@@ -62,8 +59,8 @@ class RoleRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('users').doc(uid).get(),
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
@@ -71,18 +68,33 @@ class RoleRouter extends StatelessWidget {
           );
         }
 
-        if (snapshot.hasData && snapshot.data!.exists) {
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-          final role = data['role'] ?? 'elder';
-
-          if (role == 'caregiver') {
-            return const CaregiverDashboard();
-          } else {
-            return const ElderHome();
-          }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Scaffold(
+            body: Center(child: Text('User profile not found.')),
+          );
         }
 
-        return LoginScreen();
+        final data = snapshot.data!.data() as Map<String, dynamic>?;
+        final role = data?['role'] ?? 'elder';
+
+        if (role == 'caregiver') {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Caregiver Dashboard'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: () => FirebaseAuth.instance.signOut(),
+                )
+              ],
+            ),
+            body: const Center(
+              child: Text('Caregiver View — Ready for feature/caregiver merge'),
+            ),
+          );
+        }
+
+        return const ElderHome();
       },
     );
   }
