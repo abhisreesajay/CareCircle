@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/emergency_contact_model.dart';
-import '../services/emergency_contact_service.dart';
+import '../../models/emergency_contact_model.dart';
+import '../../services/emergency_contact_service.dart';
 
 class EmergencyContactsScreen extends StatefulWidget {
   final String elderId;

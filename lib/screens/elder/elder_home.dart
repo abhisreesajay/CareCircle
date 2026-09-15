@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../services/auth_service.dart'; // Added this import
+
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F8FA),
-
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFF164A63),
@@ -259,9 +261,7 @@ class ElderHome extends StatelessWidget {
                     size: 34,
                   ),
                 ),
-
                 const SizedBox(width: 17),
-
                 // Text
                 Expanded(
                   child: Column(
@@ -288,7 +288,6 @@ class ElderHome extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 20,
@@ -331,8 +330,9 @@ class ElderHome extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
+              onPressed: () async {
+                Navigator.pop(context); // Close the dialog first
+                await AuthService().signOut(); // Actually log the user out
               },
               child: const Text(
                 'LOGOUT',

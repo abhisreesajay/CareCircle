@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/medicine_model.dart';
-import '../services/medicine_service.dart';
+import '../../models/medicine_model.dart';
+import '../../services/medicine_service.dart';
 
 class MedicinesScreen extends StatefulWidget {
   final String elderId;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/activity_history_model.dart';
-import '../services/activity_history_service.dart';
+import '../../models/activity_history_model.dart';
+import '../../services/activity_history_service.dart';
 
 class ActivityHistoryScreen extends StatelessWidget {
   final String elderId;

@@ -1,45 +1,76 @@
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/care_circle_model.dart';
 
 class CareCircleService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Generate a random 6-digit alphanumeric code for Elders
-  String generateInviteCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
-    return List.generate(6, (index) => chars[rnd.nextInt(chars.length)]).join();
-  }
-
-  // Save the generated code to an Elder's document
-  Future<String> createElderInviteCode(String elderUid) async {
-    final code = generateInviteCode();
-    await _db.collection('users').doc(elderUid).update({
-      'inviteCode': code,
-    });
-    return code;
-  }
-
-  // Link a Caregiver to an Elder using the 6-digit code
-  Future<void> linkCaregiverToElder({
-    required String caregiverUid,
+  // Link caregiver to an elder using the 6-character invite code
+  Future<String> linkCaregiverWithInviteCode({
     required String inviteCode,
+    required String caregiverUid,
   }) async {
-    final query = await _db
+    final cleanCode = inviteCode.trim().toUpperCase();
+
+    // 1. Locate elder with matching invite code
+    final query = await _firestore
         .collection('users')
         .where('role', isEqualTo: 'elder')
-        .where('inviteCode', isEqualTo: inviteCode.trim().toUpperCase())
+        .where('inviteCode', isEqualTo: cleanCode)
         .limit(1)
         .get();
 
     if (query.docs.isEmpty) {
-      throw Exception('Invalid code. No matching elder account found.');
+      throw Exception('Invalid invite code. Please check and try again.');
     }
 
-    final elderUid = query.docs.first.id;
+    final elderId = query.docs.first.id;
 
-    await _db.collection('users').doc(caregiverUid).update({
-      'linkedElders': FieldValue.arrayUnion([elderUid]),
+    // 2. Add caregiver to the elder's care circle collection
+    await _firestore.collection('care_circles').doc(elderId).set({
+      'elderId': elderId,
+      'caregiverIds': FieldValue.arrayUnion([caregiverUid]),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    return elderId;
+  }
+
+  // Get the linked elder ID for a specific caregiver
+  Future<String?> getElderIdForCaregiver(String caregiverUid) async {
+    final query = await _firestore
+        .collection('care_circles')
+        .where('caregiverIds', arrayContains: caregiverUid)
+        .limit(1)
+        .get();
+
+    if (query.docs.isNotEmpty) {
+      return query.docs.first.id;
+    }
+    return null;
+  }
+
+  // Stream caregiver list for a specific elder (used in Elder UI)
+  Stream<CareCircleModel?> streamCareCircle(String elderId) {
+    return _firestore
+        .collection('care_circles')
+        .doc(elderId)
+        .snapshots()
+        .map((doc) {
+      if (doc.exists && doc.data() != null) {
+        return CareCircleModel.fromMap(doc.data()!, doc.id);
+      }
+      return null;
+    });
+  }
+
+  // Unlink a caregiver from an elder
+  Future<void> removeCaregiver({
+    required String elderId,
+    required String caregiverUid,
+  }) async {
+    await _firestore.collection('care_circles').doc(elderId).update({
+      'caregiverIds': FieldValue.arrayRemove([caregiverUid]),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 }

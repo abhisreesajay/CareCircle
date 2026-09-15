@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/check_in_history_model.dart';
-import '../services/check_in_history_service.dart';
+import '../../models/check_in_history_model.dart';
+import '../../services/check_in_history_service.dart';
 
 class CheckInHistoryScreen extends StatelessWidget {
   final String elderId;
