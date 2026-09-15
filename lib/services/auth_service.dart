@@ -5,39 +5,48 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<UserCredential?> registerUser({
+  Stream<User?> get userStateStream => _auth.authStateChanges();
+
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  Future<UserCredential> registerUser({
     required String email,
     required String password,
-    required String role, // Received from SignUpScreen ('elder' or 'caregiver')
+    required String role,
   }) async {
-    try {
-      // Step 1: Create authentication account
-      UserCredential cred = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+    UserCredential cred = await _auth.createUserWithEmailAndPassword(
+      email: email.trim(),
+      password: password.trim(),
+    );
 
-      // Step 2: Build document payload
-      Map<String, dynamic> userData = {
-        'uid': cred.user!.uid,
-        'email': email,
-        'role': role,
-        'createdAt': FieldValue.serverTimestamp(),
-      };
+    Map<String, dynamic> userData = {
+      'uid': cred.user!.uid,
+      'email': email.trim(),
+      'role': role,
+      'createdAt': FieldValue.serverTimestamp(),
+    };
 
-      // Add role-specific schema fields
-      if (role == 'caregiver') {
-        userData['linkedElders'] = []; // Array storing UIDs of elders they look after
-      } else {
-        userData['inviteCode'] = ''; // Code used by caregivers to link to this elder
-      }
-
-      // Step 3: Save payload to /users/{uid}
-      await _db.collection('users').doc(cred.user!.uid).set(userData);
-
-      return cred;
-    } catch (e) {
-      rethrow;
+    if (role == 'caregiver') {
+      userData['linkedElders'] = [];
+    } else {
+      userData['inviteCode'] = '';
     }
+
+    await _db.collection('users').doc(cred.user!.uid).set(userData);
+    return cred;
+  }
+
+  Future<UserCredential> loginUser({
+    required String email,
+    required String password,
+  }) async {
+    return await _auth.signInWithEmailAndPassword(
+      email: email.trim(),
+      password: password.trim(),
+    );
+  }
+
+  Future<void> signOut() async {
+    await _auth.signOut();
   }
 }

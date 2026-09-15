@@ -1,46 +1,50 @@
 import 'package:flutter/material.dart';
-// Note: Import your AuthService here based on your file structure
-// import '../../services/auth_service.dart'; 
+import '../../services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
   @override
-  _SignUpScreenState createState() => _SignUpScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _selectedRole = 'elder'; // Default role
+  String _selectedRole = 'elder';
+  bool _isLoading = false;
 
   void _signUp() async {
-  final email = _emailController.text.trim();
-  final password = _passwordController.text.trim();
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
 
-  if (email.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please fill in all fields')),
-    );
-    return;
+    setState(() => _isLoading = true);
+    try {
+      await AuthService().registerUser(
+        email: _emailController.text,
+        password: _passwordController.text,
+        role: _selectedRole,
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration Failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
-
-  try {
-    await AuthService().registerUser(
-      email: email,
-      password: password,
-      role: _selectedRole, // 'elder' or 'caregiver'
-    );
-    // Success: AuthWrapper in main.dart automatically navigates to RoleRouter
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Registration Error: ${e.toString()}')),
-    );
-  }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('CareCircle - Sign Up')),
+      appBar: AppBar(title: const Text('Create CareCircle Account')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -48,31 +52,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
-            SizedBox(height: 20),
-            DropdownButton<String>(
-              value: _selectedRole,
-              items: [
-                DropdownMenuItem(value: 'elder', child: Text('I am an Elder')),
-                DropdownMenuItem(value: 'caregiver', child: Text('I am a Caregiver')),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Select Role: '),
+                DropdownButton<String>(
+                  value: _selectedRole,
+                  items: const [
+                    DropdownMenuItem(value: 'elder', child: Text('Elder')),
+                    DropdownMenuItem(value: 'caregiver', child: Text('Caregiver')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedRole = val);
+                  },
+                ),
               ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedRole = value!;
-                });
-              },
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _signUp,
-              child: Text('Sign Up'),
-            ),
+            const SizedBox(height: 24),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: _signUp,
+                    child: const Text('Register Account'),
+                  ),
           ],
         ),
       ),
