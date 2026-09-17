@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'screen/auth/login_screen.dart';
-import 'screens/caregiver_dashboard.dart';
+import 'screens/caregiver/caregiver_dashboard.dart';
 import 'screens/elder/elder_home.dart';
 
 void main() async {
@@ -76,7 +76,9 @@ class RoleRouter extends StatelessWidget {
           final role = data['role'] ?? 'elder';
 
           if (role == 'caregiver') {
-            return const CaregiverDashboard();
+            return const CaregiverDashboard(
+               elderId: 'test_elder_001',
+            );
           } else {
             return const ElderHome();
           }

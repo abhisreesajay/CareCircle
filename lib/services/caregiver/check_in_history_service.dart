@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/activity_history_model.dart';
+import '../../models/check_in_history_model.dart';
 
-class ActivityHistoryService {
+class CheckInHistoryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Stream<List<ActivityHistory>> getActivityHistory(String elderId) {
+  Stream<List<CheckInHistory>> getCheckInHistory(String elderId) {
     return _firestore
         .collection('elders')
         .doc(elderId)
-        .collection('activityHistory')
+        .collection('checkInHistory')
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
               .map(
-                (doc) => ActivityHistory.fromMap(
+                (doc) => CheckInHistory.fromMap(
                   doc.id,
                   doc.data(),
                 ),

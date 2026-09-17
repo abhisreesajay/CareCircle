@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import '../models/medicine_model.dart';
-import '../services/medicine_service.dart';
+import '../../models/appointment_model.dart';
+import '../../services/caregiver/appointment_service.dart';
 
-class MedicinesScreen extends StatefulWidget {
+class AppointmentsScreen extends StatefulWidget {
   final String elderId;
 
-  const MedicinesScreen({
+  const AppointmentsScreen({
     super.key,
     required this.elderId,
   });
 
   @override
-  State<MedicinesScreen> createState() => _MedicinesScreenState();
+  State<AppointmentsScreen> createState() => _AppointmentsScreenState();
 }
 
-class _MedicinesScreenState extends State<MedicinesScreen> {
-  final MedicineService _medicineService = MedicineService();
+class _AppointmentsScreenState extends State<AppointmentsScreen> {
+  final AppointmentService _appointmentService = AppointmentService();
 
   static const Color primaryGreen = Color(0xFF738F52);
   static const Color darkGreen = Color(0xFF536B3A);
@@ -23,22 +23,26 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   static const Color backgroundColor = Color(0xFFF7F9F3);
   static const Color textColor = Color(0xFF26301F);
 
-  void _showMedicineDialog({Medicine? medicine}) {
-    final nameController =
-        TextEditingController(text: medicine?.name ?? '');
-    final dosageController =
-        TextEditingController(text: medicine?.dosage ?? '');
+  void _showAppointmentDialog({Appointment? appointment}) {
+    final doctorController =
+        TextEditingController(text: appointment?.doctorName ?? '');
+    final hospitalController =
+        TextEditingController(text: appointment?.hospitalName ?? '');
+    final dateController =
+        TextEditingController(text: appointment?.date ?? '');
     final timeController =
-        TextEditingController(text: medicine?.time ?? '');
-    final frequencyController =
-        TextEditingController(text: medicine?.frequency ?? '');
+        TextEditingController(text: appointment?.time ?? '');
+    final purposeController =
+        TextEditingController(text: appointment?.purpose ?? '');
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(
-            medicine == null ? 'Add Medicine' : 'Edit Medicine',
+            appointment == null
+                ? 'Add Appointment'
+                : 'Edit Appointment',
             style: const TextStyle(
               color: darkGreen,
               fontWeight: FontWeight.bold,
@@ -49,11 +53,11 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: nameController,
+                  controller: doctorController,
                   decoration: InputDecoration(
-                    labelText: 'Medicine Name',
+                    labelText: 'Doctor Name',
                     prefixIcon: const Icon(
-                      Icons.medication,
+                      Icons.person,
                       color: primaryGreen,
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -70,11 +74,32 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextField(
-                  controller: dosageController,
+                  controller: hospitalController,
                   decoration: InputDecoration(
-                    labelText: 'Dosage',
+                    labelText: 'Hospital / Clinic',
                     prefixIcon: const Icon(
-                      Icons.medical_information,
+                      Icons.local_hospital,
+                      color: primaryGreen,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: primaryGreen,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: dateController,
+                  decoration: InputDecoration(
+                    labelText: 'Date',
+                    prefixIcon: const Icon(
+                      Icons.calendar_today,
                       color: primaryGreen,
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -112,11 +137,11 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextField(
-                  controller: frequencyController,
+                  controller: purposeController,
                   decoration: InputDecoration(
-                    labelText: 'Frequency',
+                    labelText: 'Purpose',
                     prefixIcon: const Icon(
-                      Icons.repeat,
+                      Icons.description,
                       color: primaryGreen,
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -152,31 +177,31 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
-                if (nameController.text.trim().isEmpty) {
+                if (doctorController.text.trim().isEmpty) {
                   return;
                 }
 
-                final newMedicine = Medicine(
-                  id: medicine?.id ??
+                final newAppointment = Appointment(
+                  id: appointment?.id ??
                       DateTime.now()
                           .millisecondsSinceEpoch
                           .toString(),
-                  name: nameController.text.trim(),
-                  dosage: dosageController.text.trim(),
+                  doctorName: doctorController.text.trim(),
+                  hospitalName: hospitalController.text.trim(),
+                  date: dateController.text.trim(),
                   time: timeController.text.trim(),
-                  frequency: frequencyController.text.trim(),
-                  acknowledged: medicine?.acknowledged ?? false,
+                  purpose: purposeController.text.trim(),
                 );
 
-                if (medicine == null) {
-                  await _medicineService.addMedicine(
+                if (appointment == null) {
+                  await _appointmentService.addAppointment(
                     widget.elderId,
-                    newMedicine,
+                    newAppointment,
                   );
                 } else {
-                  await _medicineService.updateMedicine(
+                  await _appointmentService.updateAppointment(
                     widget.elderId,
-                    newMedicine,
+                    newAppointment,
                   );
                 }
 
@@ -185,7 +210,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                 }
               },
               child: Text(
-                medicine == null ? 'Add' : 'Update',
+                appointment == null ? 'Add' : 'Update',
               ),
             ),
           ],
@@ -194,17 +219,10 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     );
   }
 
-  void _deleteMedicine(String medicineId) async {
-    await _medicineService.deleteMedicine(
+  Future<void> _deleteAppointment(String appointmentId) async {
+    await _appointmentService.deleteAppointment(
       widget.elderId,
-      medicineId,
-    );
-  }
-
-  void _acknowledgeMedicine(String medicineId) async {
-    await _medicineService.acknowledgeMedicine(
-      widget.elderId,
-      medicineId,
+      appointmentId,
     );
   }
 
@@ -214,7 +232,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(
-          'Medicines',
+          'Appointments',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -223,8 +241,10 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: StreamBuilder<List<Medicine>>(
-        stream: _medicineService.getMedicines(widget.elderId),
+      body: StreamBuilder<List<Appointment>>(
+        stream: _appointmentService.getAppointments(
+          widget.elderId,
+        ),
         builder: (context, snapshot) {
           if (snapshot.connectionState ==
               ConnectionState.waiting) {
@@ -258,21 +278,21 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
             );
           }
 
-          final medicines = snapshot.data ?? [];
+          final appointments = snapshot.data ?? [];
 
-          if (medicines.isEmpty) {
+          if (appointments.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.medication_outlined,
+                    Icons.calendar_month,
                     size: 70,
                     color: primaryGreen,
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'No medicines added yet.',
+                    'No appointments added yet.',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -281,7 +301,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Tap + to add a medicine.',
+                    'Tap + to add an appointment.',
                     style: TextStyle(
                       color: darkGreen,
                     ),
@@ -293,14 +313,12 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: medicines.length,
+            itemCount: appointments.length,
             itemBuilder: (context, index) {
-              final medicine = medicines[index];
+              final appointment = appointments[index];
 
               return Card(
-                color: medicine.acknowledged
-                    ? lightGreen
-                    : Colors.white,
+                color: lightGreen,
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
@@ -311,8 +329,21 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                     horizontal: 16,
                     vertical: 8,
                   ),
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.calendar_month,
+                      size: 28,
+                      color: darkGreen,
+                    ),
+                  ),
                   title: Text(
-                    medicine.name,
+                    appointment.doctorName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
@@ -322,29 +353,16 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      '${medicine.dosage}\n'
-                      '${medicine.time} • ${medicine.frequency}',
+                      '${appointment.hospitalName}\n'
+                      '${appointment.date} • '
+                      '${appointment.time}\n'
+                      '${appointment.purpose}',
                       style: const TextStyle(
                         height: 1.5,
                       ),
                     ),
                   ),
                   isThreeLine: true,
-                  leading: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: lightGreen,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      medicine.acknowledged
-                          ? Icons.check_circle
-                          : Icons.medication,
-                      color: darkGreen,
-                      size: 28,
-                    ),
-                  ),
                   trailing: PopupMenuButton<String>(
                     icon: const Icon(
                       Icons.more_vert,
@@ -352,13 +370,13 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                     ),
                     onSelected: (value) {
                       if (value == 'edit') {
-                        _showMedicineDialog(
-                          medicine: medicine,
+                        _showAppointmentDialog(
+                          appointment: appointment,
                         );
                       } else if (value == 'delete') {
-                        _deleteMedicine(medicine.id);
-                      } else if (value == 'acknowledge') {
-                        _acknowledgeMedicine(medicine.id);
+                        _deleteAppointment(
+                          appointment.id,
+                        );
                       }
                     },
                     itemBuilder: (context) => [
@@ -388,20 +406,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                           ],
                         ),
                       ),
-                      if (!medicine.acknowledged)
-                        const PopupMenuItem(
-                          value: 'acknowledge',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle_outline,
-                                color: darkGreen,
-                              ),
-                              SizedBox(width: 10),
-                              Text('Mark as Acknowledged'),
-                            ],
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -415,7 +419,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
         foregroundColor: Colors.white,
         elevation: 4,
         onPressed: () {
-          _showMedicineDialog();
+          _showAppointmentDialog();
         },
         child: const Icon(Icons.add),
       ),

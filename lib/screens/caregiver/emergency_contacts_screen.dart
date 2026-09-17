@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
-import '../models/appointment_model.dart';
-import '../services/appointment_service.dart';
+import '../../models/emergency_contact_model.dart';
+import '../../services/caregiver/emergency_contact_service.dart';
 
-class AppointmentsScreen extends StatefulWidget {
+class EmergencyContactsScreen extends StatefulWidget {
   final String elderId;
 
-  const AppointmentsScreen({
+  const EmergencyContactsScreen({
     super.key,
     required this.elderId,
   });
 
   @override
-  State<AppointmentsScreen> createState() => _AppointmentsScreenState();
+  State<EmergencyContactsScreen> createState() =>
+      _EmergencyContactsScreenState();
 }
 
-class _AppointmentsScreenState extends State<AppointmentsScreen> {
-  final AppointmentService _appointmentService = AppointmentService();
+class _EmergencyContactsScreenState
+    extends State<EmergencyContactsScreen> {
+  final EmergencyContactService _contactService =
+      EmergencyContactService();
 
   static const Color primaryGreen = Color(0xFF738F52);
   static const Color darkGreen = Color(0xFF536B3A);
@@ -23,26 +26,22 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   static const Color backgroundColor = Color(0xFFF7F9F3);
   static const Color textColor = Color(0xFF26301F);
 
-  void _showAppointmentDialog({Appointment? appointment}) {
-    final doctorController =
-        TextEditingController(text: appointment?.doctorName ?? '');
-    final hospitalController =
-        TextEditingController(text: appointment?.hospitalName ?? '');
-    final dateController =
-        TextEditingController(text: appointment?.date ?? '');
-    final timeController =
-        TextEditingController(text: appointment?.time ?? '');
-    final purposeController =
-        TextEditingController(text: appointment?.purpose ?? '');
+  void _showContactDialog({EmergencyContact? contact}) {
+    final nameController =
+        TextEditingController(text: contact?.name ?? '');
+    final phoneController =
+        TextEditingController(text: contact?.phone ?? '');
+    final relationshipController =
+        TextEditingController(text: contact?.relationship ?? '');
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(
-            appointment == null
-                ? 'Add Appointment'
-                : 'Edit Appointment',
+            contact == null
+                ? 'Add Emergency Contact'
+                : 'Edit Emergency Contact',
             style: const TextStyle(
               color: darkGreen,
               fontWeight: FontWeight.bold,
@@ -53,9 +52,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: doctorController,
+                  controller: nameController,
                   decoration: InputDecoration(
-                    labelText: 'Doctor Name',
+                    labelText: 'Name',
                     prefixIcon: const Icon(
                       Icons.person,
                       color: primaryGreen,
@@ -74,11 +73,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextField(
-                  controller: hospitalController,
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    labelText: 'Hospital / Clinic',
+                    labelText: 'Phone Number',
                     prefixIcon: const Icon(
-                      Icons.local_hospital,
+                      Icons.phone,
                       color: primaryGreen,
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -95,53 +95,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
                 const SizedBox(height: 12),
                 TextField(
-                  controller: dateController,
+                  controller: relationshipController,
                   decoration: InputDecoration(
-                    labelText: 'Date',
+                    labelText: 'Relationship',
                     prefixIcon: const Icon(
-                      Icons.calendar_today,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: timeController,
-                  decoration: InputDecoration(
-                    labelText: 'Time',
-                    prefixIcon: const Icon(
-                      Icons.access_time,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: purposeController,
-                  decoration: InputDecoration(
-                    labelText: 'Purpose',
-                    prefixIcon: const Icon(
-                      Icons.description,
+                      Icons.people,
                       color: primaryGreen,
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -177,31 +135,31 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
-                if (doctorController.text.trim().isEmpty) {
+                if (nameController.text.trim().isEmpty ||
+                    phoneController.text.trim().isEmpty) {
                   return;
                 }
 
-                final newAppointment = Appointment(
-                  id: appointment?.id ??
+                final newContact = EmergencyContact(
+                  id: contact?.id ??
                       DateTime.now()
                           .millisecondsSinceEpoch
                           .toString(),
-                  doctorName: doctorController.text.trim(),
-                  hospitalName: hospitalController.text.trim(),
-                  date: dateController.text.trim(),
-                  time: timeController.text.trim(),
-                  purpose: purposeController.text.trim(),
+                  name: nameController.text.trim(),
+                  phone: phoneController.text.trim(),
+                  relationship:
+                      relationshipController.text.trim(),
                 );
 
-                if (appointment == null) {
-                  await _appointmentService.addAppointment(
+                if (contact == null) {
+                  await _contactService.addContact(
                     widget.elderId,
-                    newAppointment,
+                    newContact,
                   );
                 } else {
-                  await _appointmentService.updateAppointment(
+                  await _contactService.updateContact(
                     widget.elderId,
-                    newAppointment,
+                    newContact,
                   );
                 }
 
@@ -210,7 +168,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 }
               },
               child: Text(
-                appointment == null ? 'Add' : 'Update',
+                contact == null ? 'Add' : 'Update',
               ),
             ),
           ],
@@ -219,10 +177,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     );
   }
 
-  Future<void> _deleteAppointment(String appointmentId) async {
-    await _appointmentService.deleteAppointment(
+  Future<void> _deleteContact(String contactId) async {
+    await _contactService.deleteContact(
       widget.elderId,
-      appointmentId,
+      contactId,
     );
   }
 
@@ -232,7 +190,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(
-          'Appointments',
+          'Emergency Contacts',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -241,8 +199,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: StreamBuilder<List<Appointment>>(
-        stream: _appointmentService.getAppointments(
+      body: StreamBuilder<List<EmergencyContact>>(
+        stream: _contactService.getContacts(
           widget.elderId,
         ),
         builder: (context, snapshot) {
@@ -278,33 +236,35 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             );
           }
 
-          final appointments = snapshot.data ?? [];
+          final contacts = snapshot.data ?? [];
 
-          if (appointments.isEmpty) {
+          if (contacts.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.calendar_month,
+                    Icons.contact_phone_outlined,
                     size: 70,
                     color: primaryGreen,
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'No appointments added yet.',
+                    'No emergency contacts added yet.',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: textColor,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Tap + to add an appointment.',
+                    'Tap + to add an emergency contact.',
                     style: TextStyle(
                       color: darkGreen,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -313,9 +273,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: appointments.length,
+            itemCount: contacts.length,
             itemBuilder: (context, index) {
-              final appointment = appointments[index];
+              final contact = contacts[index];
 
               return Card(
                 color: lightGreen,
@@ -337,13 +297,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
-                      Icons.calendar_month,
+                      Icons.contact_phone,
                       size: 28,
                       color: darkGreen,
                     ),
                   ),
                   title: Text(
-                    appointment.doctorName,
+                    contact.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
@@ -353,10 +313,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      '${appointment.hospitalName}\n'
-                      '${appointment.date} • '
-                      '${appointment.time}\n'
-                      '${appointment.purpose}',
+                      '${contact.phone}\n'
+                      '${contact.relationship}',
                       style: const TextStyle(
                         height: 1.5,
                       ),
@@ -370,13 +328,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     ),
                     onSelected: (value) {
                       if (value == 'edit') {
-                        _showAppointmentDialog(
-                          appointment: appointment,
+                        _showContactDialog(
+                          contact: contact,
                         );
                       } else if (value == 'delete') {
-                        _deleteAppointment(
-                          appointment.id,
-                        );
+                        _deleteContact(contact.id);
                       }
                     },
                     itemBuilder: (context) => [
@@ -419,7 +375,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         foregroundColor: Colors.white,
         elevation: 4,
         onPressed: () {
-          _showAppointmentDialog();
+          _showContactDialog();
         },
         child: const Icon(Icons.add),
       ),
