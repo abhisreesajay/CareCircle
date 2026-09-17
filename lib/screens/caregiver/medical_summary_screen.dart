@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/medical_summary_model.dart';
-import '../services/medical_summary_service.dart';
+import '../../models/medical_summary_model.dart';
+import '../../services/caregiver/medical_summary_service.dart';
 
 class MedicalSummaryScreen extends StatelessWidget {
   final String elderId;
