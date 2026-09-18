@@ -31,13 +31,25 @@ class SosRecord {
     String id,
     Map<String, dynamic> map,
   ) {
+    final timestampValue = map['timestamp'];
+
+    DateTime timestamp;
+
+    if (timestampValue is Timestamp) {
+      timestamp = timestampValue.toDate();
+    } else if (timestampValue is DateTime) {
+      timestamp = timestampValue;
+    } else {
+      timestamp = DateTime.now();
+    }
+
     return SosRecord(
       id: id,
-      userId: map['userId'] ?? '',
-      latitude: (map['latitude'] ?? 0).toDouble(),
-      longitude: (map['longitude'] ?? 0).toDouble(),
-      timestamp: (map['timestamp'] as Timestamp).toDate(),
-      status: map['status'] ?? 'UNKNOWN',
+      userId: map['userId']?.toString() ?? '',
+      latitude: (map['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (map['longitude'] as num?)?.toDouble() ?? 0.0,
+      timestamp: timestamp,
+      status: map['status']?.toString() ?? 'UNKNOWN',
     );
   }
 }

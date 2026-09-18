@@ -1,9 +1,27 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Location permissions -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Basic location permissions -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Background location permission for automatic safe-zone monitoring -->
+    <uses-permission
+        android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!-- Foreground service permissions for location monitoring -->
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+    <!-- Notification permission for Android 13 and above -->
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:label="care_circle"
         android:name="${applicationName}"
@@ -21,25 +39,27 @@
 
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
-                android:resource="@style/NormalTheme"/>
+                android:resource="@style/NormalTheme" />
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
         </activity>
 
+        <!-- Flutter embedding configuration -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
 
     </application>
 
+    <!-- Required for Flutter text-processing intents -->
     <queries>
         <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
+            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <data android:mimeType="text/plain" />
         </intent>
     </queries>
 
