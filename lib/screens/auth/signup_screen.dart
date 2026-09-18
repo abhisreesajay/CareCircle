@@ -329,7 +329,7 @@ class _SignupScreenState extends State<SignupScreen> {
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? _accentColor.withOpacity(0.15)
+              ? _accentColor.withValues(alpha: 0.15)
               : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(

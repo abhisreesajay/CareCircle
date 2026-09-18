@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      final user = userCredential?.user;
+      final user = userCredential.user;
 
       if (user != null) {
         final profile = await AuthService().getUserProfile(user.uid);

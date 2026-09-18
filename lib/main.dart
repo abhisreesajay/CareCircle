@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'services/messaging_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'models/user_model.dart';
 import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/elder/elder_home.dart';
-import 'screens/caregiver/caregiver_dashboard.dart';
+import 'guards/caregiver_gateway.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
+  // Initialize Messaging BEFORE runApp
+  MessagingService.setupBackgroundHandling();
+  await MessagingService().initialize();
+
   runApp(const CareCircleApp());
 }
 
@@ -38,19 +44,16 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // 1. Connection loading state
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // 2. User not logged in -> Show LoginScreen
         if (!snapshot.hasData || snapshot.data == null) {
           return const LoginScreen();
         }
 
-        // 3. User logged in -> Fetch role profile from Firestore
         final user = snapshot.data!;
         return FutureBuilder<UserModel?>(
           future: AuthService().getUserProfile(user.uid),
@@ -65,13 +68,12 @@ class AuthWrapper extends StatelessWidget {
 
             if (profile != null) {
               if (profile.role == 'elder') {
-                return ElderHome();
+                return const ElderHome();
               } else if (profile.role == 'caregiver') {
-                return CaregiverDashboard(elderId: profile.uid);
+                return const CaregiverGateway(); 
               }
             }
 
-            // Fallback if profile fetch fails or user profile is missing
             return const LoginScreen();
           },
         );
