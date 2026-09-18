@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'medicines_screen.dart';
 import 'appointments_screen.dart';
@@ -10,13 +12,157 @@ import 'activity_history_screen.dart';
 import 'medical_summary_screen.dart';
 import 'alerts_screen.dart';
 
-class CaregiverDashboard extends StatelessWidget {
+class CaregiverDashboard extends StatefulWidget {
   final String elderId;
 
   const CaregiverDashboard({
     super.key,
     required this.elderId,
   });
+
+  @override
+  State<CaregiverDashboard> createState() => _CaregiverDashboardState();
+}
+
+class _CaregiverDashboardState extends State<CaregiverDashboard> {
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _sosSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _startSosListener();
+  }
+
+  // =====================================================================
+  // SOS LISTENER
+  // =====================================================================
+
+  void _startSosListener() {
+    _sosSubscription = FirebaseFirestore.instance
+        .collection('sosRecords')
+        .where('userId', isEqualTo: widget.elderId)
+        .snapshots()
+        .listen((snapshot) {
+      for (final change in snapshot.docChanges) {
+        if (change.type == DocumentChangeType.added) {
+          _showSosDialog(change.doc);
+        }
+      }
+    });
+  }
+
+  // =====================================================================
+  // SOS DIALOG
+  // =====================================================================
+
+  void _showSosDialog(
+    DocumentSnapshot<Map<String, dynamic>> document,
+  ) {
+    if (!mounted) return;
+
+    final data = document.data() ?? <String, dynamic>{};
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: const Row(
+            children: [
+              Icon(
+                Icons.warning_rounded,
+                color: Color(0xFFC85C50),
+                size: 30,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'SOS Alert',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF26352F),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'The elder has triggered an emergency SOS.',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF26352F),
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // ---------------------------------------------------------
+              // TIME
+              // ---------------------------------------------------------
+
+              if (data['timestamp'] != null)
+                _SosDetailRow(
+                  icon: Icons.access_time_rounded,
+                  label: 'Time',
+                  value: data['timestamp'].toString(),
+                ),
+
+              // ---------------------------------------------------------
+              // LOCATION
+              // ---------------------------------------------------------
+
+              if (data['latitude'] != null)
+                _SosDetailRow(
+                  icon: Icons.location_on_rounded,
+                  label: 'Latitude',
+                  value: data['latitude'].toString(),
+                ),
+
+              if (data['longitude'] != null)
+                _SosDetailRow(
+                  icon: Icons.location_on_rounded,
+                  label: 'Longitude',
+                  value: data['longitude'].toString(),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  color: Color(0xFF46695A),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // =====================================================================
+  // DISPOSE SOS LISTENER
+  // =====================================================================
+
+  @override
+  void dispose() {
+    _sosSubscription?.cancel();
+    super.dispose();
+  }
 
   void _openPage(BuildContext context, Widget page) {
     Navigator.push(
@@ -215,7 +361,7 @@ class CaregiverDashboard extends StatelessWidget {
                       onTap: () {
                         _openPage(
                           context,
-                          MedicinesScreen(elderId: elderId),
+                          MedicinesScreen(elderId: widget.elderId),
                         );
                       },
                     ),
@@ -233,7 +379,7 @@ class CaregiverDashboard extends StatelessWidget {
                       onTap: () {
                         _openPage(
                           context,
-                          AppointmentsScreen(elderId: elderId),
+                          AppointmentsScreen(elderId: widget.elderId),
                         );
                       },
                     ),
@@ -256,7 +402,9 @@ class CaregiverDashboard extends StatelessWidget {
                 onTap: () {
                   _openPage(
                     context,
-                    EmergencyContactsScreen(elderId: elderId),
+                    EmergencyContactsScreen(
+                      elderId: widget.elderId,
+                    ),
                   );
                 },
               ),
@@ -289,7 +437,9 @@ class CaregiverDashboard extends StatelessWidget {
                       onTap: () {
                         _openPage(
                           context,
-                          ElderStatusScreen(elderId: elderId),
+                          ElderStatusScreen(
+                            elderId: widget.elderId,
+                          ),
                         );
                       },
                     ),
@@ -305,7 +455,9 @@ class CaregiverDashboard extends StatelessWidget {
                       onTap: () {
                         _openPage(
                           context,
-                          AlertsScreen(elderId: elderId),
+                          AlertsScreen(
+                            elderId: widget.elderId,
+                          ),
                         );
                       },
                     ),
@@ -325,7 +477,9 @@ class CaregiverDashboard extends StatelessWidget {
                       onTap: () {
                         _openPage(
                           context,
-                          CheckInHistoryScreen(elderId: elderId),
+                          CheckInHistoryScreen(
+                            elderId: widget.elderId,
+                          ),
                         );
                       },
                     ),
@@ -341,7 +495,9 @@ class CaregiverDashboard extends StatelessWidget {
                       onTap: () {
                         _openPage(
                           context,
-                          ActivityHistoryScreen(elderId: elderId),
+                          ActivityHistoryScreen(
+                            elderId: widget.elderId,
+                          ),
                         );
                       },
                     ),
@@ -359,7 +515,9 @@ class CaregiverDashboard extends StatelessWidget {
                 onTap: () {
                   _openPage(
                     context,
-                    MedicalSummaryScreen(elderId: elderId),
+                    MedicalSummaryScreen(
+                      elderId: widget.elderId,
+                    ),
                   );
                 },
                 child: Container(
@@ -437,7 +595,9 @@ class CaregiverDashboard extends StatelessWidget {
                 onTap: () {
                   _openPage(
                     context,
-                    NearbyServicesScreen(elderId: elderId),
+                    NearbyServicesScreen(
+                      elderId: widget.elderId,
+                    ),
                   );
                 },
               ),
@@ -461,6 +621,62 @@ class CaregiverDashboard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+// =======================================================================
+// SOS DETAIL ROW
+// =======================================================================
+
+class _SosDetailRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _SosDetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: 19,
+            color: const Color(0xFF46695A),
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$label: ',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF26352F),
+                    ),
+                  ),
+                  TextSpan(
+                    text: value,
+                    style: const TextStyle(
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
