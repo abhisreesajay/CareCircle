@@ -115,8 +115,22 @@ class ElderHome extends StatelessWidget {
                 route: '/checkin',
               ),
 
+                           const SizedBox(height: 14),
+
+              // Check-in Reminders
+              _buildActionCard(
+                context: context,
+                title: 'Check-in Reminders',
+                subtitle: 'Set and manage daily reminders',
+                icon: Icons.alarm_rounded,
+                iconColor: const Color(0xFFB36B00),
+                backgroundColor: const Color(0xFFFFF2DE),
+                route: '/checkin-reminder',
+              ),
+
               const SizedBox(height: 14),
 
+              // Voice Check-in
               // Voice Check-in
               _buildActionCard(
                 context: context,

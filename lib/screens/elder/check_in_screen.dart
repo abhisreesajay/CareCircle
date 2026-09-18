@@ -1,52 +1,91 @@
 import 'package:flutter/material.dart';
-class CheckInScreen extends StatelessWidget {
-  const CheckInScreen({super.key});
-  void _showConfirmation(
-    BuildContext context,
-    String title,
-    String message,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
+import '../../services/check_in_history_service.dart';
+import '../../services/check_in_reminder_service.dart';
+
+class CheckInScreen extends StatefulWidget {
+  const CheckInScreen({
+    super.key,
+    required this.elderId,
+  });
+
+  final String elderId;
+
+  @override
+  State<CheckInScreen> createState() => _CheckInScreenState();
+}
+
+class _CheckInScreenState extends State<CheckInScreen> {
+  bool _saving = false;
+
+  Future<void> _saveCheckIn(String status) async {
+    setState(() {
+      _saving = true;
+    });
+
+    try {
+      await CheckInHistoryService().saveCheckIn(
+        elderId: widget.elderId,
+        status: status,
+      );
+
+      if (status == 'COMPLETED') {
+        final reminderService = CheckInReminderService();
+
+        final reminderId =
+            await reminderService.getPendingReminderId(widget.elderId);
+
+        if (reminderId != null) {
+          await reminderService.completeReminder(
+            elderId: widget.elderId,
+            reminderId: reminderId,
+          );
+        }
+      }
+
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
           title: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            ),
+            status == 'COMPLETED'
+                ? 'Check-in Complete'
+                : 'Help Requested',
           ),
           content: Text(
-            message,
-            style: const TextStyle(
-              fontSize: 20,
-            ),
+            status == 'COMPLETED'
+                ? 'Your daily check-in has been recorded.'
+                : 'Your request for help has been recorded.',
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'OK',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
             ),
           ],
-        );
-      },
-    );
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unable to save check-in: $e'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F8FA),
-
       appBar: AppBar(
         title: const Text(
           'Daily Check-in',
@@ -58,11 +97,9 @@ class CheckInScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF164A63),
         foregroundColor: Colors.white,
       ),
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-
           child: Column(
             children: [
               const SizedBox(height: 30),
@@ -90,18 +127,12 @@ class CheckInScreen extends StatelessWidget {
 
               const Spacer(),
 
-              // I'M OK button
               SizedBox(
                 width: double.infinity,
                 height: 110,
                 child: ElevatedButton(
-                  onPressed: () {
-                    _showConfirmation(
-                      context,
-                      'Check-in Complete',
-                      'Great! Your caregiver has been notified that you are okay.',
-                    );
-                  },
+                  onPressed:
+                      _saving ? null : () => _saveCheckIn('COMPLETED'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF16845B),
                     foregroundColor: Colors.white,
@@ -109,30 +140,28 @@ class CheckInScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                     ),
                   ),
-                  child: const Text(
-                    "I'M OK",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: _saving
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          "I'M OK",
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
 
               const SizedBox(height: 25),
 
-              // NEED HELP button
               SizedBox(
                 width: double.infinity,
                 height: 110,
                 child: ElevatedButton(
-                  onPressed: () {
-                    _showConfirmation(
-                      context,
-                      'Help Requested',
-                      'Your caregiver has been notified that you need help.',
-                    );
-                  },
+                  onPressed:
+                      _saving ? null : () => _saveCheckIn('HELP_REQUESTED'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFC62828),
                     foregroundColor: Colors.white,
@@ -153,7 +182,7 @@ class CheckInScreen extends StatelessWidget {
               const Spacer(),
 
               const Text(
-                'Your caregiver will be notified after your selection.',
+                'Your check-in will be saved securely.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
