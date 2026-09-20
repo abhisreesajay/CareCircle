@@ -52,7 +52,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
           activeSosId = activeSos.id;
         });
       }
-    } catch (error) {
+    } catch (_) {
       // The user can still try sending an SOS.
     }
   }
@@ -77,7 +77,10 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         throw Exception('Please log in first.');
       }
 
-      // Prevent multiple ACTIVE SOS records.
+      // ----------------------------------------------------------
+      // STEP 1: CHECK EXISTING ACTIVE SOS
+      // ----------------------------------------------------------
+
       final existingActiveSOS = await _sosService.getActiveSos(
         userId: user.uid,
       );
@@ -99,8 +102,10 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         return;
       }
 
-      // Creates the SOS, gets current location,
-      // and retrieves medical information.
+      // ----------------------------------------------------------
+      // STEP 2: CREATE SOS
+      // ----------------------------------------------------------
+
       final sosRecord = await _sosService.createSos(
         userId: user.uid,
       );

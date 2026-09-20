@@ -159,8 +159,12 @@ def _get_location_text(
     )
 
 
+# ============================================================
+# SOS ALERT FUNCTION
+# ============================================================
+
 @firestore_fn.on_document_created(
-    document="sosRecords/{sosId}"
+    document="sosAlerts/{sosId}"
 )
 def on_sos_created(
     event: firestore_fn.Event[
@@ -168,11 +172,11 @@ def on_sos_created(
     ],
 ):
     """
-    Triggered whenever a new SOS record is created.
+    Triggered whenever a new SOS alert is created.
 
     Expected Firestore document:
 
-    sosRecords/{sosId}
+    sosAlerts/{sosId}
         userId
         latitude
         longitude
@@ -189,7 +193,9 @@ def on_sos_created(
     sos_data = sos.to_dict()
 
     if sos_data is None:
-        print("SOS document could not be converted to a map.")
+        print(
+            "SOS document could not be converted to a map."
+        )
         return
 
     user_id = sos_data.get(
@@ -252,6 +258,10 @@ def on_sos_created(
         body=notification_body,
     )
 
+
+# ============================================================
+# SAFE-ZONE VIOLATION FUNCTION
+# ============================================================
 
 @firestore_fn.on_document_created(
     document="safeZoneViolations/{violationId}"
@@ -320,6 +330,10 @@ def on_safe_zone_violation_created(
         "status",
         "OUTSIDE",
     )
+
+    # Keep the safe-zone ID available for future
+    # elder-specific notification filtering.
+    del safe_zone_id
 
     # Only notify for an actual outside-zone event.
     if status != "OUTSIDE":

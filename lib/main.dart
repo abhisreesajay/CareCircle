@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
+import 'services/messaging_service.dart';
 
 // Shared project screens
 import 'screens/auth/login_screen.dart';
@@ -19,8 +21,28 @@ import 'screens/safe_zone_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // --------------------------------------------------
+  // FIREBASE INITIALIZATION
+  // --------------------------------------------------
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // --------------------------------------------------
+  // FCM BACKGROUND MESSAGE HANDLER
+  // --------------------------------------------------
+  //
+  // Registers the handler that is used when an FCM
+  // message is received while the application is
+  // running in the background or terminated.
+  //
+  // This must be registered after Flutter is initialized
+  // and Firebase is initialized, but before runApp().
+  //
+
+  FirebaseMessaging.onBackgroundMessage(
+    firebaseMessagingBackgroundHandler,
   );
 
   runApp(const CareCircleApp());

@@ -19,11 +19,10 @@ class SosService {
   // ------------------------------------------------------------
   // GET CURRENT LOCATION
   // ------------------------------------------------------------
-  //
+
   // Gets the user's current GPS location only once.
   //
   // This does not continuously track the user.
-  //
   Future<Position> getCurrentLocation() async {
     final Position? position =
         await LocationService.getCurrentLocation();
@@ -41,16 +40,7 @@ class SosService {
   // ------------------------------------------------------------
   // CREATE SOS
   // ------------------------------------------------------------
-  //
-  // Creates and saves a new ACTIVE SOS record in Firestore.
-  //
-  // The supplied userId must match the currently logged-in user.
-  //
-  // The SOS record also includes the user's medical information
-  // if it exists in:
-  //
-  // medicalInformation/{userId}
-  //
+
   Future<SosRecord> createSos({
     required String userId,
   }) async {
@@ -60,7 +50,6 @@ class SosService {
       );
     }
 
-    // Get the currently logged-in Firebase user.
     final User? currentUser =
         _auth.currentUser;
 
@@ -70,9 +59,7 @@ class SosService {
       );
     }
 
-    // Security check:
-    // Do not allow one user to create an SOS
-    // for another user.
+    // A user can only create an SOS for their own account.
     if (currentUser.uid != userId) {
       throw Exception(
         'You can only create an SOS for your own account.',
@@ -85,23 +72,16 @@ class SosService {
         await getCurrentLocation();
 
     // Retrieve medical information.
-    //
-    // If no medical information exists, an empty
-    // map will be stored in the SOS record.
-    final Map<String, dynamic>?
-        medicalInformation =
+    final Map<String, dynamic>? medicalInformation =
         await _medicalService
             .getMedicalInformation(userId);
 
-    // Create a new Firestore document with
-    // an automatically generated ID.
-    final DocumentReference<
-        Map<String, dynamic>> doc =
+    // Create a new document inside sosAlerts.
+    final DocumentReference<Map<String, dynamic>> doc =
         _firestore
-            .collection('sosRecords')
+            .collection('sosAlerts')
             .doc();
 
-    // Create the SOS model.
     final SosRecord sos = SosRecord(
       id: doc.id,
       userId: currentUser.uid,
@@ -111,14 +91,9 @@ class SosService {
       status: 'ACTIVE',
     );
 
-    // Convert the SOS model into a map.
     final Map<String, dynamic> sosData =
         sos.toMap();
 
-    // Add extra information to the SOS record.
-    //
-    // These fields are useful for the caregiver
-    // and for the future notification backend.
     sosData['createdAt'] =
         FieldValue.serverTimestamp();
 
@@ -134,10 +109,7 @@ class SosService {
   // ------------------------------------------------------------
   // GET ACTIVE SOS
   // ------------------------------------------------------------
-  //
-  // Gets the latest ACTIVE SOS record created
-  // by a specific user.
-  //
+
   Future<SosRecord?> getActiveSos({
     required String userId,
   }) async {
@@ -147,7 +119,6 @@ class SosService {
       );
     }
 
-    // Get the currently logged-in Firebase user.
     final User? currentUser =
         _auth.currentUser;
 
@@ -157,19 +128,16 @@ class SosService {
       );
     }
 
-    // Security check:
-    // A user can only check their own active
-    // SOS records.
     if (currentUser.uid != userId) {
       throw Exception(
         'You can only view your own active SOS records.',
       );
     }
 
-    final QuerySnapshot<
-        Map<String, dynamic>> querySnapshot =
+    final QuerySnapshot<Map<String, dynamic>>
+        querySnapshot =
         await _firestore
-            .collection('sosRecords')
+            .collection('sosAlerts')
             .where(
               'userId',
               isEqualTo: currentUser.uid,
@@ -180,17 +148,13 @@ class SosService {
             )
             .get();
 
-    // No active SOS exists.
     if (querySnapshot.docs.isEmpty) {
       return null;
     }
 
-    final List<
-        QueryDocumentSnapshot<
-            Map<String, dynamic>>> documents =
-        List<
-            QueryDocumentSnapshot<
-                Map<String, dynamic>>>.from(
+    final List<QueryDocumentSnapshot<Map<String, dynamic>>>
+        documents =
+        List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(
       querySnapshot.docs,
     );
 
@@ -212,13 +176,10 @@ class SosService {
         bTimestamp,
       );
 
-      // If both timestamps are unavailable,
-      // keep their order.
       if (aDate == null && bDate == null) {
         return 0;
       }
 
-      // Records without timestamps go last.
       if (aDate == null) {
         return 1;
       }
@@ -227,12 +188,11 @@ class SosService {
         return -1;
       }
 
-      // Newest record first.
       return bDate.compareTo(aDate);
     });
 
-    final QueryDocumentSnapshot<
-        Map<String, dynamic>> latestDocument =
+    final QueryDocumentSnapshot<Map<String, dynamic>>
+        latestDocument =
         documents.first;
 
     return SosRecord.fromMap(
@@ -244,12 +204,7 @@ class SosService {
   // ------------------------------------------------------------
   // GET SOS MEDICAL INFORMATION
   // ------------------------------------------------------------
-  //
-  // Retrieves the medical information saved inside
-  // a particular SOS record.
-  //
-  // This can be used by the caregiver dashboard.
-  //
+
   Future<Map<String, dynamic>> getSosMedicalInformation(
     String sosId,
   ) async {
@@ -259,10 +214,10 @@ class SosService {
       );
     }
 
-    final DocumentSnapshot<
-        Map<String, dynamic>> snapshot =
+    final DocumentSnapshot<Map<String, dynamic>>
+        snapshot =
         await _firestore
-            .collection('sosRecords')
+            .collection('sosAlerts')
             .doc(sosId)
             .get();
 
@@ -294,9 +249,7 @@ class SosService {
   // ------------------------------------------------------------
   // CANCEL SOS
   // ------------------------------------------------------------
-  //
-  // Updates the active SOS status to CANCELLED.
-  //
+
   Future<void> cancelSos(String sosId) async {
     if (sosId.trim().isEmpty) {
       throw Exception(
@@ -313,16 +266,14 @@ class SosService {
       );
     }
 
-    // Get the SOS document first so that
-    // ownership can be verified.
-    final DocumentReference<
-        Map<String, dynamic>> sosDocument =
+    final DocumentReference<Map<String, dynamic>>
+        sosDocument =
         _firestore
-            .collection('sosRecords')
+            .collection('sosAlerts')
             .doc(sosId);
 
-    final DocumentSnapshot<
-        Map<String, dynamic>> snapshot =
+    final DocumentSnapshot<Map<String, dynamic>>
+        snapshot =
         await sosDocument.get();
 
     if (!snapshot.exists) {
@@ -343,9 +294,6 @@ class SosService {
     final String recordUserId =
         data['userId'] as String? ?? '';
 
-    // Security check:
-    // Only the user who created the SOS
-    // can cancel it.
     if (recordUserId != currentUser.uid) {
       throw Exception(
         'You can only cancel your own SOS.',
@@ -371,10 +319,7 @@ class SosService {
   // ------------------------------------------------------------
   // TIMESTAMP CONVERSION HELPER
   // ------------------------------------------------------------
-  //
-  // Converts Firestore Timestamp or DateTime
-  // into DateTime.
-  //
+
   DateTime? _convertTimestampToDateTime(
     dynamic timestamp,
   ) {

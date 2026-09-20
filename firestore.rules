@@ -3,10 +3,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --------------------------------------------------
-    // HELPER FUNCTIONS
-    // --------------------------------------------------
-
     function isSignedIn() {
       return request.auth != null;
     }
@@ -26,107 +22,200 @@ service cloud.firestore {
         ).data.role == "caregiver";
     }
 
-
-    // --------------------------------------------------
+    // ============================================================
     // USERS
-    // --------------------------------------------------
+    // ============================================================
 
     match /users/{userId} {
 
-      // A user can read their own profile.
-      // Caregivers can read user profiles.
-      allow read: if isOwner(userId) || isCaregiver();
+      allow read: if isOwner(userId)
+        || isCaregiver();
 
-      // A signed-in user can create their own profile.
       allow create: if isOwner(userId);
 
-      // A user can update their own profile,
-      // but cannot change their role.
       allow update: if isOwner(userId)
-        && request.resource.data.role == resource.data.role;
+        && request.resource.data.role
+            == resource.data.role;
 
-      // User profiles cannot be deleted through the app.
       allow delete: if false;
     }
 
-
-    // --------------------------------------------------
+    // ============================================================
     // SAFE ZONES
-    // --------------------------------------------------
+    // ============================================================
 
     match /safeZones/{safeZoneId} {
 
-      // The elder who owns the safe zone or a caregiver
-      // can read it.
+      // Elder can read their assigned safe zones.
+      // Caregiver can read zones they created.
       allow read: if isSignedIn()
         && (
-          resource.data.elderId == request.auth.uid
-          || isCaregiver()
+          resource.data.elderId
+              == request.auth.uid
+          || (
+            isCaregiver()
+            && resource.data.createdBy
+                == request.auth.uid
+          )
         );
 
-      // A signed-in elder can create their own safe zone.
-      allow create: if isSignedIn()
-        && request.resource.data.elderId == request.auth.uid;
+      // Only a caregiver can create a safe zone.
+      allow create: if isCaregiver()
+        && request.resource.data.createdBy
+            == request.auth.uid
+        && request.resource.data.elderId
+            is string
+        && request.resource.data.elderId
+            != ""
+        && request.resource.data.name
+            is string
+        && request.resource.data.name
+            != ""
+        && request.resource.data.latitude
+            is number
+        && request.resource.data.latitude
+            >= -90
+        && request.resource.data.latitude
+            <= 90
+        && request.resource.data.longitude
+            is number
+        && request.resource.data.longitude
+            >= -180
+        && request.resource.data.longitude
+            <= 180
+        && request.resource.data.radiusInMeters
+            is number
+        && request.resource.data.radiusInMeters
+            >= 50;
 
-      // The owner can update the safe zone,
-      // but cannot change its elderId.
-      allow update: if isSignedIn()
-        && resource.data.elderId == request.auth.uid
-        && request.resource.data.elderId == resource.data.elderId;
+      // Only the caregiver who created
+      // the zone can update it.
+      allow update: if isCaregiver()
+        && resource.data.createdBy
+            == request.auth.uid
+        && request.resource.data.createdBy
+            == resource.data.createdBy
+        && request.resource.data.elderId
+            == resource.data.elderId
+        && request.resource.data.name
+            is string
+        && request.resource.data.name
+            != ""
+        && request.resource.data.latitude
+            is number
+        && request.resource.data.latitude
+            >= -90
+        && request.resource.data.latitude
+            <= 90
+        && request.resource.data.longitude
+            is number
+        && request.resource.data.longitude
+            >= -180
+        && request.resource.data.longitude
+            <= 180
+        && request.resource.data.radiusInMeters
+            is number
+        && request.resource.data.radiusInMeters
+            >= 50;
 
-      // The owner can delete their safe zone.
-      allow delete: if isSignedIn()
-        && resource.data.elderId == request.auth.uid;
+      // Only the caregiver who created
+      // the zone can delete it.
+      allow delete: if isCaregiver()
+        && resource.data.createdBy
+            == request.auth.uid;
     }
 
+    // ============================================================
+    // SAFE-ZONE VIOLATIONS
+    // ============================================================
 
-    // --------------------------------------------------
-    // SOS RECORDS
-    // --------------------------------------------------
+    match /safeZoneViolations/{violationId} {
 
-    match /sosRecords/{sosId} {
-
-      // A signed-in elder can create an SOS record
-      // only for their own user ID and only as ACTIVE.
+      // Elder can create an OUTSIDE violation only when
+      // the referenced safe zone belongs to that elder.
       allow create: if isSignedIn()
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.status == "ACTIVE";
+        && request.resource.data.elderId
+            == request.auth.uid
+        && request.resource.data.safeZoneId
+            is string
+        && request.resource.data.safeZoneId
+            != ""
+        && exists(
+          /databases/$(database)/documents/safeZones/$(request.resource.data.safeZoneId)
+        )
+        && get(
+          /databases/$(database)/documents/safeZones/$(request.resource.data.safeZoneId)
+        ).data.elderId
+            == request.auth.uid
+        && request.resource.data.status
+            == "OUTSIDE"
+        && request.resource.data.latitude
+            is number
+        && request.resource.data.longitude
+            is number
+        && request.resource.data.distanceInMeters
+            is number;
 
-      // The elder who created the SOS or a caregiver
-      // can read the SOS record.
+      // Elder can read their own violations.
+      // Signed-in caregivers can read violations.
       allow read: if isSignedIn()
         && (
-          resource.data.userId == request.auth.uid
+          resource.data.elderId
+              == request.auth.uid
           || isCaregiver()
         );
 
-      // Only the elder who created the SOS can cancel it.
-      // The userId cannot be changed.
-      allow update: if isSignedIn()
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.status == "CANCELLED";
+      // Violations cannot be modified or deleted by clients.
+      allow update, delete: if false;
+    }
 
-      // SOS records cannot be deleted through the app.
+    // ============================================================
+    // SOS
+    // ============================================================
+
+    match /sosAlerts/{sosId} {
+
+      // Elder can create their own active SOS.
+      allow create: if isSignedIn()
+        && request.resource.data.userId
+            == request.auth.uid
+        && request.resource.data.status
+            == "ACTIVE";
+
+      // Elder can read their own SOS.
+      // Caregivers can read SOS alerts.
+      allow read: if isSignedIn()
+        && (
+          resource.data.userId
+              == request.auth.uid
+          || isCaregiver()
+        );
+
+      // Elder can cancel their own active SOS.
+      allow update: if isSignedIn()
+        && resource.data.userId
+            == request.auth.uid
+        && request.resource.data.userId
+            == resource.data.userId
+        && request.resource.data.status
+            == "CANCELLED";
+
       allow delete: if false;
     }
 
-
-    // --------------------------------------------------
+    // ============================================================
     // CARE CIRCLES
-    // --------------------------------------------------
+    // ============================================================
 
     match /careCircles/{circleId} {
 
-      // Existing CareCircle functionality requires
-      // authenticated users to access care circles.
-      allow read, create, update, delete: if isSignedIn();
+      allow read, create, update, delete:
+          if isSignedIn();
     }
 
-
-    // --------------------------------------------------
+    // ============================================================
     // DENY EVERYTHING ELSE
-    // --------------------------------------------------
+    // ============================================================
 
     match /{document=**} {
       allow read, write: if false;
