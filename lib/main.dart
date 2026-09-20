@@ -1,8 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
-import 'screens/auth_screen.dart';
+
+// Shared project screens
+import 'screens/auth/login_screen.dart';
+import 'screens/caregiver/caregiver_dashboard.dart';
+import 'screens/elder/check_in_screen.dart';
+import 'screens/elder/elder_home.dart';
+
+// Person 4 screens
 import 'screens/emergency_contacts_screen.dart';
 import 'screens/emergency_screen.dart';
 import 'screens/safe_zone_screen.dart';
@@ -23,21 +32,122 @@ class CareCircleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'CareCircle',
+      debugShowCheckedModeBanner: false,
+
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
-        ),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2A9D8F),
+        ),
       ),
 
-      // Login page opens first.
-      home: const AuthScreen(),
+      // Named routes used by shared screens and Person 4 screens.
+      routes: {
+        '/checkin': (context) => const CheckInScreen(),
+        '/sos': (context) => const EmergencyScreen(),
+        '/emergency-contacts': (context) =>
+            const EmergencyContactsScreen(),
+        '/safe-zone': (context) => const SafeZoneScreen(),
+      },
+
+      home: const AuthWrapper(),
     );
   }
 }
 
+/// Checks whether the user is logged in.
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data != null) {
+          return RoleRouter(
+            uid: snapshot.data!.uid,
+          );
+        }
+
+        return const LoginScreen();
+      },
+    );
+  }
+}
+
+/// Opens the correct dashboard based on the user's Firestore role.
+class RoleRouter extends StatelessWidget {
+  final String uid;
+
+  const RoleRouter({
+    super.key,
+    required this.uid,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Text(
+                'Error loading user profile:\n${snapshot.error}',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Scaffold(
+            body: Center(
+              child: Text('User profile not found.'),
+            ),
+          );
+        }
+
+        final data = snapshot.data!.data() ?? {};
+        final role = data['role'] ?? 'elder';
+
+        if (role == 'caregiver') {
+          return const CaregiverDashboard(
+            elderId: 'test_elder_001',
+          );
+        }
+
+        return const ElderHome();
+      },
+    );
+  }
+}
+
+/// Person 4 dashboard for Emergency, Safety and Location features.
+///
+/// This screen is kept separately so it can be connected to the elder
+/// dashboard or used for Person 4 testing/demo.
 class Person4Dashboard extends StatelessWidget {
   const Person4Dashboard({super.key});
 
@@ -143,9 +253,7 @@ class Person4Dashboard extends StatelessWidget {
                       '• SOS cancellation\n'
                       '• Safe zone creation\n'
                       '• Emergency contact management\n'
-                      '• FCM token registration\n'
-                      '• Background safe-zone exit monitoring: pending\n'
-                      '• Safe-zone exit notifications: pending',
+                      '• FCM token registration',
                       textAlign: TextAlign.left,
                     ),
                   ],

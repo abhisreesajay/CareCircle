@@ -325,7 +325,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   const SizedBox(height: 16),
 
                   DropdownButtonFormField<String>(
-                    value: _selectedRole,
+                    initialValue: _selectedRole,
                     decoration: const InputDecoration(
                       labelText: 'Select Role',
                       border: OutlineInputBorder(),

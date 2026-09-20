@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCDgQair7jMQLeOTXOZcUm2bdiQBNUchVP8',
+    apiKey: 'AIzaSyCDgQairxGOLeOTXOZcUm2bdiQBNUchVP8',
     appId: '1:227094038804:web:7545b67f47c7e722745a01',
     messagingSenderId: '227094038804',
     projectId: 'carecircle-62a1c',
@@ -57,27 +57,27 @@ class DefaultFirebaseOptions {
     projectId: 'carecircle-62a1c',
     storageBucket: 'carecircle-62a1c.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD7KEeRn7jMQW7tPNaZ4y8-M1JZDVCcYKQ',
     appId: '1:227094038804:ios:9cebd7f73d4f6639745a01',
     messagingSenderId: '227094038804',
     projectId: 'carecircle-62a1c',
     storageBucket: 'carecircle-62a1c.firebasestorage.app',
+    iosClientId: '227094038804-t6edun6ne0848beedgpse4afslnrnmg6.apps.googleusercontent.com',
     iosBundleId: 'com.example.careCircle',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyD7KEeRn7jMQW7tPNaZ4y8-M1JZDVCcYKQ',
     appId: '1:227094038804:ios:9cebd7f73d4f6639745a01',
     messagingSenderId: '227094038804',
     projectId: 'carecircle-62a1c',
     storageBucket: 'carecircle-62a1c.firebasestorage.app',
+    iosClientId: '227094038804-t6edun6ne0848beedgpse4afslnrnmg6.apps.googleusercontent.com',
     iosBundleId: 'com.example.careCircle',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCDgQair7jMQLeOTXOZcUm2bdiQBNUchVP8',
+    apiKey: 'AIzaSyCDgQairxGOLeOTXOZcUm2bdiQBNUchVP8',
     appId: '1:227094038804:web:f6950602392dd4b7745a01',
     messagingSenderId: '227094038804',
     projectId: 'carecircle-62a1c',

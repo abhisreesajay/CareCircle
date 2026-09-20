@@ -3,6 +3,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --------------------------------------------------
+    // HELPER FUNCTIONS
+    // --------------------------------------------------
+
     function isSignedIn() {
       return request.auth != null;
     }
@@ -22,21 +26,29 @@ service cloud.firestore {
         ).data.role == "caregiver";
     }
 
+
     // --------------------------------------------------
     // USERS
     // --------------------------------------------------
 
     match /users/{userId} {
 
+      // A user can read their own profile.
+      // Caregivers can read user profiles.
       allow read: if isOwner(userId) || isCaregiver();
 
+      // A signed-in user can create their own profile.
       allow create: if isOwner(userId);
 
+      // A user can update their own profile,
+      // but cannot change their role.
       allow update: if isOwner(userId)
         && request.resource.data.role == resource.data.role;
 
+      // User profiles cannot be deleted through the app.
       allow delete: if false;
     }
+
 
     // --------------------------------------------------
     // SAFE ZONES
@@ -44,22 +56,29 @@ service cloud.firestore {
 
     match /safeZones/{safeZoneId} {
 
+      // The elder who owns the safe zone or a caregiver
+      // can read it.
       allow read: if isSignedIn()
         && (
           resource.data.elderId == request.auth.uid
           || isCaregiver()
         );
 
+      // A signed-in elder can create their own safe zone.
       allow create: if isSignedIn()
         && request.resource.data.elderId == request.auth.uid;
 
+      // The owner can update the safe zone,
+      // but cannot change its elderId.
       allow update: if isSignedIn()
         && resource.data.elderId == request.auth.uid
         && request.resource.data.elderId == resource.data.elderId;
 
+      // The owner can delete their safe zone.
       allow delete: if isSignedIn()
         && resource.data.elderId == request.auth.uid;
     }
+
 
     // --------------------------------------------------
     // SOS RECORDS
@@ -67,41 +86,31 @@ service cloud.firestore {
 
     match /sosRecords/{sosId} {
 
+      // A signed-in elder can create an SOS record
+      // only for their own user ID and only as ACTIVE.
       allow create: if isSignedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == "ACTIVE";
 
+      // The elder who created the SOS or a caregiver
+      // can read the SOS record.
       allow read: if isSignedIn()
         && (
           resource.data.userId == request.auth.uid
           || isCaregiver()
         );
 
+      // Only the elder who created the SOS can cancel it.
+      // The userId cannot be changed.
       allow update: if isSignedIn()
         && resource.data.userId == request.auth.uid
         && request.resource.data.userId == resource.data.userId
         && request.resource.data.status == "CANCELLED";
 
+      // SOS records cannot be deleted through the app.
       allow delete: if false;
     }
 
-    // --------------------------------------------------
-    // SAFE-ZONE VIOLATIONS
-    // --------------------------------------------------
-
-    match /safeZoneViolations/{violationId} {
-
-      allow create: if isSignedIn()
-        && request.resource.data.elderId == request.auth.uid;
-
-      allow read: if isSignedIn()
-        && (
-          resource.data.elderId == request.auth.uid
-          || isCaregiver()
-        );
-
-      allow update, delete: if false;
-    }
 
     // --------------------------------------------------
     // CARE CIRCLES
@@ -109,8 +118,11 @@ service cloud.firestore {
 
     match /careCircles/{circleId} {
 
+      // Existing CareCircle functionality requires
+      // authenticated users to access care circles.
       allow read, create, update, delete: if isSignedIn();
     }
+
 
     // --------------------------------------------------
     // DENY EVERYTHING ELSE

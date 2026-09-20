@@ -32,15 +32,13 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
   Future<void> _checkExistingActiveSOS() async {
     try {
-      final User? user =
-          FirebaseAuth.instance.currentUser;
+      final User? user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
         return;
       }
 
-      final activeSos =
-          await _sosService.getActiveSos(
+      final activeSos = await _sosService.getActiveSos(
         userId: user.uid,
       );
 
@@ -73,16 +71,14 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     });
 
     try {
-      final User? user =
-          FirebaseAuth.instance.currentUser;
+      final User? user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
         throw Exception('Please log in first.');
       }
 
       // Prevent multiple ACTIVE SOS records.
-      final existingActiveSOS =
-          await _sosService.getActiveSos(
+      final existingActiveSOS = await _sosService.getActiveSos(
         userId: user.uid,
       );
 
@@ -105,8 +101,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
       // Creates the SOS, gets current location,
       // and retrieves medical information.
-      final sosRecord =
-          await _sosService.createSos(
+      final sosRecord = await _sosService.createSos(
         userId: user.uid,
       );
 
@@ -132,13 +127,11 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         'SOS failed: ${_cleanErrorMessage(error)}',
       );
     } finally {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        setState(() {
+          isSendingSOS = false;
+        });
       }
-
-      setState(() {
-        isSendingSOS = false;
-      });
     }
   }
 
@@ -156,8 +149,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     });
 
     try {
-      final User? user =
-          FirebaseAuth.instance.currentUser;
+      final User? user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
         throw Exception('Please log in first.');
@@ -167,8 +159,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
       // Find the latest active SOS if needed.
       if (sosId == null || sosId.isEmpty) {
-        final activeSos =
-            await _sosService.getActiveSos(
+        final activeSos = await _sosService.getActiveSos(
           userId: user.uid,
         );
 
@@ -203,13 +194,11 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         '${_cleanErrorMessage(error)}',
       );
     } finally {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        setState(() {
+          isCancellingSOS = false;
+        });
       }
-
-      setState(() {
-        isCancellingSOS = false;
-      });
     }
   }
 
@@ -259,8 +248,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            const MedicalInformationScreen(),
+        builder: (context) => const MedicalInformationScreen(),
       ),
     );
   }
@@ -302,8 +290,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isBusy =
-        isSendingSOS || isCancellingSOS;
+    final bool isBusy = isSendingSOS || isCancellingSOS;
 
     return Scaffold(
       appBar: AppBar(
@@ -433,8 +420,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: Colors.red.shade50,
-                    borderRadius:
-                        BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.red.shade200,
                     ),
