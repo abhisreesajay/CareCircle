@@ -168,28 +168,42 @@ class MessagingService {
     );
   }
 
-  /// Removes the saved FCM token when the user logs out.
   Future<void> removeToken(String userId) async {
     try {
       if (userId.trim().isEmpty) {
         return;
       }
-
-      final User? currentUser = _auth.currentUser;
-
-      if (currentUser == null || currentUser.uid != userId) {
+  
+      final User? currentUser =
+          _auth.currentUser;
+  
+      if (currentUser == null ||
+          currentUser.uid != userId) {
         return;
       }
-
-      await _firestore.collection('users').doc(userId).set(
+  
+      final String? token =
+          await _messaging.getToken();
+  
+      if (token == null ||
+          token.isEmpty) {
+        return;
+      }
+  
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .set(
         {
-          'fcmToken': FieldValue.delete(),
-          'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+          'fcmTokens':
+              FieldValue.arrayRemove([token]),
+          'fcmTokenUpdatedAt':
+              FieldValue.serverTimestamp(),
         },
         SetOptions(merge: true),
       );
     } catch (_) {
-      // Do not crash the app if token removal fails.
+      // Do not crash the application.
     }
   }
 
