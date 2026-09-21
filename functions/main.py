@@ -3,92 +3,127 @@ from firebase_functions.options import set_global_options
 from firebase_admin import initialize_app, firestore, messaging
 
 
-# Limit the maximum number of Cloud Function instances.
-set_global_options(max_instances=10)
+# ============================================================
+# FIREBASE INITIALIZATION
+# ============================================================
 
-
-# Initialize Firebase Admin SDK.
 initialize_app()
 
+set_global_options(
+    max_instances=10,
+)
+
+
+# ============================================================
+# GET NOTIFICATION RECIPIENTS
+# ============================================================
 
 def _get_notification_recipients(
     db,
     elder_id: str,
 ):
     """
-    Finds caregivers and emergency contacts who should receive alerts.
+    Finds caregivers connected to the specific elder.
 
-    Current expected Firestore structure:
+    Firestore structure:
 
     users/{userId}
-        role: "caregiver" OR "emergency_contact"
-        fcmToken: "device FCM token"
+        role: "caregiver"
+        linkedElders: [
+            "elderUid"
+        ]
+        fcmTokens: [
+            "device-token-1",
+            "device-token-2"
+        ]
 
-    Current behavior:
-    - Sends to all caregivers.
-    - Sends to all emergency contacts.
-    - Avoids duplicate FCM tokens.
-
-    The elder_id is currently accepted so that this function can later
-    be restricted to caregivers/emergency contacts connected to a
-    particular elder.
+    Emergency contacts can also have FCM tokens, but they
+    are not necessarily registered CareCircle users.
+    Therefore this function currently sends to linked
+    caregivers only.
     """
-
-    del elder_id  # Reserved for elder-specific filtering later.
 
     recipients = []
     token_set = set()
 
-    recipient_roles = [
-        "caregiver",
-        "emergency_contact",
-    ]
+    try:
+        caregivers = (
+            db.collection("users")
+            .where("role", "==", "caregiver")
+            .stream()
+        )
 
-    for role in recipient_roles:
-        try:
-            users = (
-                db.collection("users")
-                .where("role", "==", role)
-                .stream()
+        for user_document in caregivers:
+            user_data = user_document.to_dict()
+
+            if not user_data:
+                continue
+
+            linked_elders = user_data.get(
+                "linkedElders",
+                [],
             )
 
-            for user_document in users:
-                user_data = user_document.to_dict()
+            if not isinstance(linked_elders, list):
+                continue
 
-                fcm_token = user_data.get("fcmToken")
+            if elder_id not in linked_elders:
+                continue
 
-                if not fcm_token:
+            fcm_tokens = user_data.get(
+                "fcmTokens",
+                [],
+            )
+
+            # Backward compatibility:
+            # support the old single-token field too.
+            old_token = user_data.get(
+                "fcmToken",
+            )
+
+            if old_token:
+                if isinstance(old_token, str):
+                    fcm_tokens = list(fcm_tokens)
+                    fcm_tokens.append(old_token)
+
+            if not isinstance(fcm_tokens, list):
+                continue
+
+            for token in fcm_tokens:
+
+                if not isinstance(token, str):
                     continue
 
-                if not isinstance(fcm_token, str):
+                token = token.strip()
+
+                if not token:
                     continue
 
-                fcm_token = fcm_token.strip()
-
-                if not fcm_token:
+                if token in token_set:
                     continue
 
-                if fcm_token in token_set:
-                    continue
-
-                token_set.add(fcm_token)
+                token_set.add(token)
 
                 recipients.append(
                     {
                         "userId": user_document.id,
-                        "role": role,
-                        "fcmToken": fcm_token,
+                        "role": "caregiver",
+                        "fcmToken": token,
                     }
                 )
 
-        except Exception as error:
-            print(
-                f"Could not load recipients with role "
-                f"{role}: {error}"
-            )
+    except Exception as error:
+        print(
+            "Could not load caregiver recipients: "
+            f"{error}"
+        )
 
     return recipients
 
+
+# ============================================================
+# SEND NOTIFICATIONS
+# ============================================================
 
 def _send_notification_to_recipients(
     recipients,
@@ -96,17 +131,20 @@ def _send_notification_to_recipients(
     body: str,
 ):
     """
-    Sends one push notification to each recipient.
+    Sends an FCM notification to every valid recipient.
 
-    A failed or invalid token will not stop the remaining
-    recipients from receiving the notification.
+    A failure for one token does not stop notifications
+    from being sent to the remaining recipients.
     """
 
     successful_count = 0
     failed_count = 0
 
     for recipient in recipients:
-        fcm_token = recipient.get("fcmToken")
+
+        fcm_token = recipient.get(
+            "fcmToken",
+        )
 
         if not fcm_token:
             continue
@@ -120,30 +158,38 @@ def _send_notification_to_recipients(
         )
 
         try:
-            response = messaging.send(message)
+            response = messaging.send(
+                message,
+            )
 
             successful_count += 1
 
             print(
-                f"Notification sent successfully to "
+                "Notification sent successfully to "
                 f"{recipient.get('userId')}. "
                 f"Message ID: {response}"
             )
 
         except Exception as error:
+
             failed_count += 1
 
             print(
-                f"Notification failed for "
-                f"{recipient.get('userId')}: {error}"
+                "Notification failed for "
+                f"{recipient.get('userId')}: "
+                f"{error}"
             )
 
     print(
-        f"Notification result: "
+        "Notification result: "
         f"{successful_count} successful, "
         f"{failed_count} failed."
     )
 
+
+# ============================================================
+# LOCATION TEXT
+# ============================================================
 
 def _get_location_text(
     latitude,
@@ -174,9 +220,10 @@ def on_sos_created(
     """
     Triggered whenever a new SOS alert is created.
 
-    Expected Firestore document:
+    Firestore:
 
     sosAlerts/{sosId}
+
         userId
         latitude
         longitude
@@ -187,21 +234,29 @@ def on_sos_created(
     sos = event.data
 
     if sos is None:
-        print("SOS document data is missing.")
+        print(
+            "SOS document data is missing."
+        )
         return
 
     sos_data = sos.to_dict()
 
     if sos_data is None:
         print(
-            "SOS document could not be converted to a map."
+            "SOS document could not be converted "
+            "to a map."
         )
         return
 
     user_id = sos_data.get(
         "userId",
-        "Unknown elder",
     )
+
+    if not user_id:
+        print(
+            "SOS does not contain a userId."
+        )
+        return
 
     latitude = sos_data.get(
         "latitude",
@@ -218,15 +273,26 @@ def on_sos_created(
         "ACTIVE",
     )
 
-    # Ignore invalid or cancelled SOS records.
+    # --------------------------------------------------------
+    # Ignore cancelled SOS records
+    # --------------------------------------------------------
+
     if status == "CANCELLED":
         print(
             f"SOS {sos.id} is already cancelled. "
-            f"No notification sent."
+            "No notification sent."
         )
         return
 
+    # --------------------------------------------------------
+    # Get Firestore
+    # --------------------------------------------------------
+
     db = firestore.client()
+
+    # --------------------------------------------------------
+    # Find linked caregivers
+    # --------------------------------------------------------
 
     recipients = _get_notification_recipients(
         db=db,
@@ -235,22 +301,31 @@ def on_sos_created(
 
     if not recipients:
         print(
-            "No caregivers or emergency contacts with "
-            "valid FCM tokens were found."
+            "No linked caregivers with valid FCM "
+            "tokens were found."
         )
         return
+
+    # --------------------------------------------------------
+    # Build notification
+    # --------------------------------------------------------
 
     location_text = _get_location_text(
         latitude=latitude,
         longitude=longitude,
     )
 
-    notification_title = "🚨 Emergency SOS"
+    notification_title = "Emergency SOS"
 
     notification_body = (
-        f"Emergency SOS received from elder {user_id}. "
+        f"Emergency SOS received from elder "
+        f"{user_id}. "
         f"{location_text}"
     )
+
+    # --------------------------------------------------------
+    # Send
+    # --------------------------------------------------------
 
     _send_notification_to_recipients(
         recipients=recipients,
@@ -272,11 +347,13 @@ def on_safe_zone_violation_created(
     ],
 ):
     """
-    Triggered whenever a safe-zone violation document is created.
+    Triggered whenever a safe-zone violation document
+    is created.
 
-    Expected Firestore document:
+    Firestore:
 
     safeZoneViolations/{violationId}
+
         elderId
         safeZoneId
         safeZoneName
@@ -289,27 +366,30 @@ def on_safe_zone_violation_created(
     violation = event.data
 
     if violation is None:
-        print("Safe-zone violation data is missing.")
+        print(
+            "Safe-zone violation data is missing."
+        )
         return
 
     violation_data = violation.to_dict()
 
     if violation_data is None:
         print(
-            "Safe-zone violation could not be converted "
-            "to a map."
+            "Safe-zone violation could not be "
+            "converted to a map."
         )
         return
 
     elder_id = violation_data.get(
         "elderId",
-        "Unknown elder",
     )
 
-    safe_zone_id = violation_data.get(
-        "safeZoneId",
-        "Unknown safe zone",
-    )
+    if not elder_id:
+        print(
+            "Safe-zone violation does not contain "
+            "an elderId."
+        )
+        return
 
     safe_zone_name = violation_data.get(
         "safeZoneName",
@@ -331,17 +411,21 @@ def on_safe_zone_violation_created(
         "OUTSIDE",
     )
 
-    # Keep the safe-zone ID available for future
-    # elder-specific notification filtering.
-    del safe_zone_id
+    # --------------------------------------------------------
+    # Only notify for an actual outside-zone event
+    # --------------------------------------------------------
 
-    # Only notify for an actual outside-zone event.
     if status != "OUTSIDE":
         print(
-            f"Safe-zone violation {violation.id} has status "
-            f"{status}. No notification sent."
+            f"Safe-zone violation {violation.id} "
+            f"has status {status}. "
+            "No notification sent."
         )
         return
+
+    # --------------------------------------------------------
+    # Get Firestore
+    # --------------------------------------------------------
 
     db = firestore.client()
 
@@ -352,23 +436,31 @@ def on_safe_zone_violation_created(
 
     if not recipients:
         print(
-            "No caregivers or emergency contacts with "
-            "valid FCM tokens were found."
+            "No linked caregivers with valid FCM "
+            "tokens were found."
         )
         return
+
+    # --------------------------------------------------------
+    # Build notification
+    # --------------------------------------------------------
 
     location_text = _get_location_text(
         latitude=latitude,
         longitude=longitude,
     )
 
-    notification_title = "⚠️ Safe-Zone Alert"
+    notification_title = "Safe-Zone Alert"
 
     notification_body = (
         f"Elder {elder_id} has left the safe zone "
         f"'{safe_zone_name}'. "
         f"{location_text}"
     )
+
+    # --------------------------------------------------------
+    # Send
+    # --------------------------------------------------------
 
     _send_notification_to_recipients(
         recipients=recipients,
