@@ -1,14 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F8FA),
+      backgroundColor: const Color(0xFFF4EFE5),
 
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF164A63),
+        backgroundColor: const Color(0xFF46695A),
         foregroundColor: Colors.white,
         centerTitle: false,
         title: const Column(
@@ -48,16 +51,24 @@ class ElderHome extends StatelessWidget {
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 30),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            24,
+            20,
+            30,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome section
+              // --------------------------------------------------
+              // WELCOME
+              // --------------------------------------------------
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFFFFFBF4),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -75,7 +86,7 @@ class ElderHome extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 27,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF163B4D),
+                        color: Color(0xFF26352F),
                       ),
                     ),
                     SizedBox(height: 8),
@@ -83,7 +94,7 @@ class ElderHome extends StatelessWidget {
                       'How can we help you today?',
                       style: TextStyle(
                         fontSize: 20,
-                        color: Color(0xFF52656D),
+                        color: Color(0xFF46695A),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -98,84 +109,102 @@ class ElderHome extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF163B4D),
+                  color: Color(0xFF26352F),
                 ),
               ),
 
               const SizedBox(height: 15),
 
-              // Check-in
+              // --------------------------------------------------
+              // 1. CHECK-IN
+              // --------------------------------------------------
+
               _buildActionCard(
                 context: context,
                 title: 'Daily Check-in',
-                subtitle: 'Tell us how you are feeling',
+                subtitle: 'Let your caregiver know you are okay',
                 icon: Icons.check_circle_outline_rounded,
-                iconColor: const Color(0xFF16845B),
-                backgroundColor: const Color(0xFFE8F6EF),
+                iconColor: const Color(0xFF46695A),
+                backgroundColor: const Color(0xFFE5F0EA),
                 route: '/checkin',
               ),
 
               const SizedBox(height: 14),
 
-              // Voice Check-in
+              // --------------------------------------------------
+              // 2. VOICE CHECK-IN
+              // --------------------------------------------------
+
               _buildActionCard(
                 context: context,
                 title: 'Voice Check-in',
                 subtitle: 'Speak instead of typing',
                 icon: Icons.mic_none_rounded,
-                iconColor: const Color(0xFF3867A6),
-                backgroundColor: const Color(0xFFEAF1FB),
+                iconColor: const Color(0xFF5C7D72),
+                backgroundColor: const Color(0xFFE9F0ED),
                 route: '/voice-checkin',
               ),
 
               const SizedBox(height: 14),
 
-              // SOS
+              // --------------------------------------------------
+              // 3. SOS
+              // --------------------------------------------------
+
               _buildActionCard(
                 context: context,
                 title: 'Emergency SOS',
-                subtitle: 'Get immediate emergency help',
+                subtitle: 'Send an emergency alert',
                 icon: Icons.warning_amber_rounded,
-                iconColor: const Color(0xFFC62828),
-                backgroundColor: const Color(0xFFFFEAEA),
+                iconColor: const Color(0xFFC85C50),
+                backgroundColor: const Color(0xFFFBE8E5),
                 route: '/sos',
                 isEmergency: true,
               ),
 
               const SizedBox(height: 14),
 
-              // Hospitals
+              // --------------------------------------------------
+              // 4. NEARBY HOSPITALS
+              // --------------------------------------------------
+
               _buildActionCard(
                 context: context,
                 title: 'Nearby Hospitals',
                 subtitle: 'Find hospitals near you',
                 icon: Icons.local_hospital_outlined,
-                iconColor: const Color(0xFF7A4FA3),
-                backgroundColor: const Color(0xFFF3EAF8),
-                route: '/hospitals',
+                iconColor: const Color(0xFF8A6259),
+                backgroundColor: const Color(0xFFF4E8E4),
+                route: '/nearby-services',
               ),
 
               const SizedBox(height: 14),
 
-              // Services
+              // --------------------------------------------------
+              // 5. NEARBY SERVICES
+              // --------------------------------------------------
+
               _buildActionCard(
                 context: context,
                 title: 'Nearby Services',
                 subtitle: 'Find shops and restaurants nearby',
                 icon: Icons.storefront_outlined,
-                iconColor: const Color(0xFFB36B00),
-                backgroundColor: const Color(0xFFFFF2DE),
-                route: '/services',
+                iconColor: const Color(0xFF8A7448),
+                backgroundColor: const Color(0xFFF4EEDC),
+                route: '/nearby-services',
               ),
 
               const SizedBox(height: 28),
 
-              // Help information
+              // --------------------------------------------------
+              // HELP
+              // --------------------------------------------------
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF164A63),
+                  color: const Color(0xFF46695A),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: const Row(
@@ -188,7 +217,7 @@ class ElderHome extends StatelessWidget {
                     SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        'Need help? Use the Emergency SOS button or contact your caregiver.',
+                        'Need help? Use Emergency SOS or contact your caregiver.',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -233,19 +262,21 @@ class ElderHome extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Material(
-        color: Colors.white,
+        color: const Color(0xFFFFFBF4),
         borderRadius: BorderRadius.circular(18),
         elevation: 2,
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () {
-            Navigator.pushNamed(context, route);
+            Navigator.pushNamed(
+              context,
+              route,
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(17),
             child: Row(
               children: [
-                // Icon box
                 Container(
                   width: 62,
                   height: 62,
@@ -262,10 +293,10 @@ class ElderHome extends StatelessWidget {
 
                 const SizedBox(width: 17),
 
-                // Text
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
@@ -273,8 +304,8 @@ class ElderHome extends StatelessWidget {
                           fontSize: 21,
                           fontWeight: FontWeight.bold,
                           color: isEmergency
-                              ? const Color(0xFFC62828)
-                              : const Color(0xFF163B4D),
+                              ? const Color(0xFFC85C50)
+                              : const Color(0xFF26352F),
                         ),
                       ),
                       const SizedBox(height: 5),
@@ -282,7 +313,7 @@ class ElderHome extends StatelessWidget {
                         subtitle,
                         style: const TextStyle(
                           fontSize: 15,
-                          color: Color(0xFF63747B),
+                          color: Color(0xFF66756E),
                         ),
                       ),
                     ],
@@ -292,7 +323,7 @@ class ElderHome extends StatelessWidget {
                 const Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 20,
-                  color: Color(0xFF78909C),
+                  color: Color(0xFF789089),
                 ),
               ],
             ),
@@ -305,25 +336,28 @@ class ElderHome extends StatelessWidget {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
+          backgroundColor: const Color(0xFFFFFBF4),
           title: const Text(
             'Logout',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: Color(0xFF26352F),
             ),
           ),
           content: const Text(
             'Are you sure you want to logout?',
             style: TextStyle(
               fontSize: 19,
+              color: Color(0xFF46695A),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
               child: const Text(
                 'CANCEL',
@@ -331,9 +365,27 @@ class ElderHome extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+
+                try {
+                  await FirebaseAuth.instance.signOut();
+                } catch (error) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Logout failed: $error',
+                        ),
+                      ),
+                    );
+                  }
+                }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF46695A),
+                foregroundColor: Colors.white,
+              ),
               child: const Text(
                 'LOGOUT',
                 style: TextStyle(fontSize: 17),
