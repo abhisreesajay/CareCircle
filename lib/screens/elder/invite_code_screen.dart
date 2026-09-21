@@ -1,6 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../../services/caregiver/care_circle_service.dart';
 
 class InviteCodeScreen extends StatefulWidget {
   const InviteCodeScreen({
@@ -14,8 +15,13 @@ class InviteCodeScreen extends StatefulWidget {
 
 class _InviteCodeScreenState
     extends State<InviteCodeScreen> {
+  final CareCircleService _careCircleService =
+      CareCircleService();
+
   String? _code;
+
   bool _loading = true;
+  bool _generating = false;
 
   @override
   void initState() {
@@ -24,63 +30,111 @@ class _InviteCodeScreenState
   }
 
   Future<void> _loadCode() async {
-    final user =
+    final User? user =
         FirebaseAuth.instance.currentUser;
 
     if (user == null) {
+      if (!mounted) return;
+
       setState(() {
         _loading = false;
       });
+
       return;
     }
 
-    final ref =
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid);
+    try {
+      final String code =
+          await _careCircleService
+              .createElderInviteCode(
+        user.uid,
+      );
 
-    final snapshot =
-        await ref.get();
+      if (!mounted) return;
 
-    String? code =
-        snapshot.data()?['inviteCode']
-            ?.toString();
+      setState(() {
+        _code = code;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
 
-    if (code == null ||
-        code.trim().isEmpty) {
-      code = _generateCode();
+      setState(() {
+        _loading = false;
+      });
 
-      await ref.set(
-        {
-          'inviteCode': code,
-        },
-        SetOptions(merge: true),
+      _showMessage(
+        e.toString().replaceFirst(
+          'Exception: ',
+          '',
+        ),
       );
     }
-
-    if (!mounted) return;
-
-    setState(() {
-      _code = code;
-      _loading = false;
-    });
   }
 
-  String _generateCode() {
-    const chars =
-        'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  Future<void> _generateNewCode() async {
+    final User? user =
+        FirebaseAuth.instance.currentUser;
 
-    final now =
-        DateTime.now().millisecondsSinceEpoch;
-
-    String code = '';
-
-    for (int i = 0; i < 6; i++) {
-      code += chars[
-          (now + i * 17) % chars.length];
+    if (user == null) {
+      _showMessage(
+        'Please log in again.',
+      );
+      return;
     }
 
-    return code;
+    setState(() {
+      _generating = true;
+    });
+
+    try {
+      // Generate a new code directly.
+      final String code =
+          _careCircleService.generateInviteCode();
+
+      // Save it on the elder profile.
+      // The invite lookup document is also created.
+      await _careCircleService
+          .createElderInviteCode(
+        user.uid,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _code = code;
+      });
+
+      _showMessage(
+        'Your connection code is ready.',
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      _showMessage(
+        e.toString().replaceFirst(
+          'Exception: ',
+          '',
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _generating = false;
+        });
+      }
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
   }
 
   @override
@@ -97,60 +151,99 @@ class _InviteCodeScreenState
               const EdgeInsets.all(24),
           child: _loading
               ? const CircularProgressIndicator()
-              : Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Your Connection Code',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight:
-                            FontWeight.bold,
+              : SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment:
+                        MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.link_rounded,
+                        size: 80,
                       ),
-                    ),
 
-                    const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                    Container(
-                      padding:
-                          const EdgeInsets
-                              .symmetric(
-                        horizontal: 32,
-                        vertical: 24,
-                      ),
-                      decoration:
-                          BoxDecoration(
-                        borderRadius:
-                            BorderRadius
-                                .circular(16),
-                        border:
-                            Border.all(
-                          width: 2,
-                        ),
-                      ),
-                      child: Text(
-                        _code ?? '------',
-                        style:
-                            const TextStyle(
-                          fontSize: 36,
+                      const Text(
+                        'Your Connection Code',
+                        textAlign:
+                            TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24,
                           fontWeight:
                               FontWeight.bold,
-                          letterSpacing: 6,
                         ),
                       ),
-                    ),
 
-                    const SizedBox(height: 24),
+                      const SizedBox(height: 12),
 
-                    const Text(
-                      'Give this code to your '
-                      'caregiver so they can '
-                      'connect to your account.',
-                      textAlign:
-                          TextAlign.center,
-                    ),
-                  ],
+                      const Text(
+                        'Give this code to your caregiver '
+                        'so they can connect to your '
+                        'CareCircle account.',
+                        textAlign:
+                            TextAlign.center,
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      Container(
+                        padding:
+                            const EdgeInsets
+                                .symmetric(
+                          horizontal: 32,
+                          vertical: 24,
+                        ),
+                        decoration:
+                            BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(
+                            16,
+                          ),
+                          border:
+                              Border.all(
+                            width: 2,
+                          ),
+                        ),
+                        child: Text(
+                          _code ?? '------',
+                          style:
+                              const TextStyle(
+                            fontSize: 36,
+                            fontWeight:
+                                FontWeight.bold,
+                            letterSpacing: 6,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              _generating
+                                  ? null
+                                  : _loadCode,
+                          icon: const Icon(
+                            Icons.refresh,
+                          ),
+                          label: _generating
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child:
+                                      CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'Refresh Code',
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
         ),
       ),

@@ -45,25 +45,20 @@ service cloud.firestore {
 
     match /users/{userId} {
 
-      // A user can read their own profile.
-      // A caregiver can also read user profiles because
-      // CareCircle linking searches elder invite codes.
+      // Users can read their own profile.
+      // Caregivers can read profiles when required
+      // for CareCircle functionality.
       allow read: if isOwner(userId)
         || isCaregiver();
 
-
-      // A user can create only their own account document.
+      // User creates their own profile.
       allow create: if isOwner(userId);
 
-
-      // Normal profile updates by the owner.
+      // User can update their own profile.
       allow update: if isOwner(userId);
 
-
-      // A caregiver is allowed to add themselves to an
-      // elder's caregivers list during CareCircle linking.
-      //
-      // Only the "caregivers" field may change.
+      // A caregiver may update an elder's caregivers list
+      // while linking themselves.
       allow update: if isCaregiver()
         && userData(userId).role == 'elder'
         && request.resource.data.diff(resource.data)
@@ -73,9 +68,39 @@ service cloud.firestore {
         && request.resource.data.caregivers
             .hasAny([request.auth.uid]);
 
-
-      // Users are never deleted through the client app.
       allow delete: if false;
+    }
+
+
+    // ============================================================
+    // INVITE CODES
+    // ============================================================
+
+    match /inviteCodes/{code} {
+
+      // A caregiver needs to read the code to find
+      // the elder it belongs to.
+      allow read: if isCaregiver();
+
+      // Elder creates their own invite code.
+      allow create: if signedIn()
+        && request.resource.data.elderId
+            == request.auth.uid
+        && request.resource.data.code
+            == code;
+
+      // Elder can update their own invite code.
+      allow update: if signedIn()
+        && resource.data.elderId
+            == request.auth.uid
+        && request.resource.data.elderId
+            == request.auth.uid
+        && request.resource.data.code
+            == code;
+
+      allow delete: if signedIn()
+        && resource.data.elderId
+            == request.auth.uid;
     }
 
 
@@ -307,31 +332,6 @@ service cloud.firestore {
       allow read, write:
         if isOwner(elderId)
         || caregiverLinkedToElder(elderId);
-    }
-
-      // ============================================================
-      // INVITE CODES
-      // ============================================================
-
-      match /inviteCodes/{code} {
-
-        // Caregivers can look up an invite code.
-        allow read: if isCaregiver();
-
-        // An elder can create their own invite code.
-        allow create: if signedIn()
-          && request.resource.data.elderId
-              == request.auth.uid;
-
-        allow update: if signedIn()
-          && resource.data.elderId
-              == request.auth.uid
-          && request.resource.data.elderId
-              == request.auth.uid;
-
-        allow delete: if signedIn()
-          && resource.data.elderId
-              == request.auth.uid;
     }
 
 

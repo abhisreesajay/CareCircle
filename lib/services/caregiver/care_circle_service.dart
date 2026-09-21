@@ -7,19 +7,18 @@ class CareCircleService {
       FirebaseFirestore.instance;
 
   // ============================================================
-  // GENERATE CODE
+  // GENERATE INVITE CODE
   // ============================================================
 
   String generateInviteCode() {
     const String chars =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
     final Random random = Random();
 
     return List.generate(
       6,
-      (_) => chars[
-          random.nextInt(chars.length)],
+      (_) => chars[random.nextInt(chars.length)],
     ).join();
   }
 
@@ -30,18 +29,54 @@ class CareCircleService {
   Future<String> createElderInviteCode(
     String elderUid,
   ) async {
-    if (elderUid.trim().isEmpty) {
+    final String uid = elderUid.trim();
+
+    if (uid.isEmpty) {
       throw Exception(
         'Elder UID is required.',
       );
     }
 
-    final String code =
-        generateInviteCode();
+    // Check whether the elder already has a code.
+    final DocumentSnapshot<Map<String, dynamic>>
+        elderSnapshot = await _db
+            .collection('users')
+            .doc(uid)
+            .get();
 
+    final existingCode =
+        elderSnapshot.data()?['inviteCode']
+            ?.toString()
+            .trim()
+            .toUpperCase();
+
+    if (existingCode != null &&
+        existingCode.isNotEmpty) {
+      return existingCode;
+    }
+
+    // Generate a new code.
+    String code = generateInviteCode();
+
+    // Make sure the code does not already exist.
+    for (int i = 0; i < 5; i++) {
+      final existing =
+          await _db
+              .collection('inviteCodes')
+              .doc(code)
+              .get();
+
+      if (!existing.exists) {
+        break;
+      }
+
+      code = generateInviteCode();
+    }
+
+    // Save the code on the elder's profile.
     await _db
         .collection('users')
-        .doc(elderUid)
+        .doc(uid)
         .set(
       {
         'inviteCode': code,
@@ -49,12 +84,14 @@ class CareCircleService {
       SetOptions(merge: true),
     );
 
+    // Also create the lookup document used
+    // by caregivers.
     await _db
         .collection('inviteCodes')
         .doc(code)
         .set({
       'code': code,
-      'elderId': elderUid,
+      'elderId': uid,
       'createdAt':
           FieldValue.serverTimestamp(),
     });
@@ -63,17 +100,20 @@ class CareCircleService {
   }
 
   // ============================================================
-  // LINK CAREGIVER
+  // LINK CAREGIVER TO ELDER
   // ============================================================
 
   Future<void> linkCaregiverToElder({
     required String caregiverUid,
     required String inviteCode,
   }) async {
+    final String caregiverId =
+        caregiverUid.trim();
+
     final String code =
         inviteCode.trim().toUpperCase();
 
-    if (caregiverUid.trim().isEmpty) {
+    if (caregiverId.isEmpty) {
       throw Exception(
         'Caregiver UID is required.',
       );
@@ -85,6 +125,13 @@ class CareCircleService {
       );
     }
 
+    if (code.length != 6) {
+      throw Exception(
+        'Invite code must contain 6 characters.',
+      );
+    }
+
+    // Find the invite code.
     final DocumentSnapshot<
         Map<String, dynamic>> invite =
         await _db
@@ -102,7 +149,7 @@ class CareCircleService {
         invite.data() ?? {};
 
     final String elderUid =
-        data['elderId']?.toString() ?? '';
+        data['elderId']?.toString().trim() ?? '';
 
     if (elderUid.isEmpty) {
       throw Exception(
@@ -110,15 +157,73 @@ class CareCircleService {
       );
     }
 
-    if (elderUid == caregiverUid) {
+    if (elderUid == caregiverId) {
       throw Exception(
         'A user cannot link themselves.',
       );
     }
 
+    // Make sure the target user really exists
+    // and is an elder.
+    final elderSnapshot =
+        await _db
+            .collection('users')
+            .doc(elderUid)
+            .get();
+
+    if (!elderSnapshot.exists) {
+      throw Exception(
+        'Elder account was not found.',
+      );
+    }
+
+    final elderData =
+        elderSnapshot.data() ?? {};
+
+    final String role =
+        elderData['role']
+                ?.toString()
+                .toLowerCase() ??
+            '';
+
+    if (role != 'elder') {
+      throw Exception(
+        'This invite code does not belong to an elder.',
+      );
+    }
+
+    // Make sure the caregiver is actually a caregiver.
+    final caregiverSnapshot =
+        await _db
+            .collection('users')
+            .doc(caregiverId)
+            .get();
+
+    if (!caregiverSnapshot.exists) {
+      throw Exception(
+        'Caregiver account was not found.',
+      );
+    }
+
+    final caregiverData =
+        caregiverSnapshot.data() ?? {};
+
+    final String caregiverRole =
+        caregiverData['role']
+                ?.toString()
+                .toLowerCase() ??
+            '';
+
+    if (caregiverRole != 'caregiver') {
+      throw Exception(
+        'Only caregiver accounts can be linked.',
+      );
+    }
+
+    // Add elder to caregiver's linkedElders.
     await _db
         .collection('users')
-        .doc(caregiverUid)
+        .doc(caregiverId)
         .set(
       {
         'linkedElders':
@@ -129,6 +234,7 @@ class CareCircleService {
       SetOptions(merge: true),
     );
 
+    // Add caregiver to elder's caregivers.
     await _db
         .collection('users')
         .doc(elderUid)
@@ -136,7 +242,7 @@ class CareCircleService {
       {
         'caregivers':
             FieldValue.arrayUnion(
-          [caregiverUid],
+          [caregiverId],
         ),
       },
       SetOptions(merge: true),
