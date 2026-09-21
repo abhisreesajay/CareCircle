@@ -141,20 +141,28 @@ class MessagingService {
     required String userId,
     required String token,
   }) async {
-    if (userId.trim().isEmpty || token.trim().isEmpty) {
+    if (userId.trim().isEmpty ||
+        token.trim().isEmpty) {
       return;
     }
-
-    final User? currentUser = _auth.currentUser;
-
-    if (currentUser == null || currentUser.uid != userId) {
+  
+    final User? currentUser =
+        _auth.currentUser;
+  
+    if (currentUser == null ||
+        currentUser.uid != userId) {
       return;
     }
-
-    await _firestore.collection('users').doc(userId).set(
+  
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .set(
       {
-        'fcmToken': token,
-        'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+        'fcmTokens':
+            FieldValue.arrayUnion([token]),
+        'fcmTokenUpdatedAt':
+            FieldValue.serverTimestamp(),
       },
       SetOptions(merge: true),
     );
