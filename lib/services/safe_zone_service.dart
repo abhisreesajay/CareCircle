@@ -16,11 +16,9 @@ class SafeZoneService {
   Future<void> createSafeZone(
     SafeZone safeZone,
   ) async {
-    final collection =
-        _firestore.collection('safeZones');
+    final collection = _firestore.collection('safeZones');
 
-    final DocumentReference<Map<String, dynamic>>
-        document =
+    final DocumentReference<Map<String, dynamic>> document =
         safeZone.id.trim().isEmpty
             ? collection.doc()
             : collection.doc(safeZone.id);
@@ -37,8 +35,7 @@ class SafeZoneService {
   Future<List<SafeZone>> getSafeZones(
     String elderId,
   ) async {
-    final String normalizedElderId =
-        elderId.trim();
+    final String normalizedElderId = elderId.trim();
 
     if (normalizedElderId.isEmpty) {
       throw Exception(
@@ -46,8 +43,7 @@ class SafeZoneService {
       );
     }
 
-    final QuerySnapshot<Map<String, dynamic>>
-        snapshot =
+    final QuerySnapshot<Map<String, dynamic>> snapshot =
         await _firestore
             .collection('safeZones')
             .where(
@@ -194,6 +190,10 @@ class SafeZoneService {
     );
   }
 
+  // ============================================================
+  // INTERNAL SAFE-ZONE VIOLATION CREATION
+  // ============================================================
+
   Future<void> _createSafeZoneViolation({
     required String elderId,
     required SafeZone safeZone,
@@ -201,10 +201,20 @@ class SafeZoneService {
     required double longitude,
     required double distanceInMeters,
   }) async {
-    await _firestore
-        .collection('safeZoneViolations')
-        .add({
+    final CollectionReference<Map<String, dynamic>> collection =
+        _firestore.collection('safeZoneViolations');
+
+    // Generate the Firestore document reference first.
+    final DocumentReference<Map<String, dynamic>> document =
+        collection.doc();
+
+    // Store the generated document ID inside the document
+    // as violationId so the ID is available to the application.
+    await document.set({
+      'violationId': document.id,
+
       'elderId': elderId,
+
       'safeZoneId': safeZone.id,
       'safeZoneName': safeZone.name,
 
@@ -216,13 +226,11 @@ class SafeZoneService {
 
       'distanceInMeters': distanceInMeters,
 
-      'timestamp':
-          FieldValue.serverTimestamp(),
+      'timestamp': FieldValue.serverTimestamp(),
 
       'status': 'OUTSIDE',
 
-      'createdAt':
-          FieldValue.serverTimestamp(),
+      'createdAt': FieldValue.serverTimestamp(),
     });
   }
 
