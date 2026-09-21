@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import '../../services/check_in_reminder_service.dart';
 
 class CheckInReminderScreen extends StatefulWidget {
   const CheckInReminderScreen({
@@ -15,57 +15,108 @@ class CheckInReminderScreen extends StatefulWidget {
       _CheckInReminderScreenState();
 }
 
-class _CheckInReminderScreenState
-    extends State<CheckInReminderScreen> {
-  final TextEditingController _timeController =
-      TextEditingController();
-
-  final List<Map<String, String>> _reminders = [];
+class _CheckInReminderScreenState extends State<CheckInReminderScreen> {
+  final CheckInReminderService _reminderService =
+      CheckInReminderService();
 
   Timer? _firstTimer;
   Timer? _secondTimer;
   Timer? _caregiverTimer;
 
-  bool _running = false;
+  String? _runningReminderId;
+  TimeOfDay? _selectedTime;
 
-  void _createReminder() {
-    if (_timeController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a scheduled time.'),
-        ),
-      );
-      return;
-    }
+  Future<void> _selectTime() async {
+    final selectedTime = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? TimeOfDay.now(),
+    );
+
+    if (!mounted) return;
+    if (selectedTime == null) return;
 
     setState(() {
-      _reminders.add({
-        'time': _timeController.text.trim(),
-        'status': 'PENDING',
-      });
+      _selectedTime = selectedTime;
     });
-
-    _timeController.clear();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Daily check-in reminder created.'),
-      ),
-    );
   }
 
-  void _startReminder(int index) {
-    if (_running) {
+  Future<void> _createReminder() async {
+    if (_selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('A reminder is already running.'),
+          content: Text('Please select a check-in time first.'),
+        ),
+      );
+      return;
+    }
+
+    final now = DateTime.now();
+
+    DateTime scheduledLocal = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _selectedTime!.hour,
+      _selectedTime!.minute,
+    );
+
+    // If the selected time has already passed today,
+    // schedule it for tomorrow.
+    if (scheduledLocal.isBefore(now)) {
+      scheduledLocal = scheduledLocal.add(
+        const Duration(days: 1),
+      );
+    }
+
+    // Store the exact time in UTC for Cloud Functions.
+    final scheduledUtc = scheduledLocal.toUtc().toIso8601String();
+
+    try {
+      await _reminderService.createReminder(
+        elderId: widget.elderId,
+        scheduledTime: scheduledUtc,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _selectedTime = null;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Daily check-in reminder saved to Firebase.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Unable to create reminder: $e',
+          ),
+        ),
+      );
+    }
+  }
+
+  void _startReminder(String reminderId) {
+    if (_runningReminderId != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'A reminder is already running.',
+          ),
         ),
       );
       return;
     }
 
     setState(() {
-      _running = true;
+      _runningReminderId = reminderId;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -76,6 +127,7 @@ class _CheckInReminderScreenState
       ),
     );
 
+    // First reminder after 10 seconds
     _firstTimer = Timer(
       const Duration(seconds: 10),
       () {
@@ -88,6 +140,7 @@ class _CheckInReminderScreenState
       },
     );
 
+    // Second reminder after 25 seconds
     _secondTimer = Timer(
       const Duration(seconds: 25),
       () {
@@ -100,9 +153,10 @@ class _CheckInReminderScreenState
       },
     );
 
+    // Caregiver notification after 40 seconds
     _caregiverTimer = Timer(
       const Duration(seconds: 40),
-      () {
+      () async {
         if (!mounted) return;
 
         _showNotification(
@@ -110,33 +164,28 @@ class _CheckInReminderScreenState
           'The elder has not completed the scheduled check-in.',
         );
 
-        setState(() {
-          _running = false;
-        });
+        try {
+          await _reminderService.markCaregiverNotified(
+            widget.elderId,
+            reminderId,
+          );
+        } catch (_) {
+          // Ignore notification update errors during demo.
+        }
+
+        if (mounted) {
+          setState(() {
+            _runningReminderId = null;
+          });
+        }
       },
     );
   }
 
-  void _completeReminder(int index) {
-    _firstTimer?.cancel();
-    _secondTimer?.cancel();
-    _caregiverTimer?.cancel();
-
-    setState(() {
-      _reminders[index]['status'] = 'COMPLETED';
-      _running = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Check-in completed. Caregiver notification cancelled.',
-        ),
-      ),
-    );
-  }
-
-  void _showNotification(String title, String message) {
+  void _showNotification(
+    String title,
+    String message,
+  ) {
     showDialog(
       context: context,
       builder: (context) {
@@ -155,7 +204,9 @@ class _CheckInReminderScreenState
           ),
           content: Text(
             message,
-            style: const TextStyle(fontSize: 17),
+            style: const TextStyle(
+              fontSize: 17,
+            ),
           ),
           actions: [
             TextButton(
@@ -175,7 +226,7 @@ class _CheckInReminderScreenState
     _firstTimer?.cancel();
     _secondTimer?.cancel();
     _caregiverTimer?.cancel();
-    _timeController.dispose();
+
     super.dispose();
   }
 
@@ -207,9 +258,7 @@ class _CheckInReminderScreenState
                   color: Color(0xFF163B4D),
                 ),
               ),
-
               const SizedBox(height: 12),
-
               const Text(
                 'Set the time for the daily check-in.',
                 textAlign: TextAlign.center,
@@ -218,23 +267,29 @@ class _CheckInReminderScreenState
                   color: Color(0xFF63747B),
                 ),
               ),
-
               const SizedBox(height: 25),
 
-              TextField(
-                controller: _timeController,
-                decoration: InputDecoration(
-                  labelText: 'Scheduled time',
-                  hintText: 'Example: 09:00 AM',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+              // Time selection
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: OutlinedButton.icon(
+                  onPressed: _selectTime,
+                  icon: const Icon(Icons.access_time),
+                  label: Text(
+                    _selectedTime == null
+                        ? 'SELECT CHECK-IN TIME'
+                        : 'TIME: ${_selectedTime!.format(context)}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
                   ),
-                  prefixIcon: const Icon(Icons.access_time),
                 ),
               ),
 
               const SizedBox(height: 20),
 
+              // Create reminder
               SizedBox(
                 width: double.infinity,
                 height: 60,
@@ -274,93 +329,105 @@ class _CheckInReminderScreenState
               const SizedBox(height: 10),
 
               Expanded(
-                child: _reminders.isEmpty
-                    ? const Center(
+                child: StreamBuilder(
+                  stream: _reminderService
+                      .getReminders(widget.elderId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Unable to load reminders: '
+                          '${snapshot.error}',
+                        ),
+                      );
+                    }
+
+                    final reminders = snapshot.data ?? [];
+
+                    if (reminders.isEmpty) {
+                      return const Center(
                         child: Text(
                           'No reminders created yet.',
-                          style: TextStyle(fontSize: 17),
+                          style: TextStyle(
+                            fontSize: 17,
+                          ),
                         ),
-                      )
-                    : ListView.builder(
-                        itemCount: _reminders.length,
-                        itemBuilder: (context, index) {
-                          final reminder = _reminders[index];
+                      );
+                    }
 
-                          final completed =
-                              reminder['status'] == 'COMPLETED';
+                    return ListView.builder(
+                      itemCount: reminders.length,
+                      itemBuilder: (context, index) {
+                        final reminder = reminders[index];
 
-                          return Card(
-                            margin:
-                                const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: Icon(
-                                completed
-                                    ? Icons.check_circle
-                                    : Icons.alarm,
-                                color: completed
-                                    ? Colors.green
-                                    : Colors.orange,
-                                size: 32,
-                              ),
-                              title: Text(
-                                reminder['time']!,
-                                style: const TextStyle(
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              subtitle: Text(
-                                'Status: ${reminder['status']}',
-                              ),
-                              trailing: completed
-                                  ? const Icon(
-                                      Icons.done,
-                                      color: Colors.green,
-                                    )
-                                  : ElevatedButton(
-                                      onPressed: _running
-                                          ? null
-                                          : () => _startReminder(
-                                                index,
-                                              ),
-                                      child: const Text('START'),
-                                    ),
+                        final completed =
+                            reminder.status == 'COMPLETED';
+
+                        final running =
+                            _runningReminderId == reminder.id;
+
+                        return Card(
+                          margin: const EdgeInsets.only(
+                            bottom: 12,
+                          ),
+                          child: ListTile(
+                            leading: Icon(
+                              completed
+                                  ? Icons.check_circle
+                                  : Icons.alarm,
+                              color: completed
+                                  ? Colors.green
+                                  : Colors.orange,
+                              size: 32,
                             ),
-                          );
-                        },
-                      ),
+                            title: Text(
+                              reminder.scheduledTime,
+                              style: const TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Status: ${reminder.status}',
+                            ),
+                            trailing: completed
+                                ? const Icon(
+                                    Icons.done,
+                                    color: Colors.green,
+                                  )
+                                : running
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child:
+                                            CircularProgressIndicator(),
+                                      )
+                                    : ElevatedButton(
+                                        onPressed: () {
+                                          _startReminder(
+                                            reminder.id,
+                                          );
+                                        },
+                                        child: const Text(
+                                          'START',
+                                        ),
+                                      ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
 
               const SizedBox(height: 10),
-
-              if (_reminders.isNotEmpty && !_running)
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      final index = _reminders.length - 1;
-
-                      _completeReminder(index);
-                    },
-                    child: const Text(
-                      'MARK CHECK-IN COMPLETE',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-
-              if (_running)
-                const Padding(
-                  padding: EdgeInsets.only(top: 10),
-                  child: Text(
-                    'Reminder sequence is running...',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
