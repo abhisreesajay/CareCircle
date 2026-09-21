@@ -1,8 +1,84 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/auth_service.dart';
+import '../../services/messaging_service.dart';
+
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final messagingService = MessagingService();
+
+    try {
+      if (user != null) {
+        await messagingService.removeToken(user.uid);
+      }
+
+      await messagingService.dispose();
+      await AuthService().signOut();
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Logout failed: $error'),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFFFFBF4),
+          title: const Text(
+            'Logout',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF26352F),
+            ),
+          ),
+          content: const Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(
+              fontSize: 19,
+              color: Color(0xFF46695A),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text(
+                'CANCEL',
+                style: TextStyle(fontSize: 17),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                await _logout(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF46695A),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text(
+                'LOGOUT',
+                style: TextStyle(fontSize: 17),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,6 +270,22 @@ class ElderHome extends StatelessWidget {
                 route: '/nearby-services',
               ),
 
+              const SizedBox(height: 14),
+
+              // --------------------------------------------------
+              // 6. CAREGIVER CONNECTION
+              // --------------------------------------------------
+
+              _buildActionCard(
+                context: context,
+                title: 'Caregiver Connection',
+                subtitle: 'View your caregiver connection code',
+                icon: Icons.people_outline_rounded,
+                iconColor: const Color(0xFF46695A),
+                backgroundColor: const Color(0xFFE5F0EA),
+                route: '/invite-code',
+              ),
+
               const SizedBox(height: 28),
 
               // --------------------------------------------------
@@ -330,70 +422,6 @@ class ElderHome extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFFFFFBF4),
-          title: const Text(
-            'Logout',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF26352F),
-            ),
-          ),
-          content: const Text(
-            'Are you sure you want to logout?',
-            style: TextStyle(
-              fontSize: 19,
-              color: Color(0xFF46695A),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text(
-                'CANCEL',
-                style: TextStyle(fontSize: 17),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(dialogContext);
-
-                try {
-                  await FirebaseAuth.instance.signOut();
-                } catch (error) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Logout failed: $error',
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF46695A),
-                foregroundColor: Colors.white,
-              ),
-              child: const Text(
-                'LOGOUT',
-                style: TextStyle(fontSize: 17),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

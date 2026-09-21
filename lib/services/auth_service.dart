@@ -1,18 +1,19 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'messaging_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final MessagingService _messagingService = MessagingService();
 
-  // Stream used by AuthWrapper to detect login/logout changes.
   Stream<User?> get userStateStream => _auth.authStateChanges();
 
-  // Returns the currently logged-in user's Firebase UID.
   String? get currentUserId => _auth.currentUser?.uid;
 
   // ============================================================
-  // REGISTER USER
+  // REGISTER
   // ============================================================
 
   Future<UserCredential> registerUser({
@@ -21,78 +22,88 @@ class AuthService {
     required String role,
   }) async {
     final String cleanEmail = email.trim();
+    final String cleanRole = role.trim().toLowerCase();
 
-    UserCredential cred;
+    if (cleanEmail.isEmpty) {
+      throw Exception('Email is required.');
+    }
 
-    // ------------------------------------------------------------
-    // Step 1: Create Firebase Authentication account
-    // ------------------------------------------------------------
+    if (password.isEmpty) {
+      throw Exception('Password is required.');
+    }
+
+    if (cleanRole != 'elder' && cleanRole != 'caregiver') {
+      throw Exception('Invalid account role.');
+    }
+
+    UserCredential credential;
+
     try {
-      cred = await _auth.createUserWithEmailAndPassword(
+      credential =
+          await _auth.createUserWithEmailAndPassword(
         email: cleanEmail,
         password: password,
       );
     } on FirebaseAuthException catch (e) {
       throw Exception(_getAuthErrorMessage(e));
     } catch (e) {
-      throw Exception('Unable to create the account: $e');
+      throw Exception(
+        'Unable to create the account: $e',
+      );
     }
 
-    // Make sure Firebase returned a user.
-    if (cred.user == null) {
-      throw Exception('Account creation failed. No user was returned.');
+    final User? user = credential.user;
+
+    if (user == null) {
+      throw Exception(
+        'Account creation failed.',
+      );
     }
 
-    // ------------------------------------------------------------
-    // Step 2: Prepare Firestore user document
-    // ------------------------------------------------------------
     final Map<String, dynamic> userData = {
-      'uid': cred.user!.uid,
+      'uid': user.uid,
       'email': cleanEmail,
-      'role': role,
+      'role': cleanRole,
       'createdAt': FieldValue.serverTimestamp(),
     };
 
-    if (role == 'caregiver') {
-      userData['linkedElders'] = [];
+    if (cleanRole == 'caregiver') {
+      userData['linkedElders'] = <String>[];
     } else {
+      userData['caregivers'] = <String>[];
       userData['inviteCode'] = '';
     }
 
-    // ------------------------------------------------------------
-    // Step 3: Save user information in Firestore
-    // ------------------------------------------------------------
     try {
       await _db
           .collection('users')
-          .doc(cred.user!.uid)
+          .doc(user.uid)
           .set(userData);
-    } on FirebaseException catch (e) {
-      // If Firestore fails after Authentication succeeds,
-      // try to remove the newly-created Firebase Auth account
-      // so we don't leave a partially-created account behind.
-      try {
-        await cred.user!.delete();
-      } catch (_) {
-        // Ignore cleanup failure.
-      }
 
-      throw Exception(_getFirestoreErrorMessage(e));
+      await _messagingService.initialize(user.uid);
+
+      return credential;
+    } on FirebaseException catch (e) {
+      try {
+        await user.delete();
+      } catch (_) {}
+
+      throw Exception(
+        _getFirestoreErrorMessage(e),
+      );
     } catch (e) {
       try {
-        await cred.user!.delete();
-      } catch (_) {
-        // Ignore cleanup failure.
-      }
+        await user.delete();
+      } catch (_) {}
 
-      throw Exception('Account was created, but saving user data failed: $e');
+      throw Exception(
+        'Account was created, but setup failed: $e',
+      );
     }
-
-    return cred;
   }
 
   // ============================================================
-  // LOGIN USER
+  // LOGIN
   // ============================================================
 
   Future<UserCredential> loginUser({
@@ -100,14 +111,29 @@ class AuthService {
     required String password,
   }) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      final UserCredential credential =
+          await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
+
+      final User? user = credential.user;
+
+      if (user != null) {
+        await _messagingService.initialize(
+          user.uid,
+        );
+      }
+
+      return credential;
     } on FirebaseAuthException catch (e) {
-      throw Exception(_getAuthErrorMessage(e));
+      throw Exception(
+        _getAuthErrorMessage(e),
+      );
     } catch (e) {
-      throw Exception('Unable to sign in: $e');
+      throw Exception(
+        'Unable to sign in: $e',
+      );
     }
   }
 
@@ -116,14 +142,26 @@ class AuthService {
   // ============================================================
 
   Future<void> signOut() async {
+    final User? user = _auth.currentUser;
+
+    if (user != null) {
+      await _messagingService.removeToken(
+        user.uid,
+      );
+    }
+
+    await _messagingService.dispose();
+
     await _auth.signOut();
   }
 
   // ============================================================
-  // FIREBASE AUTH ERROR MESSAGES
+  // AUTH ERROR MESSAGES
   // ============================================================
 
-  String _getAuthErrorMessage(FirebaseAuthException e) {
+  String _getAuthErrorMessage(
+    FirebaseAuthException e,
+  ) {
     switch (e.code) {
       case 'email-already-in-use':
         return 'An account already exists with this email address.';
@@ -132,7 +170,7 @@ class AuthService {
         return 'The email address is invalid.';
 
       case 'weak-password':
-        return 'The password is too weak. Please use a stronger password.';
+        return 'The password is too weak.';
 
       case 'operation-not-allowed':
         return 'Email/Password authentication is not enabled in Firebase.';
@@ -159,7 +197,8 @@ class AuthService {
         return 'Please log in again and try the operation.';
 
       default:
-        return 'Authentication error (${e.code}): ${e.message ?? 'Unknown error'}';
+        return 'Authentication error (${e.code}): '
+            '${e.message ?? 'Unknown error'}';
     }
   }
 
@@ -167,22 +206,25 @@ class AuthService {
   // FIRESTORE ERROR MESSAGES
   // ============================================================
 
-  String _getFirestoreErrorMessage(FirebaseException e) {
+  String _getFirestoreErrorMessage(
+    FirebaseException e,
+  ) {
     switch (e.code) {
       case 'permission-denied':
-        return 'Account authentication succeeded, but Firestore denied permission to save the user data. Please check the Firestore security rules.';
+        return 'Firestore denied permission. Check Firestore rules.';
 
       case 'unavailable':
-        return 'Firestore is currently unavailable. Please check your internet connection and try again.';
+        return 'Firestore is unavailable. Check your internet connection.';
 
       case 'failed-precondition':
-        return 'Firestore is not properly configured for this operation.';
+        return 'Firestore is not properly configured.';
 
       case 'not-found':
         return 'The required Firestore resource was not found.';
 
       default:
-        return 'Firestore error (${e.code}): ${e.message ?? 'Unknown Firestore error'}';
+        return 'Firestore error (${e.code}): '
+            '${e.message ?? 'Unknown Firestore error'}';
     }
   }
 }

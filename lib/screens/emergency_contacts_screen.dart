@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'auth_screen.dart';
+import 'auth/login_screen.dart';
 
 class EmergencyContactsScreen extends StatefulWidget {
   const EmergencyContactsScreen({super.key});
@@ -27,25 +27,20 @@ class _EmergencyContactsScreenState
 
   bool _isLoading = false;
 
-  User? get _currentUser {
-    return _auth.currentUser;
-  }
+  User? get _currentUser => _auth.currentUser;
 
-  String? get _userId {
-    return _currentUser?.uid;
-  }
+  String? get _userId => _currentUser?.uid;
 
   CollectionReference<Map<String, dynamic>>
-      get _contactsCollection {
-    return _firestore.collection('emergencyContacts');
-  }
+      get _contactsCollection =>
+          _firestore.collection('emergencyContacts');
 
-  // Opens the login/register screen
+  /// Opens the current login screen.
   Future<void> _openLoginScreen() async {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const AuthScreen(),
+        builder: (context) => const LoginScreen(),
       ),
     );
   }
@@ -96,11 +91,8 @@ class _EmergencyContactsScreenState
             ),
             ElevatedButton(
               onPressed: () async {
-                final name =
-                    _nameController.text.trim();
-
-                final phone =
-                    _phoneController.text.trim();
+                final name = _nameController.text.trim();
+                final phone = _phoneController.text.trim();
 
                 if (name.isEmpty || phone.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -257,7 +249,7 @@ class _EmergencyContactsScreenState
   Widget build(BuildContext context) {
     final userId = _userId;
 
-    // Screen shown when the user is not logged in
+    // User is not logged in.
     if (userId == null) {
       return Scaffold(
         appBar: AppBar(
@@ -267,7 +259,8 @@ class _EmergencyContactsScreenState
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment:
+                  MainAxisAlignment.center,
               children: [
                 const Icon(
                   Icons.lock_outline,
@@ -281,8 +274,6 @@ class _EmergencyContactsScreenState
                   style: TextStyle(fontSize: 17),
                 ),
                 const SizedBox(height: 20),
-
-                // This button now opens AuthScreen
                 ElevatedButton(
                   onPressed: _openLoginScreen,
                   child: const Text('LOGIN REQUIRED'),
@@ -294,7 +285,7 @@ class _EmergencyContactsScreenState
       );
     }
 
-    // Screen shown after login
+    // User is logged in.
     return Scaffold(
       appBar: AppBar(
         title: const Text('Emergency Contacts'),
@@ -347,7 +338,8 @@ class _EmergencyContactsScreenState
               final data = document.data();
 
               final String name =
-                  data['name']?.toString() ?? 'Unknown';
+                  data['name']?.toString() ??
+                      'Unknown';
 
               final String phone =
                   data['phone']?.toString() ??

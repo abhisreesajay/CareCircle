@@ -1,150 +1,260 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-class CheckInScreen extends StatelessWidget {
-  const CheckInScreen({super.key});
-  void _showConfirmation(
-    BuildContext context,
-    String title,
-    String message,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
+
+import '../../services/check_in_service.dart';
+
+class CheckInScreen extends StatefulWidget {
+  const CheckInScreen({
+    super.key,
+  });
+
+  @override
+  State<CheckInScreen> createState() =>
+      _CheckInScreenState();
+}
+
+class _CheckInScreenState
+    extends State<CheckInScreen> {
+  final CheckInService _service =
+      CheckInService();
+
+  bool _loading = false;
+
+  Future<void> _submit({
+    required String response,
+    required String status,
+  }) async {
+    final User? user =
+        FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      _showMessage(
+        'Please log in again.',
+      );
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      await _service.recordCheckIn(
+        elderId: user.uid,
+        method: 'button',
+        response: response,
+        status: status,
+      );
+
+      if (!mounted) return;
+
+      await showDialog<void>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(
+              status == 'COMPLETED'
+                  ? 'Check-in Complete'
+                  : 'Help Requested',
             ),
-          ),
-          content: Text(
-            message,
-            style: const TextStyle(
-              fontSize: 20,
+            content: Text(
+              status == 'COMPLETED'
+                  ? 'Your caregiver has been notified that you are okay.'
+                  : 'Your caregiver has been notified that you need help.',
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'OK',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child:
+                    const Text('OK'),
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      _showMessage(
+        'Could not save check-in: $e',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F8FA),
-
+      backgroundColor:
+          const Color(0xFFF4EFE5),
       appBar: AppBar(
         title: const Text(
           'Daily Check-in',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
         ),
-        backgroundColor: const Color(0xFF164A63),
-        foregroundColor: Colors.white,
+        backgroundColor:
+            const Color(0xFF46695A),
+        foregroundColor:
+            Colors.white,
       ),
-
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
-
+          padding:
+              const EdgeInsets.all(24),
           child: Column(
             children: [
-              const SizedBox(height: 30),
+              const SizedBox(
+                height: 30,
+              ),
 
               const Text(
-                'How are you feeling today?',
-                textAlign: TextAlign.center,
+                'How are you today?',
+                textAlign:
+                    TextAlign.center,
                 style: TextStyle(
                   fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF163B4D),
+                  fontWeight:
+                      FontWeight.w800,
+                  color:
+                      Color(0xFF26352F),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 15,
+              ),
 
               const Text(
-                'Please select one option.',
-                textAlign: TextAlign.center,
+                'Choose the option that best describes what you need.',
+                textAlign:
+                    TextAlign.center,
                 style: TextStyle(
-                  fontSize: 19,
-                  color: Color(0xFF63747B),
+                  fontSize: 18,
+                  color:
+                      Color(0xFF7A827D),
                 ),
               ),
 
               const Spacer(),
 
-              // I'M OK button
               SizedBox(
-                width: double.infinity,
+                width:
+                    double.infinity,
                 height: 110,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _showConfirmation(
-                      context,
-                      'Check-in Complete',
-                      'Great! Your caregiver has been notified that you are okay.',
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF16845B),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+                child:
+                    ElevatedButton(
+                  onPressed:
+                      _loading
+                          ? null
+                          : () {
+                              _submit(
+                                response:
+                                    "I'm OK",
+                                status:
+                                    'COMPLETED',
+                              );
+                            },
+                  style:
+                      ElevatedButton.styleFrom(
+                    backgroundColor:
+                        const Color(
+                      0xFF46695A,
+                    ),
+                    foregroundColor:
+                        Colors.white,
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius
+                              .circular(
+                        22,
+                      ),
                     ),
                   ),
-                  child: const Text(
-                    "I'M OK",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: _loading
+                      ? const CircularProgressIndicator(
+                          color:
+                              Colors.white,
+                        )
+                      : const Text(
+                          "I'M OK",
+                          style:
+                              TextStyle(
+                            fontSize: 30,
+                            fontWeight:
+                                FontWeight
+                                    .w800,
+                          ),
+                        ),
                 ),
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(
+                height: 24,
+              ),
 
-              // NEED HELP button
               SizedBox(
-                width: double.infinity,
+                width:
+                    double.infinity,
                 height: 110,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _showConfirmation(
-                      context,
-                      'Help Requested',
-                      'Your caregiver has been notified that you need help.',
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC62828),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+                child:
+                    ElevatedButton(
+                  onPressed:
+                      _loading
+                          ? null
+                          : () {
+                              _submit(
+                                response:
+                                    'Need help',
+                                status:
+                                    'HELP_REQUESTED',
+                              );
+                            },
+                  style:
+                      ElevatedButton.styleFrom(
+                    backgroundColor:
+                        const Color(
+                      0xFFC85C50,
+                    ),
+                    foregroundColor:
+                        Colors.white,
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius
+                              .circular(
+                        22,
+                      ),
                     ),
                   ),
-                  child: const Text(
+                  child:
+                      const Text(
                     'NEED HELP',
-                    style: TextStyle(
+                    style:
+                        TextStyle(
                       fontSize: 30,
-                      fontWeight: FontWeight.bold,
+                      fontWeight:
+                          FontWeight
+                              .w800,
                     ),
                   ),
                 ),
@@ -153,15 +263,19 @@ class CheckInScreen extends StatelessWidget {
               const Spacer(),
 
               const Text(
-                'Your caregiver will be notified after your selection.',
-                textAlign: TextAlign.center,
+                'Your caregiver will receive your check-in status.',
+                textAlign:
+                    TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color(0xFF63747B),
+                  color:
+                      Color(0xFF7A827D),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 20,
+              ),
             ],
           ),
         ),

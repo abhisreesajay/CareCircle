@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../models/check_in_history_model.dart';
+import '../../services/check_in_service.dart';
 import '../../services/caregiver/check_in_history_service.dart';
 
-class CheckInHistoryScreen extends StatelessWidget {
+class CheckInHistoryScreen extends StatefulWidget {
   final String elderId;
 
   const CheckInHistoryScreen({
@@ -10,113 +12,336 @@ class CheckInHistoryScreen extends StatelessWidget {
     required this.elderId,
   });
 
-  static const Color darkSage = Color(0xFF46695A);
-  static const Color sage = Color(0xFF7FA68F);
-  static const Color cream = Color(0xFFFFFBF4);
-  static const Color background = Color(0xFFF4EFE5);
-  static const Color terracotta = Color(0xFFC85C50);
-  static const Color textDark = Color(0xFF26352F);
-  static const Color mutedText = Color(0xFF7A827D);
+  @override
+  State<CheckInHistoryScreen> createState() =>
+      _CheckInHistoryScreenState();
+}
+
+class _CheckInHistoryScreenState
+    extends State<CheckInHistoryScreen> {
+  final CheckInService _checkInService =
+      CheckInService();
+
+  static const Color darkSage =
+      Color(0xFF46695A);
+
+  static const Color sage =
+      Color(0xFF7FA68F);
+
+  static const Color cream =
+      Color(0xFFFFFBF4);
+
+  static const Color background =
+      Color(0xFFF4EFE5);
+
+  static const Color terracotta =
+      Color(0xFFC85C50);
+
+  static const Color textDark =
+      Color(0xFF26352F);
+
+  static const Color mutedText =
+      Color(0xFF7A827D);
+
+  Future<void> _markCheckedIn(
+    CheckInHistory item,
+  ) async {
+    try {
+      await _checkInService.markCheckedIn(
+        elderId: widget.elderId,
+        checkInId: item.id,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Check-in marked as completed.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        SnackBar(
+          content: Text(
+            'Could not update check-in: $e',
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final service = CheckInHistoryService();
+    final service =
+        CheckInHistoryService();
 
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor:
+          background,
       appBar: AppBar(
-        backgroundColor: background,
-        foregroundColor: textDark,
+        backgroundColor:
+            background,
+        foregroundColor:
+            textDark,
         elevation: 0,
         title: const Text(
           'Check-in History',
           style: TextStyle(
             fontSize: 26,
-            fontWeight: FontWeight.w700,
+            fontWeight:
+                FontWeight.w700,
           ),
         ),
       ),
-      body: StreamBuilder<List<CheckInHistory>>(
-        stream: service.getCheckInHistory(elderId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: StreamBuilder<
+          List<CheckInHistory>>(
+        stream:
+            service.getCheckInHistory(
+          widget.elderId,
+        ),
+        builder: (
+          context,
+          snapshot,
+        ) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: darkSage),
+              child:
+                  CircularProgressIndicator(
+                color: darkSage,
+              ),
             );
           }
 
           if (snapshot.hasError) {
-            return const _ErrorState();
+            return const Center(
+              child: Text(
+                'Unable to load check-in history.',
+              ),
+            );
           }
 
-          final history = snapshot.data ?? [];
+          final history =
+              snapshot.data ?? [];
 
           if (history.isEmpty) {
-            return const _EmptyState();
+            return const Center(
+              child: Text(
+                'No check-ins yet.',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: mutedText,
+                ),
+              ),
+            );
           }
 
-          final completed = history
-              .where((item) => item.status.toLowerCase() == 'completed')
-              .length;
+          final completed =
+              history.where(
+            (item) =>
+                item.status
+                    .toLowerCase() ==
+                'completed',
+          ).length;
 
-          final missed = history
-              .where((item) => item.status.toLowerCase() == 'missed')
-              .length;
+          final missed =
+              history.where(
+            (item) =>
+                item.status
+                    .toLowerCase() ==
+                'missed',
+          ).length;
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+            padding:
+                const EdgeInsets.fromLTRB(
+              20,
+              10,
+              20,
+              100,
+            ),
             children: [
               Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
+                padding:
+                    const EdgeInsets.all(22),
+                decoration:
+                    BoxDecoration(
                   color: darkSage,
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius:
+                      BorderRadius.circular(
+                    28,
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    const Text(
-                      'Check-in overview',
-                      style: TextStyle(
-                        color: cream,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    _SummaryPill(
+                      value:
+                          '${history.length}',
+                      label: 'Total',
                     ),
-                    const SizedBox(height: 18),
-                    Row(
-                      children: [
-                        _SummaryPill(
-                          value: '${history.length}',
-                          label: 'Total',
-                        ),
-                        const SizedBox(width: 10),
-                        _SummaryPill(
-                          value: '$completed',
-                          label: 'Completed',
-                        ),
-                        const SizedBox(width: 10),
-                        _SummaryPill(
-                          value: '$missed',
-                          label: 'Missed',
-                        ),
-                      ],
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    _SummaryPill(
+                      value:
+                          '$completed',
+                      label:
+                          'Completed',
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    _SummaryPill(
+                      value: '$missed',
+                      label: 'Missed',
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Recent check-ins',
-                style: TextStyle(
-                  color: textDark,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
+
+              const SizedBox(
+                height: 24,
               ),
-              const SizedBox(height: 12),
+
               ...history.map(
-                (item) => _CheckInCard(item: item),
+                (item) {
+                  final bool completed =
+                      item.status
+                              .toLowerCase() ==
+                          'completed';
+
+                  return Container(
+                    margin:
+                        const EdgeInsets.only(
+                      bottom: 14,
+                    ),
+                    padding:
+                        const EdgeInsets.all(
+                      18,
+                    ),
+                    decoration:
+                        BoxDecoration(
+                      color: cream,
+                      borderRadius:
+                          BorderRadius.circular(
+                        24,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              completed
+                                  ? Icons
+                                      .check_circle_rounded
+                                  : Icons
+                                      .warning_rounded,
+                              color: completed
+                                  ? darkSage
+                                  : terracotta,
+                              size: 30,
+                            ),
+                            const SizedBox(
+                              width: 14,
+                            ),
+                            Expanded(
+                              child:
+                                  Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment
+                                        .start,
+                                children: [
+                                  Text(
+                                    item.date,
+                                    style:
+                                        const TextStyle(
+                                      fontSize:
+                                          16,
+                                      fontWeight:
+                                          FontWeight
+                                              .w700,
+                                      color:
+                                          textDark,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    'Scheduled: ${item.scheduledTime}',
+                                    style:
+                                        const TextStyle(
+                                      color:
+                                          mutedText,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    item.status,
+                                    style:
+                                        TextStyle(
+                                      color:
+                                          completed
+                                              ? darkSage
+                                              : terracotta,
+                                      fontWeight:
+                                          FontWeight
+                                              .w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        if (!completed)
+                          const SizedBox(
+                            height: 14,
+                          ),
+
+                        if (!completed)
+                          SizedBox(
+                            width:
+                                double.infinity,
+                            child:
+                                ElevatedButton.icon(
+                              onPressed:
+                                  () =>
+                                      _markCheckedIn(
+                                item,
+                              ),
+                              icon:
+                                  const Icon(
+                                Icons
+                                    .check_circle_outline,
+                              ),
+                              label:
+                                  const Text(
+                                'MARK AS CHECKED IN',
+                              ),
+                              style:
+                                  ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    darkSage,
+                                foregroundColor:
+                                    Colors.white,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           );
@@ -126,7 +351,8 @@ class CheckInHistoryScreen extends StatelessWidget {
   }
 }
 
-class _SummaryPill extends StatelessWidget {
+class _SummaryPill
+    extends StatelessWidget {
   final String value;
   final String label;
 
@@ -135,202 +361,33 @@ class _SummaryPill extends StatelessWidget {
     required this.label,
   });
 
-  static const Color cream = Color(0xFFFFFBF4);
-
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: cream.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                color: cream,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                color: cream.withValues(alpha: 0.70),
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CheckInCard extends StatelessWidget {
-  final CheckInHistory item;
-
-  const _CheckInCard({
-    required this.item,
-  });
-
-  static const Color sage = Color(0xFF7FA68F);
-  static const Color darkSage = Color(0xFF46695A);
-  static const Color cream = Color(0xFFFFFBF4);
-  static const Color terracotta = Color(0xFFC85C50);
-  static const Color textDark = Color(0xFF26352F);
-  static const Color mutedText = Color(0xFF7A827D);
-
-  @override
-  Widget build(BuildContext context) {
-    final completed = item.status.toLowerCase() == 'completed';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cream,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: completed
-              ? sage.withValues(alpha: 0.20)
-              : terracotta.withValues(alpha: 0.22),
-        ),
-      ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: completed
-                  ? sage.withValues(alpha: 0.13)
-                  : terracotta.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              completed
-                  ? Icons.check_circle_rounded
-                  : Icons.warning_rounded,
-              color: completed ? darkSage : terracotta,
-              size: 27,
+          Text(
+            value,
+            style:
+                const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight:
+                  FontWeight.w700,
             ),
           ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.date,
-                  style: const TextStyle(
-                    color: textDark,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  'Scheduled: ${item.scheduledTime}',
-                  style: const TextStyle(
-                    color: mutedText,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  item.status,
-                  style: TextStyle(
-                    color: completed ? darkSage : terracotta,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
+          const SizedBox(
+            height: 3,
+          ),
+          Text(
+            label,
+            style:
+                const TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  static const Color sage = Color(0xFF7FA68F);
-  static const Color textDark = Color(0xFF26352F);
-  static const Color mutedText = Color(0xFF7A827D);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.check_circle_outline_rounded,
-              size: 65,
-              color: sage,
-            ),
-            const SizedBox(height: 18),
-            const Text(
-              'No check-ins yet',
-              style: TextStyle(
-                color: textDark,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Check-in history will appear here.',
-              style: TextStyle(color: mutedText),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState();
-
-  static const Color terracotta = Color(0xFFC85C50);
-  static const Color textDark = Color(0xFF26352F);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_off_rounded,
-              size: 55,
-              color: terracotta,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Unable to load check-in history',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: textDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

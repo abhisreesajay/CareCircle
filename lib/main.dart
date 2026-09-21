@@ -9,11 +9,13 @@ import 'services/messaging_service.dart';
 
 import 'screens/auth/login_screen.dart';
 import 'screens/caregiver/caregiver_dashboard.dart';
+import 'screens/caregiver/connect_elder_screen.dart';
 
 import 'screens/elder/check_in_screen.dart';
 import 'screens/elder/elder_home.dart';
 import 'screens/elder/voice_check_in_screen.dart';
 import 'screens/elder/nearby_services_screen.dart';
+import 'screens/elder/invite_code_screen.dart';
 
 import 'screens/emergency_screen.dart';
 import 'screens/safe_zone_screen.dart';
@@ -40,40 +42,25 @@ class CareCircleApp extends StatelessWidget {
     return MaterialApp(
       title: 'CareCircle',
       debugShowCheckedModeBanner: false,
-
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF7FA68F),
         ),
       ),
-
       routes: {
-        '/checkin': (context) =>
-            const CheckInScreen(),
-
-        '/voice-checkin': (context) =>
-            const VoiceCheckInScreen(),
-
-        '/sos': (context) =>
-            const EmergencyScreen(),
-
+        '/checkin': (context) => const CheckInScreen(),
+        '/voice-checkin': (context) => const VoiceCheckInScreen(),
+        '/sos': (context) => const EmergencyScreen(),
         '/nearby-services': (context) =>
             const ElderNearbyServicesScreen(),
-
-        '/safe-zone': (context) =>
-            const SafeZoneScreen(),
+        '/safe-zone': (context) => const SafeZoneScreen(),
+        '/invite-code': (context) => const InviteCodeScreen(),
       },
-
       home: const AuthWrapper(),
     );
   }
 }
-
-
-// ============================================================
-// AUTH WRAPPER
-// ============================================================
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -82,10 +69,8 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
-
       builder: (context, snapshot) {
-        if (snapshot.connectionState ==
-            ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
@@ -93,25 +78,19 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        if (snapshot.hasData &&
-            snapshot.data != null) {
-          return RoleRouter(
-            uid: snapshot.data!.uid,
-          );
+        final user = snapshot.data;
+
+        if (user == null) {
+          return const LoginScreen();
         }
 
-        return const LoginScreen();
+        return RoleRouter(uid: user.uid);
       },
     );
   }
 }
 
-
-// ============================================================
-// ROLE ROUTER
-// ============================================================
-
-class RoleRouter extends StatelessWidget {
+class RoleRouter extends StatefulWidget {
   final String uid;
 
   const RoleRouter({
@@ -120,14 +99,48 @@ class RoleRouter extends StatelessWidget {
   });
 
   @override
+  State<RoleRouter> createState() => _RoleRouterState();
+}
+
+class _RoleRouterState extends State<RoleRouter> {
+  final MessagingService _messagingService =
+      MessagingService();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeMessaging();
+  }
+
+  @override
+  void didUpdateWidget(
+    covariant RoleRouter oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.uid != widget.uid) {
+      _initializeMessaging();
+    }
+  }
+
+  Future<void> _initializeMessaging() async {
+    await _messagingService.initialize(widget.uid);
+  }
+
+  @override
+  void dispose() {
+    _messagingService.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<
         DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(uid)
+          .doc(widget.uid)
           .snapshots(),
-
       builder: (context, snapshot) {
         if (snapshot.connectionState ==
             ConnectionState.waiting) {
@@ -160,9 +173,7 @@ class RoleRouter extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'User profile not found.\n'
-                  'Please contact your caregiver or '
-                  'administrator.',
+                  'User profile not found.',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -170,66 +181,56 @@ class RoleRouter extends StatelessWidget {
           );
         }
 
-        final Map<String, dynamic> data =
-            snapshot.data!.data() ?? {};
+        final data =
+            snapshot.data!.data() ??
+                <String, dynamic>{};
 
-        final String role =
-            data['role']?.toString().toLowerCase() ??
-                'elder';
+        final role =
+            data['role']?.toString().toLowerCase();
 
-        // --------------------------------------------------
+        // -----------------------------
         // CAREGIVER
-        // --------------------------------------------------
+        // -----------------------------
 
         if (role == 'caregiver') {
-          final List<dynamic> linkedElders =
+          final linkedElders =
               data['linkedElders'] is List
-                  ? data['linkedElders'] as List
-                  : [];
+                  ? List<dynamic>.from(
+                      data['linkedElders'] as List,
+                    )
+                  : <dynamic>[];
 
           if (linkedElders.isEmpty) {
-            return const Scaffold(
-              body: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text(
-                    'No elder is linked to this caregiver yet.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              ),
-            );
+            return const CaregiverConnectElderScreen();
           }
 
-          final String elderId =
-              linkedElders.first.toString();
+          final elderId =
+              linkedElders.first.toString().trim();
+
+          if (elderId.isEmpty) {
+            return const CaregiverConnectElderScreen();
+          }
 
           return CaregiverDashboard(
             elderId: elderId,
           );
         }
 
-        // --------------------------------------------------
+        // -----------------------------
         // ELDER
-        // --------------------------------------------------
+        // -----------------------------
 
         if (role == 'elder') {
           return const ElderHome();
         }
-
-        // --------------------------------------------------
-        // UNKNOWN ROLE
-        // --------------------------------------------------
 
         return Scaffold(
           body: Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                'Unknown account role: $role',
+                'Unknown account role: '
+                '${role ?? 'missing'}',
                 textAlign: TextAlign.center,
               ),
             ),

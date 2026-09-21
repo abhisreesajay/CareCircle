@@ -309,6 +309,31 @@ service cloud.firestore {
         || caregiverLinkedToElder(elderId);
     }
 
+      // ============================================================
+      // INVITE CODES
+      // ============================================================
+
+      match /inviteCodes/{code} {
+
+        // Caregivers can look up an invite code.
+        allow read: if isCaregiver();
+
+        // An elder can create their own invite code.
+        allow create: if signedIn()
+          && request.resource.data.elderId
+              == request.auth.uid;
+
+        allow update: if signedIn()
+          && resource.data.elderId
+              == request.auth.uid
+          && request.resource.data.elderId
+              == request.auth.uid;
+
+        allow delete: if signedIn()
+          && resource.data.elderId
+              == request.auth.uid;
+    }
+
 
     // ============================================================
     // DEFAULT DENY
