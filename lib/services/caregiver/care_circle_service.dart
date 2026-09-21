@@ -3,17 +3,10 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CareCircleService {
-  final FirebaseFirestore _db =
-      FirebaseFirestore.instance;
-
-  // ============================================================
-  // GENERATE INVITE CODE
-  // ============================================================
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   String generateInviteCode() {
-    const String chars =
-        'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
+    const String chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     final Random random = Random();
 
     return List.generate(
@@ -22,228 +15,157 @@ class CareCircleService {
     ).join();
   }
 
-  // ============================================================
-  // CREATE ELDER INVITE CODE
-  // ============================================================
-
-  Future<String> createElderInviteCode(
-    String elderUid,
-  ) async {
+  Future<String> createElderInviteCode(String elderUid) async {
     final String uid = elderUid.trim();
 
     if (uid.isEmpty) {
-      throw Exception(
-        'Elder UID is required.',
-      );
+      throw Exception('Elder UID is required.');
     }
 
-    // Check whether the elder already has a code.
-    final DocumentSnapshot<Map<String, dynamic>>
-        elderSnapshot = await _db
-            .collection('users')
-            .doc(uid)
-            .get();
+    final DocumentReference<Map<String, dynamic>> userRef =
+        _db.collection('users').doc(uid);
 
-    final existingCode =
-        elderSnapshot.data()?['inviteCode']
-            ?.toString()
-            .trim()
-            .toUpperCase();
+    final DocumentSnapshot<Map<String, dynamic>> elderSnapshot =
+        await userRef.get();
 
-    if (existingCode != null &&
-        existingCode.isNotEmpty) {
+    if (!elderSnapshot.exists) {
+      throw Exception('Elder account was not found.');
+    }
+
+    final Map<String, dynamic> elderData =
+        elderSnapshot.data() ?? {};
+
+    final String role =
+        elderData['role']?.toString().trim().toLowerCase() ?? '';
+
+    if (role != 'elder') {
+      throw Exception('Only elder accounts can create an invite code.');
+    }
+
+    String? existingCode =
+        elderData['inviteCode']?.toString().trim().toUpperCase();
+
+    // If the elder already has a code, make sure the corresponding
+    // inviteCodes document exists.
+    if (existingCode != null && existingCode.isNotEmpty) {
+      await _db.collection('inviteCodes').doc(existingCode).set({
+        'code': existingCode,
+        'elderId': uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
       return existingCode;
     }
 
     // Generate a new code.
-    String code = generateInviteCode();
+    final String code = generateInviteCode();
 
-    // Make sure the code does not already exist.
-    for (int i = 0; i < 5; i++) {
-      final existing =
-          await _db
-              .collection('inviteCodes')
-              .doc(code)
-              .get();
+    // Save the code in the elder's user document.
+    await userRef.set({
+      'inviteCode': code,
+    }, SetOptions(merge: true));
 
-      if (!existing.exists) {
-        break;
-      }
-
-      code = generateInviteCode();
-    }
-
-    // Save the code on the elder's profile.
-    await _db
-        .collection('users')
-        .doc(uid)
-        .set(
-      {
-        'inviteCode': code,
-      },
-      SetOptions(merge: true),
-    );
-
-    // Also create the lookup document used
-    // by caregivers.
-    await _db
-        .collection('inviteCodes')
-        .doc(code)
-        .set({
+    // Create the lookup document used by caregivers.
+    await _db.collection('inviteCodes').doc(code).set({
       'code': code,
       'elderId': uid,
-      'createdAt':
-          FieldValue.serverTimestamp(),
+      'createdAt': FieldValue.serverTimestamp(),
     });
 
     return code;
   }
 
-  // ============================================================
-  // LINK CAREGIVER TO ELDER
-  // ============================================================
-
   Future<void> linkCaregiverToElder({
     required String caregiverUid,
     required String inviteCode,
   }) async {
-    final String caregiverId =
-        caregiverUid.trim();
-
-    final String code =
-        inviteCode.trim().toUpperCase();
+    final String caregiverId = caregiverUid.trim();
+    final String code = inviteCode.trim().toUpperCase();
 
     if (caregiverId.isEmpty) {
-      throw Exception(
-        'Caregiver UID is required.',
-      );
+      throw Exception('Caregiver UID is required.');
     }
 
     if (code.isEmpty) {
-      throw Exception(
-        'Invite code is required.',
-      );
+      throw Exception('Invite code is required.');
     }
 
     if (code.length != 6) {
-      throw Exception(
-        'Invite code must contain 6 characters.',
-      );
+      throw Exception('Invite code must contain 6 characters.');
     }
 
-    // Find the invite code.
-    final DocumentSnapshot<
-        Map<String, dynamic>> invite =
-        await _db
-            .collection('inviteCodes')
-            .doc(code)
-            .get();
+    // Find the elder associated with the code.
+    final DocumentSnapshot<Map<String, dynamic>> invite =
+        await _db.collection('inviteCodes').doc(code).get();
 
     if (!invite.exists) {
-      throw Exception(
-        'Invalid invite code.',
-      );
+      throw Exception('Invalid invite code.');
     }
 
-    final Map<String, dynamic> data =
+    final Map<String, dynamic> inviteData =
         invite.data() ?? {};
 
     final String elderUid =
-        data['elderId']?.toString().trim() ?? '';
+        inviteData['elderId']?.toString().trim() ?? '';
 
     if (elderUid.isEmpty) {
-      throw Exception(
-        'Invite code is invalid.',
-      );
+      throw Exception('Invite code is invalid.');
     }
 
     if (elderUid == caregiverId) {
-      throw Exception(
-        'A user cannot link themselves.',
-      );
+      throw Exception('A user cannot link themselves.');
     }
 
-    // Make sure the target user really exists
-    // and is an elder.
-    final elderSnapshot =
-        await _db
-            .collection('users')
-            .doc(elderUid)
-            .get();
+    // Get elder account.
+    final DocumentSnapshot<Map<String, dynamic>> elderSnapshot =
+        await _db.collection('users').doc(elderUid).get();
 
     if (!elderSnapshot.exists) {
-      throw Exception(
-        'Elder account was not found.',
-      );
+      throw Exception('Elder account was not found.');
     }
 
-    final elderData =
+    final Map<String, dynamic> elderData =
         elderSnapshot.data() ?? {};
 
-    final String role =
-        elderData['role']
-                ?.toString()
-                .toLowerCase() ??
-            '';
+    final String elderRole =
+        elderData['role']?.toString().trim().toLowerCase() ?? '';
 
-    if (role != 'elder') {
+    if (elderRole != 'elder') {
       throw Exception(
         'This invite code does not belong to an elder.',
       );
     }
 
-    // Make sure the caregiver is actually a caregiver.
-    final caregiverSnapshot =
-        await _db
-            .collection('users')
-            .doc(caregiverId)
-            .get();
+    // Get caregiver account.
+    final DocumentSnapshot<Map<String, dynamic>> caregiverSnapshot =
+        await _db.collection('users').doc(caregiverId).get();
 
     if (!caregiverSnapshot.exists) {
-      throw Exception(
-        'Caregiver account was not found.',
-      );
+      throw Exception('Caregiver account was not found.');
     }
 
-    final caregiverData =
+    final Map<String, dynamic> caregiverData =
         caregiverSnapshot.data() ?? {};
 
     final String caregiverRole =
-        caregiverData['role']
-                ?.toString()
-                .toLowerCase() ??
-            '';
+        caregiverData['role']?.toString().trim().toLowerCase() ?? '';
 
     if (caregiverRole != 'caregiver') {
-      throw Exception(
-        'Only caregiver accounts can be linked.',
-      );
+      throw Exception('Only caregiver accounts can be linked.');
     }
 
-    // Add elder to caregiver's linkedElders.
-    await _db
-        .collection('users')
-        .doc(caregiverId)
-        .set(
+    // Add elder to caregiver's linked elder list.
+    await _db.collection('users').doc(caregiverId).set(
       {
-        'linkedElders':
-            FieldValue.arrayUnion(
-          [elderUid],
-        ),
+        'linkedElders': FieldValue.arrayUnion([elderUid]),
       },
       SetOptions(merge: true),
     );
 
-    // Add caregiver to elder's caregivers.
-    await _db
-        .collection('users')
-        .doc(elderUid)
-        .set(
+    // Add caregiver to elder's caregiver list.
+    await _db.collection('users').doc(elderUid).set(
       {
-        'caregivers':
-            FieldValue.arrayUnion(
-          [caregiverId],
-        ),
+        'caregivers': FieldValue.arrayUnion([caregiverId]),
       },
       SetOptions(merge: true),
     );

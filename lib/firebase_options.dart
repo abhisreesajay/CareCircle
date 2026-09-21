@@ -41,48 +41,46 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCDgQairxGOLeOTXOZcUm2bdiQBNUchVP8',
-    appId: '1:227094038804:web:7545b67f47c7e722745a01',
-    messagingSenderId: '227094038804',
-    projectId: 'carecircle-62a1c',
-    authDomain: 'carecircle-62a1c.firebaseapp.com',
-    storageBucket: 'carecircle-62a1c.firebasestorage.app',
-    measurementId: 'G-YJHSHQ1QYC',
+    apiKey: 'AIzaSyANaaT56PKlyapihSEClrjCU8EMFRfKT6Q',
+    appId: '1:616798473724:web:38da09f91d9a584b077679',
+    messagingSenderId: '616798473724',
+    projectId: 'carecircle-755eb',
+    authDomain: 'carecircle-755eb.firebaseapp.com',
+    storageBucket: 'carecircle-755eb.firebasestorage.app',
+    measurementId: 'G-9WVPF97281',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBKPIOBTZIS2CXBTxCSjHk9lIwKhmvVZHA',
-    appId: '1:227094038804:android:9cf5717aa34d920f745a01',
-    messagingSenderId: '227094038804',
-    projectId: 'carecircle-62a1c',
-    storageBucket: 'carecircle-62a1c.firebasestorage.app',
+    apiKey: 'AIzaSyCVPqA0gcyk78kiu95798iMXdXfZ-Hz7KA',
+    appId: '1:616798473724:android:369540cb3baf56d7077679',
+    messagingSenderId: '616798473724',
+    projectId: 'carecircle-755eb',
+    storageBucket: 'carecircle-755eb.firebasestorage.app',
   );
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyD7KEeRn7jMQW7tPNaZ4y8-M1JZDVCcYKQ',
-    appId: '1:227094038804:ios:9cebd7f73d4f6639745a01',
-    messagingSenderId: '227094038804',
-    projectId: 'carecircle-62a1c',
-    storageBucket: 'carecircle-62a1c.firebasestorage.app',
-    iosClientId: '227094038804-t6edun6ne0848beedgpse4afslnrnmg6.apps.googleusercontent.com',
+    apiKey: 'AIzaSyCaHNPcn7zjyR1XYX6Xh0McF0y01Q9VcL4',
+    appId: '1:616798473724:ios:ff501c86b732ae6c077679',
+    messagingSenderId: '616798473724',
+    projectId: 'carecircle-755eb',
+    storageBucket: 'carecircle-755eb.firebasestorage.app',
     iosBundleId: 'com.example.careCircle',
   );
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyD7KEeRn7jMQW7tPNaZ4y8-M1JZDVCcYKQ',
-    appId: '1:227094038804:ios:9cebd7f73d4f6639745a01',
-    messagingSenderId: '227094038804',
-    projectId: 'carecircle-62a1c',
-    storageBucket: 'carecircle-62a1c.firebasestorage.app',
-    iosClientId: '227094038804-t6edun6ne0848beedgpse4afslnrnmg6.apps.googleusercontent.com',
+    apiKey: 'AIzaSyCaHNPcn7zjyR1XYX6Xh0McF0y01Q9VcL4',
+    appId: '1:616798473724:ios:ff501c86b732ae6c077679',
+    messagingSenderId: '616798473724',
+    projectId: 'carecircle-755eb',
+    storageBucket: 'carecircle-755eb.firebasestorage.app',
     iosBundleId: 'com.example.careCircle',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCDgQairxGOLeOTXOZcUm2bdiQBNUchVP8',
-    appId: '1:227094038804:web:f6950602392dd4b7745a01',
-    messagingSenderId: '227094038804',
-    projectId: 'carecircle-62a1c',
-    authDomain: 'carecircle-62a1c.firebaseapp.com',
-    storageBucket: 'carecircle-62a1c.firebasestorage.app',
-    measurementId: 'G-JLEP8CSEPS',
+    apiKey: 'AIzaSyANaaT56PKlyapihSEClrjCU8EMFRfKT6Q',
+    appId: '1:616798473724:web:2cbf9dfc79ee0213077679',
+    messagingSenderId: '616798473724',
+    projectId: 'carecircle-755eb',
+    authDomain: 'carecircle-755eb.firebaseapp.com',
+    storageBucket: 'carecircle-755eb.firebasestorage.app',
+    measurementId: 'G-RVND1GLN0C',
   );
 }
