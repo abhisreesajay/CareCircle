@@ -9,11 +9,12 @@ import 'services/messaging_service.dart';
 
 import 'screens/auth/login_screen.dart';
 import 'screens/caregiver/caregiver_dashboard.dart';
+
 import 'screens/elder/check_in_screen.dart';
 import 'screens/elder/elder_home.dart';
 import 'screens/elder/voice_check_in_screen.dart';
+import 'screens/elder/nearby_services_screen.dart';
 
-import 'screens/emergency_contacts_screen.dart';
 import 'screens/emergency_screen.dart';
 import 'screens/safe_zone_screen.dart';
 
@@ -48,7 +49,8 @@ class CareCircleApp extends StatelessWidget {
       ),
 
       routes: {
-        '/checkin': (context) => const CheckInScreen(),
+        '/checkin': (context) =>
+            const CheckInScreen(),
 
         '/voice-checkin': (context) =>
             const VoiceCheckInScreen(),
@@ -56,8 +58,8 @@ class CareCircleApp extends StatelessWidget {
         '/sos': (context) =>
             const EmergencyScreen(),
 
-        '/emergency-contacts': (context) =>
-            const EmergencyContactsScreen(),
+        '/nearby-services': (context) =>
+            const ElderNearbyServicesScreen(),
 
         '/safe-zone': (context) =>
             const SafeZoneScreen(),
@@ -67,6 +69,11 @@ class CareCircleApp extends StatelessWidget {
     );
   }
 }
+
+
+// ============================================================
+// AUTH WRAPPER
+// ============================================================
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -99,6 +106,11 @@ class AuthWrapper extends StatelessWidget {
   }
 }
 
+
+// ============================================================
+// ROLE ROUTER
+// ============================================================
+
 class RoleRouter extends StatelessWidget {
   final String uid;
 
@@ -129,10 +141,13 @@ class RoleRouter extends StatelessWidget {
         if (snapshot.hasError) {
           return Scaffold(
             body: Center(
-              child: Text(
-                'Error loading user profile:\n'
-                '${snapshot.error}',
-                textAlign: TextAlign.center,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'Error loading user profile:\n'
+                  '${snapshot.error}',
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           );
@@ -142,8 +157,14 @@ class RoleRouter extends StatelessWidget {
             !snapshot.data!.exists) {
           return const Scaffold(
             body: Center(
-              child: Text(
-                'User profile not found.',
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'User profile not found.\n'
+                  'Please contact your caregiver or '
+                  'administrator.',
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           );
@@ -153,7 +174,12 @@ class RoleRouter extends StatelessWidget {
             snapshot.data!.data() ?? {};
 
         final String role =
-            data['role']?.toString() ?? 'elder';
+            data['role']?.toString().toLowerCase() ??
+                'elder';
+
+        // --------------------------------------------------
+        // CAREGIVER
+        // --------------------------------------------------
 
         if (role == 'caregiver') {
           final List<dynamic> linkedElders =
@@ -164,9 +190,15 @@ class RoleRouter extends StatelessWidget {
           if (linkedElders.isEmpty) {
             return const Scaffold(
               body: Center(
-                child: Text(
-                  'No elder is linked to this caregiver yet.',
-                  textAlign: TextAlign.center,
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'No elder is linked to this caregiver yet.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
               ),
             );
@@ -180,7 +212,29 @@ class RoleRouter extends StatelessWidget {
           );
         }
 
-        return const ElderHome();
+        // --------------------------------------------------
+        // ELDER
+        // --------------------------------------------------
+
+        if (role == 'elder') {
+          return const ElderHome();
+        }
+
+        // --------------------------------------------------
+        // UNKNOWN ROLE
+        // --------------------------------------------------
+
+        return Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                'Unknown account role: $role',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        );
       },
     );
   }
