@@ -3,23 +3,41 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isSignedIn() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn()
-        && request.auth.uid == userId;
+    function isOwner(uid) {
+      return signedIn()
+        && request.auth.uid == uid;
+    }
+
+    function userData(uid) {
+      return get(
+        /databases/$(database)/documents/users/$(uid)
+      ).data;
     }
 
     function isCaregiver() {
-      return isSignedIn()
-        && exists(
-          /databases/$(database)/documents/users/$(request.auth.uid)
-        )
-        && get(
-          /databases/$(database)/documents/users/$(request.auth.uid)
-        ).data.role == "caregiver";
+      return signedIn()
+        && userData(request.auth.uid).role
+            == 'caregiver';
+    }
+
+    function isElder() {
+      return signedIn()
+        && userData(request.auth.uid).role
+            == 'elder';
+    }
+
+    function caregiverLinkedToElder(elderId) {
+      return isCaregiver()
+        && elderId in (
+          userData(request.auth.uid).linkedElders
+            is list
+            ? userData(request.auth.uid).linkedElders
+            : []
+        );
     }
 
     // ============================================================
@@ -33,11 +51,116 @@ service cloud.firestore {
 
       allow create: if isOwner(userId);
 
-      allow update: if isOwner(userId)
-        && request.resource.data.role
-            == resource.data.role;
+      allow update: if isOwner(userId);
 
       allow delete: if false;
+    }
+
+    // ============================================================
+    // ELDER DATA
+    // ============================================================
+
+    match /elders/{elderId} {
+
+      allow read: if isOwner(elderId)
+        || caregiverLinkedToElder(elderId);
+
+      allow create: if isOwner(elderId);
+
+      allow update: if isOwner(elderId)
+        || caregiverLinkedToElder(elderId);
+
+      allow delete: if false;
+
+      // ----------------------------------------------------------
+      // MEDICINES
+      // ----------------------------------------------------------
+
+      match /medicines/{medicineId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+      // ----------------------------------------------------------
+      // APPOINTMENTS
+      // ----------------------------------------------------------
+
+      match /appointments/{appointmentId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+      // ----------------------------------------------------------
+      // EMERGENCY CONTACTS
+      // ----------------------------------------------------------
+
+      match /emergencyContacts/{contactId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+      // ----------------------------------------------------------
+      // NEARBY SERVICES
+      // ----------------------------------------------------------
+
+      match /nearbyServices/{serviceId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+      // ----------------------------------------------------------
+      // MEDICAL SUMMARY
+      // ----------------------------------------------------------
+
+      match /medicalSummary/{summaryId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+      // ----------------------------------------------------------
+      // CHECK-IN HISTORY
+      // ----------------------------------------------------------
+
+      match /checkInHistory/{checkInId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+      // ----------------------------------------------------------
+      // ACTIVITY HISTORY
+      // ----------------------------------------------------------
+
+      match /activityHistory/{activityId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+      // ----------------------------------------------------------
+      // STATUS
+      // ----------------------------------------------------------
+
+      match /status/{statusId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+      // ----------------------------------------------------------
+      // ALERTS
+      // ----------------------------------------------------------
+
+      match /alerts/{alertId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
     }
 
     // ============================================================
@@ -46,80 +169,31 @@ service cloud.firestore {
 
     match /safeZones/{safeZoneId} {
 
-      // Elder can read their assigned safe zones.
-      // Caregiver can read zones they created.
-      allow read: if isSignedIn()
+      allow read: if signedIn()
         && (
-          resource.data.elderId
-              == request.auth.uid
+          resource.data.elderId == request.auth.uid
           || (
             isCaregiver()
-            && resource.data.createdBy
-                == request.auth.uid
+            && caregiverLinkedToElder(
+              resource.data.elderId
+            )
           )
         );
 
-      // Only a caregiver can create a safe zone.
       allow create: if isCaregiver()
+        && caregiverLinkedToElder(
+          request.resource.data.elderId
+        )
         && request.resource.data.createdBy
-            == request.auth.uid
-        && request.resource.data.elderId
-            is string
-        && request.resource.data.elderId
-            != ""
-        && request.resource.data.name
-            is string
-        && request.resource.data.name
-            != ""
-        && request.resource.data.latitude
-            is number
-        && request.resource.data.latitude
-            >= -90
-        && request.resource.data.latitude
-            <= 90
-        && request.resource.data.longitude
-            is number
-        && request.resource.data.longitude
-            >= -180
-        && request.resource.data.longitude
-            <= 180
-        && request.resource.data.radiusInMeters
-            is number
-        && request.resource.data.radiusInMeters
-            >= 50;
+            == request.auth.uid;
 
-      // Only the caregiver who created
-      // the zone can update it.
       allow update: if isCaregiver()
         && resource.data.createdBy
             == request.auth.uid
-        && request.resource.data.createdBy
-            == resource.data.createdBy
-        && request.resource.data.elderId
-            == resource.data.elderId
-        && request.resource.data.name
-            is string
-        && request.resource.data.name
-            != ""
-        && request.resource.data.latitude
-            is number
-        && request.resource.data.latitude
-            >= -90
-        && request.resource.data.latitude
-            <= 90
-        && request.resource.data.longitude
-            is number
-        && request.resource.data.longitude
-            >= -180
-        && request.resource.data.longitude
-            <= 180
-        && request.resource.data.radiusInMeters
-            is number
-        && request.resource.data.radiusInMeters
-            >= 50;
+        && caregiverLinkedToElder(
+          resource.data.elderId
+        );
 
-      // Only the caregiver who created
-      // the zone can delete it.
       allow delete: if isCaregiver()
         && resource.data.createdBy
             == request.auth.uid;
@@ -131,41 +205,19 @@ service cloud.firestore {
 
     match /safeZoneViolations/{violationId} {
 
-      // Elder can create an OUTSIDE violation only when
-      // the referenced safe zone belongs to that elder.
-      allow create: if isSignedIn()
+      allow create: if signedIn()
         && request.resource.data.elderId
-            == request.auth.uid
-        && request.resource.data.safeZoneId
-            is string
-        && request.resource.data.safeZoneId
-            != ""
-        && exists(
-          /databases/$(database)/documents/safeZones/$(request.resource.data.safeZoneId)
-        )
-        && get(
-          /databases/$(database)/documents/safeZones/$(request.resource.data.safeZoneId)
-        ).data.elderId
-            == request.auth.uid
-        && request.resource.data.status
-            == "OUTSIDE"
-        && request.resource.data.latitude
-            is number
-        && request.resource.data.longitude
-            is number
-        && request.resource.data.distanceInMeters
-            is number;
+            == request.auth.uid;
 
-      // Elder can read their own violations.
-      // Signed-in caregivers can read violations.
-      allow read: if isSignedIn()
+      allow read: if signedIn()
         && (
           resource.data.elderId
               == request.auth.uid
-          || isCaregiver()
+          || caregiverLinkedToElder(
+            resource.data.elderId
+          )
         );
 
-      // Violations cannot be modified or deleted by clients.
       allow update, delete: if false;
     }
 
@@ -175,30 +227,28 @@ service cloud.firestore {
 
     match /sosAlerts/{sosId} {
 
-      // Elder can create their own active SOS.
-      allow create: if isSignedIn()
+      allow create: if signedIn()
         && request.resource.data.userId
             == request.auth.uid
         && request.resource.data.status
-            == "ACTIVE";
+            == 'ACTIVE';
 
-      // Elder can read their own SOS.
-      // Caregivers can read SOS alerts.
-      allow read: if isSignedIn()
+      allow read: if signedIn()
         && (
           resource.data.userId
               == request.auth.uid
-          || isCaregiver()
+          || caregiverLinkedToElder(
+            resource.data.userId
+          )
         );
 
-      // Elder can cancel their own active SOS.
-      allow update: if isSignedIn()
+      allow update: if signedIn()
         && resource.data.userId
             == request.auth.uid
         && request.resource.data.userId
             == resource.data.userId
         && request.resource.data.status
-            == "CANCELLED";
+            == 'CANCELLED';
 
       allow delete: if false;
     }
@@ -208,13 +258,23 @@ service cloud.firestore {
     // ============================================================
 
     match /careCircles/{circleId} {
-
       allow read, create, update, delete:
-          if isSignedIn();
+        if signedIn();
     }
 
     // ============================================================
-    // DENY EVERYTHING ELSE
+    // MEDICAL INFORMATION
+    // ============================================================
+
+    match /medicalInformation/{elderId} {
+
+      allow read, write:
+        if isOwner(elderId)
+        || caregiverLinkedToElder(elderId);
+    }
+
+    // ============================================================
+    // DEFAULT DENY
     // ============================================================
 
     match /{document=**} {
