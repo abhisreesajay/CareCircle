@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -10,24 +11,14 @@ from firebase_admin import credentials, firestore, messaging
 # FIREBASE INITIALIZATION
 # ============================================================
 
-service_account_json = os.environ.get(
-    "FIREBASE_SERVICE_ACCOUNT_JSON"
-)
+service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
 
 if not service_account_json:
-    raise RuntimeError(
-        "FIREBASE_SERVICE_ACCOUNT_JSON secret is missing."
-    )
+    raise RuntimeError("FIREBASE_SERVICE_ACCOUNT_JSON secret is missing.")
 
-import json
+service_account_info = json.loads(service_account_json)
 
-service_account_info = json.loads(
-    service_account_json
-)
-
-cred = credentials.Certificate(
-    service_account_info
-)
+cred = credentials.Certificate(service_account_info)
 
 firebase_admin.initialize_app(cred)
 
@@ -51,16 +42,12 @@ def get_notification_recipients(elder_id):
     )
 
     for user_document in caregivers:
-
         data = user_document.to_dict()
 
         if not data:
             continue
 
-        linked_elders = data.get(
-            "linkedElders",
-            [],
-        )
+        linked_elders = data.get("linkedElders", [])
 
         if not isinstance(linked_elders, list):
             continue
@@ -68,10 +55,7 @@ def get_notification_recipients(elder_id):
         if elder_id not in linked_elders:
             continue
 
-        tokens = data.get(
-            "fcmTokens",
-            [],
-        )
+        tokens = data.get("fcmTokens", [])
 
         if not isinstance(tokens, list):
             tokens = []
@@ -82,7 +66,6 @@ def get_notification_recipients(elder_id):
             tokens.append(old_token)
 
         for token in tokens:
-
             if not isinstance(token, str):
                 continue
 
@@ -95,7 +78,6 @@ def get_notification_recipients(elder_id):
                 continue
 
             token_set.add(token)
-
             recipients.append(token)
 
     return recipients
@@ -105,20 +87,17 @@ def get_notification_recipients(elder_id):
 # SEND FCM
 # ============================================================
 
-def send_notification(
-    elder_id,
-    title,
-    body,
-):
+def send_notification(elder_id, title, body):
 
-    tokens = get_notification_recipients(
-        elder_id
-    )
+    print(f"Finding caregiver tokens for elder: {elder_id}")
+
+    tokens = get_notification_recipients(elder_id)
+
+    print(f"Found {len(tokens)} caregiver device(s).")
 
     if not tokens:
         print(
-            f"No caregiver FCM tokens found "
-            f"for elder {elder_id}"
+            f"No caregiver FCM tokens found for elder {elder_id}"
         )
         return
 
@@ -127,7 +106,6 @@ def send_notification(
     for token in tokens:
 
         try:
-
             message = messaging.Message(
                 notification=messaging.Notification(
                     title=title,
@@ -165,25 +143,22 @@ def process_checkins():
 
     now = datetime.now(IST)
 
-    print(
-        "CareCircle check-in scheduler running:"
-    )
+    print("CareCircle check-in scheduler running:")
+
     print(
         now.strftime("%Y-%m-%d %I:%M:%S %p")
     )
 
+    print("Reading check-in reminders from Firestore...")
+
     reminders = (
         db.collection_group("checkInReminders")
-        .where(
-            "status",
-            "in",
-            [
-                "PENDING",
-                "FIRST_REMINDER_SENT",
-                "SECOND_REMINDER_SENT",
-            ],
-        )
-        .stream()
+        .get()
+    )
+
+    print(
+        f"Found {len(reminders)} "
+        f"check-in reminder(s)."
     )
 
     for reminder in reminders:
@@ -193,13 +168,41 @@ def process_checkins():
         if not data:
             continue
 
+        print(
+            f"Checking reminder: {reminder.id}"
+        )
+
+        print(
+            f"Reminder data: {data}"
+        )
+
         elder_id = data.get("elderId")
 
         scheduled_time = data.get(
             "scheduledTime"
         )
 
+        status = data.get("status")
+
         if not elder_id or not scheduled_time:
+
+            print(
+                "Missing elderId or scheduledTime. "
+                "Skipping."
+            )
+
+            continue
+
+        if status not in [
+            "PENDING",
+            "FIRST_REMINDER_SENT",
+            "SECOND_REMINDER_SENT",
+        ]:
+
+            print(
+                f"Status {status} does not need processing."
+            )
+
             continue
 
         try:
@@ -227,15 +230,44 @@ def process_checkins():
 
         elapsed = now - scheduled
 
-        # ----------------------------------------------------
+        print(
+            "Scheduled: "
+            + scheduled.strftime(
+                "%Y-%m-%d %I:%M:%S %p"
+            )
+        )
+
+        print(
+            f"Elapsed: {elapsed}"
+        )
+
+
+        # ====================================================
+        # BEFORE SCHEDULED TIME
+        # ====================================================
+
+        if elapsed.total_seconds() < 0:
+
+            print(
+                "Reminder time has not arrived yet."
+            )
+
+            continue
+
+
+        # ====================================================
         # FIRST REMINDER
-        # ----------------------------------------------------
+        # 0 - 15 MINUTES
+        # ====================================================
 
         if (
-            elapsed >= timedelta(0)
-            and elapsed < timedelta(minutes=15)
-            and data.get("status") == "PENDING"
+            elapsed < timedelta(minutes=15)
+            and status == "PENDING"
         ):
+
+            print(
+                "Sending first reminder..."
+            )
 
             send_notification(
                 elder_id,
@@ -253,22 +285,26 @@ def process_checkins():
                 f"{reminder.id}"
             )
 
-        # ----------------------------------------------------
+
+        # ====================================================
         # SECOND REMINDER
-        # ----------------------------------------------------
+        # 15 - 30 MINUTES
+        # ====================================================
 
         elif (
             elapsed >= timedelta(minutes=15)
             and elapsed < timedelta(minutes=30)
-            and data.get("status")
-            == "FIRST_REMINDER_SENT"
+            and status == "FIRST_REMINDER_SENT"
         ):
+
+            print(
+                "Sending second reminder..."
+            )
 
             send_notification(
                 elder_id,
                 "CareCircle Check-in Reminder",
-                "The elder has not completed "
-                "the check-in yet.",
+                "The elder has not completed the check-in yet.",
             )
 
             reminder.reference.update({
@@ -281,21 +317,35 @@ def process_checkins():
                 f"{reminder.id}"
             )
 
-        # ----------------------------------------------------
+
+        # ====================================================
         # MISSED CHECK-IN
-        # ----------------------------------------------------
+        # 30+ MINUTES
+        #
+        # Handles BOTH cases:
+        # FIRST_REMINDER_SENT
+        # SECOND_REMINDER_SENT
+        #
+        # This means the workflow can run late
+        # without getting stuck.
+        # ====================================================
 
         elif (
             elapsed >= timedelta(minutes=30)
-            and data.get("status")
-            == "SECOND_REMINDER_SENT"
+            and status in [
+                "FIRST_REMINDER_SENT",
+                "SECOND_REMINDER_SENT",
+            ]
         ):
+
+            print(
+                "Sending missed check-in notification..."
+            )
 
             send_notification(
                 elder_id,
                 "Missed Check-in",
-                "The elder has missed "
-                "the scheduled check-in.",
+                "The elder has missed the scheduled check-in.",
             )
 
             reminder.reference.update({
@@ -309,9 +359,15 @@ def process_checkins():
             )
 
 
+    print(
+        "CareCircle check-in scheduler finished."
+    )
+
+
 # ============================================================
 # RUN
 # ============================================================
 
 if __name__ == "__main__":
+
     process_checkins()
