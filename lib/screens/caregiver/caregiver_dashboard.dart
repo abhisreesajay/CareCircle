@@ -18,755 +18,383 @@ class CaregiverDashboard extends StatelessWidget {
     required this.elderId,
   });
 
-  void _openPage(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => page),
-    );
-  }
+  static const Color primaryGreen = Color(0xFF738F52);
+  static const Color darkGreen = Color(0xFF536B3A);
+  static const Color lightGreen = Color(0xFFE8EFDF);
+  static const Color backgroundColor = Color(0xFFF7F9F3);
+  static const Color textColor = Color(0xFF26301F);
 
   @override
   Widget build(BuildContext context) {
-    const background = Color(0xFFF4EFE5);
-    const sage = Color(0xFF7FA68F);
-    const darkSage = Color(0xFF46695A);
-    const terracotta = Color(0xFFC85C50);
-    const cream = Color(0xFFFFFBF4);
-    const textDark = Color(0xFF26352F);
-
     return Scaffold(
-      backgroundColor: background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(22, 18, 22, 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        title: const Text(
+          'Caregiver Dashboard',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: primaryGreen,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          int crossAxisCount;
 
-              // ---------------------------------------------------------
-              // HEADER
-              // ---------------------------------------------------------
+          if (constraints.maxWidth >= 1100) {
+            crossAxisCount = 3;
+          } else if (constraints.maxWidth >= 650) {
+            crossAxisCount = 2;
+          } else {
+            crossAxisCount = 1;
+          }
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Good morning',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: textDark.withValues(alpha: .60),
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      const Text(
-                        'Care Circle',
-                        style: TextStyle(
-                          fontSize: 31,
-                          fontWeight: FontWeight.w800,
-                          color: textDark,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ],
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _welcomeCard(),
+                const SizedBox(height: 28),
+
+                const Text(
+                  'Care Management',
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
                   ),
-
-                  Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      color: terracotta,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(
-                      Icons.favorite_rounded,
-                      color: Colors.white,
-                      size: 25,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 25),
-
-              // ---------------------------------------------------------
-              // ELDER PROFILE CARD
-              // ---------------------------------------------------------
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: sage,
-                  borderRadius: BorderRadius.circular(28),
                 ),
-                child: Stack(
+
+                const SizedBox(height: 14),
+
+                GridView.count(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio:
+                      crossAxisCount == 3 ? 2.0 : 1.7,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    Positioned(
-                      right: -35,
-                      top: -40,
-                      child: Container(
-                        height: 145,
-                        width: 145,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: .10),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
+                    _dashboardCard(
+                      context,
+                      title: 'Medicines',
+                      description: 'Manage medicines',
+                      icon: Icons.medication_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MedicinesScreen(
+                              elderId: elderId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    _dashboardCard(
+                      context,
+                      title: 'Appointments',
+                      description: 'Manage appointments',
+                      icon: Icons.calendar_month_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AppointmentsScreen(
+                              elderId: elderId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    _dashboardCard(
+                      context,
+                      title: 'Emergency Contacts',
+                      description: 'Manage contacts',
+                      icon: Icons.contact_phone_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EmergencyContactsScreen(
+                              elderId: elderId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    _dashboardCard(
+                      context,
+                      title: 'Nearby Services',
+                      description: 'Hospitals, shops & more',
+                      icon: Icons.location_on_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                NearbyServicesScreen(
+                              elderId: elderId,
+                            ),
+                          ),
+                        );
+                      },
                     ),
 
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              height: 58,
-                              width: 58,
-                              decoration: BoxDecoration(
-                                color: cream,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Icon(
-                                Icons.person_rounded,
-                                size: 32,
-                                color: darkSage,
-                              ),
+                    _dashboardCard(
+                      context,
+                      title: 'Medical Summary',
+                      description: 'View medical information',
+                      icon: Icons.medical_information_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                MedicalSummaryScreen(
+                              elderId: elderId,
                             ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
 
-                            const SizedBox(width: 14),
+                const SizedBox(height: 30),
 
-                            const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Elder profile',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Today at a glance',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
+                const Text(
+                  'Monitoring & History',
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                GridView.count(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio:
+                      crossAxisCount == 3 ? 2.0 : 1.7,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _dashboardCard(
+                      context,
+                      title: 'Elder Status',
+                      description: 'View current status',
+                      icon: Icons.person_outline,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ElderStatusScreen(
+                              elderId: elderId,
                             ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        Row(
-                          children: [
-                            _MiniStatus(
-                              icon: Icons.check_circle_rounded,
-                              title: 'Check-in',
-                              value: 'Pending',
+                          ),
+                        );
+                      },
+                    ),
+                    _dashboardCard(
+                      context,
+                      title: 'Check-in History',
+                      description: 'View check-in records',
+                      icon: Icons.check_circle_outline,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CheckInHistoryScreen(
+                              elderId: elderId,
                             ),
-                            const SizedBox(width: 10),
-                            _MiniStatus(
-                              icon: Icons.shield_rounded,
-                              title: 'Safe zone',
-                              value: 'Active',
+                          ),
+                        );
+                      },
+                    ),
+                    _dashboardCard(
+                      context,
+                      title: 'Activity History',
+                      description: 'View elder activities',
+                      icon: Icons.history,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ActivityHistoryScreen(
+                              elderId: elderId,
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        );
+                      },
+                    ),
+                    _dashboardCard(
+                      context,
+                      title: 'Alerts',
+                      description: 'View important alerts',
+                      icon: Icons.notifications_outlined,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AlertsScreen(
+                              elderId: elderId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _welcomeCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: primaryGreen,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.favorite_outline,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 18),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Caregiver Dashboard',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'Manage and monitor your elder’s care in one place.',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dashboardCard(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      color: Colors.white,
+      elevation: 2,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: lightGreen,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(
+                  icon,
+                  size: 28,
+                  color: darkGreen,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 26),
-
-              // ---------------------------------------------------------
-              // TODAY SECTION
-              // ---------------------------------------------------------
-
-              const Text(
-                'Today',
-                style: TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w800,
-                  color: textDark,
-                  letterSpacing: -.5,
-                ),
-              ),
-
-              const SizedBox(height: 13),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: _DashboardCard(
-                      color: cream,
-                      iconBackground: const Color(0xFFE5D3C8),
-                      icon: Icons.medication_rounded,
-                      title: 'Medicines',
-                      subtitle: 'Manage medication',
-                      onTap: () {
-                        _openPage(
-                          context,
-                          MedicinesScreen(elderId: elderId),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: _DashboardCard(
-                      color: cream,
-                      iconBackground: const Color(0xFFD8E4D9),
-                      icon: Icons.calendar_month_rounded,
-                      title: 'Appointments',
-                      subtitle: 'Upcoming visits',
-                      onTap: () {
-                        _openPage(
-                          context,
-                          AppointmentsScreen(elderId: elderId),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // ---------------------------------------------------------
-              // EMERGENCY CONTACTS
-              // ---------------------------------------------------------
-
-              _WideCard(
-                color: const Color(0xFFF0D5CE),
-                icon: Icons.phone_in_talk_rounded,
-                title: 'Care circle',
-                subtitle: 'Emergency contacts & trusted people',
-                trailing: Icons.arrow_forward_rounded,
-                onTap: () {
-                  _openPage(
-                    context,
-                    EmergencyContactsScreen(elderId: elderId),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 26),
-
-              // ---------------------------------------------------------
-              // CARE OVERVIEW
-              // ---------------------------------------------------------
-
-              const Text(
-                'Care overview',
-                style: TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w800,
-                  color: textDark,
-                  letterSpacing: -.5,
-                ),
-              ),
-
-              const SizedBox(height: 13),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: _SmallFeatureCard(
-                      color: darkSage,
-                      icon: Icons.favorite_rounded,
-                      title: 'Elder status',
-                      onTap: () {
-                        _openPage(
-                          context,
-                          ElderStatusScreen(elderId: elderId),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: _SmallFeatureCard(
-                      color: terracotta,
-                      icon: Icons.notifications_rounded,
-                      title: 'Alerts',
-                      onTap: () {
-                        _openPage(
-                          context,
-                          AlertsScreen(elderId: elderId),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: _SmallFeatureCard(
-                      color: const Color(0xFF657C91),
-                      icon: Icons.history_rounded,
-                      title: 'Check-in history',
-                      onTap: () {
-                        _openPage(
-                          context,
-                          CheckInHistoryScreen(elderId: elderId),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: _SmallFeatureCard(
-                      color: const Color(0xFF8A7460),
-                      icon: Icons.timeline_rounded,
-                      title: 'Activity',
-                      onTap: () {
-                        _openPage(
-                          context,
-                          ActivityHistoryScreen(elderId: elderId),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 26),
-
-              // ---------------------------------------------------------
-              // MEDICAL SUMMARY
-              // ---------------------------------------------------------
-
-              GestureDetector(
-                onTap: () {
-                  _openPage(
-                    context,
-                    MedicalSummaryScreen(elderId: elderId),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: cream,
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 58,
-                        width: 58,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE3E9E1),
-                          borderRadius: BorderRadius.circular(19),
-                        ),
-                        child: const Icon(
-                          Icons.medical_information_rounded,
-                          color: darkSage,
-                          size: 28,
-                        ),
-                      ),
-
-                      const SizedBox(width: 15),
-
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Medical summary',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: textDark,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Health information at a glance',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 17,
-                        color: Colors.black45,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // ---------------------------------------------------------
-              // NEARBY SERVICES
-              // ---------------------------------------------------------
-
-              _WideCard(
-                color: const Color(0xFFE4DCCB),
-                icon: Icons.location_on_rounded,
-                title: 'Nearby services',
-                subtitle: 'Hospitals, care centres & local services',
-                trailing: Icons.arrow_forward_rounded,
-                darkIcon: true,
-                onTap: () {
-                  _openPage(
-                    context,
-                    NearbyServicesScreen(elderId: elderId),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 28),
-
-              // ---------------------------------------------------------
-              // FOOTER
-              // ---------------------------------------------------------
-
-              Center(
-                child: Text(
-                  'Taking care, one day at a time ♥',
-                  style: TextStyle(
-                    color: textDark.withValues(alpha: .45),
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: primaryGreen,
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-
-// =======================================================================
-// MINI STATUS
-// =======================================================================
-
-class _MiniStatus extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String value;
-
-  const _MiniStatus({
-    required this.icon,
-    required this.title,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .18),
-          borderRadius: BorderRadius.circular(17),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 11,
-                    ),
-                  ),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-// =======================================================================
-// DASHBOARD CARD
-// =======================================================================
-
-class _DashboardCard extends StatelessWidget {
-  final Color color;
-  final Color iconBackground;
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _DashboardCard({
-    required this.color,
-    required this.iconBackground,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 170,
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                icon,
-                color: const Color(0xFF34453E),
-                size: 25,
-              ),
-            ),
-
-            const Spacer(),
-
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF26352F),
-              ),
-            ),
-
-            const SizedBox(height: 3),
-
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Colors.black54,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-// =======================================================================
-// WIDE CARD
-// =======================================================================
-
-class _WideCard extends StatelessWidget {
-  final Color color;
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final IconData trailing;
-  final VoidCallback onTap;
-  final bool darkIcon;
-
-  const _WideCard({
-    required this.color,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.trailing,
-    required this.onTap,
-    this.darkIcon = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Row(
-          children: [
-            Container(
-              height: 52,
-              width: 52,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .55),
-                borderRadius: BorderRadius.circular(17),
-              ),
-              child: Icon(
-                icon,
-                color: darkIcon
-                    ? const Color(0xFF46695A)
-                    : const Color(0xFF9C5047),
-                size: 26,
-              ),
-            ),
-
-            const SizedBox(width: 14),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF26352F),
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Icon(
-              trailing,
-              size: 20,
-              color: Colors.black54,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-// =======================================================================
-// SMALL FEATURE CARD
-// =======================================================================
-
-class _SmallFeatureCard extends StatelessWidget {
-  final Color color;
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
-  const _SmallFeatureCard({
-    required this.color,
-    required this.icon,
-    required this.title,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 125,
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              icon,
-              color: Colors.white,
-              size: 27,
-            ),
-
-            const Spacer(),
-
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-
-            const SizedBox(height: 3),
-
-            const Row(
-              children: [
-                Text(
-                  'Open',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                  ),
-                ),
-                SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white70,
-                  size: 13,
-                ),
-              ],
-            ),
-          ],
         ),
       ),
     );

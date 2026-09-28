@@ -4,17 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'firebase_options.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/caregiver/caregiver_dashboard.dart';
+import 'screens/auth/login_screen.dart';import 'screens/caregiver/caregiver_dashboard.dart';
+
 import 'screens/elder/elder_home.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const CareCircleApp());
 }
 
@@ -27,10 +24,8 @@ class CareCircleApp extends StatelessWidget {
       title: 'CareCircle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2A9D8F),
-        ),
       ),
       home: const AuthWrapper(),
     );
@@ -47,19 +42,15 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (snapshot.hasData && snapshot.data != null) {
-          return RoleRouter(
-            uid: snapshot.data!.uid,
-          );
+        if (snapshot.hasData) {
+          return RoleRouter(uid: snapshot.data!.uid);
         }
 
-        return const LoginScreen();
+        return LoginScreen();
       },
     );
   }
@@ -67,48 +58,31 @@ class AuthWrapper extends StatelessWidget {
 
 class RoleRouter extends StatelessWidget {
   final String uid;
-
-  const RoleRouter({
-    super.key,
-    required this.uid,
-  });
+  const RoleRouter({super.key, required this.uid});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .snapshots(),
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance.collection('users').doc(uid).get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const Scaffold(
-            body: Center(
-              child: Text('User profile not found.'),
-            ),
-          );
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>;
+          final role = data['role'] ?? 'elder';
+
+          if (role == 'caregiver') {
+            return const CaregiverDashboard(elderId: 'temporary_test_id');
+          } else {
+            return const ElderHome();
+          }
         }
 
-        final data =
-            snapshot.data!.data() as Map<String, dynamic>;
-
-        final role = data['role'] ?? 'elder';
-
-        if (role == 'caregiver') {
-          return const CaregiverDashboard(
-            elderId: 'test_elder_001',
-          );
-        }
-
-        return const ElderHome();
+        return LoginScreen();
       },
     );
   }

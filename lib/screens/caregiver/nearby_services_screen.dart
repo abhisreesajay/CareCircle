@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/nearby_service_model.dart';
-import '../../services/caregiver/nearby_service_service.dart';
+import '../../services/nearby_service_service.dart';
 
 class NearbyServicesScreen extends StatefulWidget {
   final String elderId;
@@ -15,17 +15,16 @@ class NearbyServicesScreen extends StatefulWidget {
       _NearbyServicesScreenState();
 }
 
-class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
-  final NearbyServiceService _service = NearbyServiceService();
+class _NearbyServicesScreenState
+    extends State<NearbyServicesScreen> {
+  final NearbyServiceService _service =
+      NearbyServiceService();
 
-  // CareCircle palette
-  static const Color sage = Color(0xFF7FA68F);
-  static const Color darkSage = Color(0xFF46695A);
-  static const Color cream = Color(0xFFFFFBF4);
-  static const Color backgroundColor = Color(0xFFF4EFE5);
-  static const Color terracotta = Color(0xFFC85C50);
-  static const Color textDark = Color(0xFF26352F);
-  static const Color mutedText = Color(0xFF7A827D);
+  static const Color primaryGreen = Color(0xFF738F52);
+  static const Color darkGreen = Color(0xFF536B3A);
+  static const Color lightGreen = Color(0xFFE8EFDF);
+  static const Color backgroundColor = Color(0xFFF7F9F3);
+  static const Color textColor = Color(0xFF26301F);
 
   void _showServiceForm({NearbyService? service}) {
     final nameController =
@@ -41,101 +40,66 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 
     showDialog(
       context: context,
-      builder: (dialogContext) {
+      builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            return Dialog(
-              backgroundColor: cream,
-              insetPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 24,
-              ),
+            return AlertDialog(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
-                  24,
-                  24,
-                  24,
-                  20,
+              title: Text(
+                service == null
+                    ? 'Add Nearby Service'
+                    : 'Edit Nearby Service',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: darkGreen,
                 ),
+              ),
+              content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: sage.withValues(alpha: 0.18),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: const Icon(
-                            Icons.location_city_outlined,
-                            color: darkSage,
-                            size: 25,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Text(
-                            service == null
-                                ? 'Add nearby service'
-                                : 'Edit nearby service',
-                            style: const TextStyle(
-                              fontSize: 21,
-                              fontWeight: FontWeight.w800,
-                              color: textDark,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    _InputField(
+                    TextField(
                       controller: nameController,
-                      label: 'Service name',
-                      hint: 'e.g. City Hospital',
-                      icon: Icons.business_outlined,
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    DropdownButtonFormField<String>(
-                      initialValue: type,
                       decoration: InputDecoration(
-                        labelText: 'Service type',
+                        labelText: 'Name',
                         prefixIcon: const Icon(
-                          Icons.category_outlined,
-                          color: darkSage,
-                        ),
-                        filled: true,
-                        fillColor: backgroundColor,
-                        labelStyle: const TextStyle(
-                          color: mutedText,
+                          Icons.business_outlined,
+                          color: darkGreen,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: sage,
-                            width: 1.5,
+                            color: primaryGreen,
+                            width: 2,
                           ),
                         ),
                       ),
-                      dropdownColor: cream,
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: type,
+                      decoration: InputDecoration(
+                        labelText: 'Type',
+                        prefixIcon: const Icon(
+                          Icons.category_outlined,
+                          color: darkGreen,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: primaryGreen,
+                            width: 2,
+                          ),
+                        ),
+                      ),
                       items: const [
                         DropdownMenuItem(
                           value: 'Hospital',
@@ -155,124 +119,129 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                         ),
                       ],
                       onChanged: (value) {
-                        if (value == null) return;
-
                         setDialogState(() {
-                          type = value;
+                          type = value!;
                         });
                       },
                     ),
-
-                    const SizedBox(height: 14),
-
-                    _InputField(
+                    const SizedBox(height: 12),
+                    TextField(
                       controller: phoneController,
-                      label: 'Phone number',
-                      hint: 'Service contact number',
-                      icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: 'Phone',
+                        prefixIcon: const Icon(
+                          Icons.phone_outlined,
+                          color: darkGreen,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: primaryGreen,
+                            width: 2,
+                          ),
+                        ),
+                      ),
                     ),
-
-                    const SizedBox(height: 14),
-
-                    _InputField(
+                    const SizedBox(height: 12),
+                    TextField(
                       controller: addressController,
-                      label: 'Address',
-                      hint: 'Service location',
-                      icon: Icons.location_on_outlined,
                       maxLines: 2,
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              Navigator.pop(dialogContext);
-                            },
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: darkSage,
-                              side: BorderSide(
-                                color: sage.withValues(alpha: 0.45),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                            ),
-                            child: const Text(
-                              'Cancel',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                      decoration: InputDecoration(
+                        labelText: 'Address',
+                        prefixIcon: const Icon(
+                          Icons.location_on_outlined,
+                          color: darkGreen,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: primaryGreen,
+                            width: 2,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (nameController.text.trim().isEmpty) {
-                                return;
-                              }
-
-                              final newService = NearbyService(
-                                id: service?.id ??
-                                    DateTime.now()
-                                        .millisecondsSinceEpoch
-                                        .toString(),
-                                name: nameController.text.trim(),
-                                type: type,
-                                phone: phoneController.text.trim(),
-                                address: addressController.text.trim(),
-                                preferred:
-                                    service?.preferred ?? false,
-                              );
-
-                              if (service == null) {
-                                await _service.addService(
-                                  widget.elderId,
-                                  newService,
-                                );
-                              } else {
-                                await _service.updateService(
-                                  widget.elderId,
-                                  newService,
-                                );
-                              }
-
-                              if (!dialogContext.mounted) return;
-
-                              Navigator.pop(dialogContext);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: darkSage,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                            ),
-                            child: Text(
-                              service == null ? 'Add service' : 'Save changes',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
               ),
+              actionsPadding: const EdgeInsets.fromLTRB(
+                16,
+                0,
+                16,
+                16,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: darkGreen,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryGreen,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                  ),
+                  onPressed: () async {
+                    final newService = NearbyService(
+                      id: service?.id ??
+                          DateTime.now()
+                              .millisecondsSinceEpoch
+                              .toString(),
+                      name: nameController.text,
+                      type: type,
+                      phone: phoneController.text,
+                      address: addressController.text,
+                      preferred:
+                          service?.preferred ?? false,
+                    );
+
+                    final navigator =
+                        Navigator.of(context);
+
+                    if (service == null) {
+                      await _service.addService(
+                        widget.elderId,
+                        newService,
+                      );
+                    } else {
+                      await _service.updateService(
+                        widget.elderId,
+                        newService,
+                      );
+                    }
+
+                    if (!mounted) {
+                      return;
+                    }
+
+                    navigator.pop();
+                  },
+                  child: Text(
+                    service == null ? 'Add' : 'Update',
+                  ),
+                ),
+              ],
             );
           },
         );
@@ -296,136 +265,28 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
     return Icons.medical_services_outlined;
   }
 
-  Color _getServiceColor(String type) {
-    if (type == 'Hospital') {
-      return terracotta;
-    }
-
-    if (type == 'Restaurant') {
-      return sage;
-    }
-
-    if (type == 'Shop') {
-      return darkSage;
-    }
-
-    return sage;
-  }
-
-  String _getServiceDescription(String type) {
-    if (type == 'Hospital') {
-      return 'Medical care';
-    }
-
-    if (type == 'Care Centre') {
-      return 'Care & support';
-    }
-
-    if (type == 'Shop') {
-      return 'Nearby shopping';
-    }
-
-    return 'Food & dining';
-  }
-
-  Future<void> _deleteService(NearbyService service) async {
-    final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: cream,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          title: const Text(
-            'Remove service?',
-            style: TextStyle(
-              color: textDark,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          content: Text(
-            'Remove "${service.name}" from nearby services?',
-            style: const TextStyle(
-              color: mutedText,
-              height: 1.4,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, false);
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: darkSage,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, true);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: terracotta,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('Remove'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (shouldDelete != true) return;
-
-    await _service.deleteService(
-      widget.elderId,
-      service.id,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-
       appBar: AppBar(
-        backgroundColor: backgroundColor,
-        foregroundColor: textDark,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        titleSpacing: 20,
         title: const Text(
-          'Nearby services',
+          'Nearby Services',
           style: TextStyle(
-            fontSize: 23,
-            fontWeight: FontWeight.w800,
-            color: textDark,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      ),
-
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showServiceForm(),
-        backgroundColor: terracotta,
+        backgroundColor: primaryGreen,
         foregroundColor: Colors.white,
-        elevation: 4,
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Add service',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        elevation: 0,
       ),
-
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: primaryGreen,
+        foregroundColor: Colors.white,
+        elevation: 3,
+        onPressed: () => _showServiceForm(),
+        child: const Icon(Icons.add),
+      ),
       body: StreamBuilder<List<NearbyService>>(
         stream: _service.getServices(widget.elderId),
         builder: (context, snapshot) {
@@ -433,663 +294,307 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
               ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-                color: darkSage,
+                color: primaryGreen,
               ),
             );
           }
 
           if (snapshot.hasError) {
-            return const _ErrorState();
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 55,
+                      color: darkGreen,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Unable to load nearby services',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
 
           final services = snapshot.data ?? [];
 
           if (services.isEmpty) {
-            return const _EmptyServiceState();
-          }
-
-          final preferredCount =
-              services.where((service) => service.preferred).length;
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              8,
-              20,
-              110,
-            ),
-            children: [
-              _IntroCard(
-                serviceCount: services.length,
-                preferredCount: preferredCount,
-              ),
-
-              const SizedBox(height: 24),
-
-              const Text(
-                'Your nearby places',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: textDark,
-                ),
-              ),
-
-              const SizedBox(height: 5),
-
-              const Text(
-                'Important places saved for easy access.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: mutedText,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              ...services.map(
-                (service) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: _ServiceCard(
-                    service: service,
-                    icon: _getServiceIcon(service.type),
-                    accentColor: _getServiceColor(service.type),
-                    description:
-                        _getServiceDescription(service.type),
-                    onEdit: () {
-                      _showServiceForm(
-                        service: service,
-                      );
-                    },
-                    onDelete: () {
-                      _deleteService(service);
-                    },
-                    onPreferred: () async {
-                      await _service.togglePreferred(
-                        widget.elderId,
-                        service,
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _IntroCard extends StatelessWidget {
-  final int serviceCount;
-  final int preferredCount;
-
-  const _IntroCard({
-    required this.serviceCount,
-    required this.preferredCount,
-  });
-
-  static const Color darkSage = Color(0xFF46695A);
-  static const Color cream = Color(0xFFFFFBF4);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: darkSage,
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: cream.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.location_city_outlined,
-              color: cream,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Care close by',
-                  style: TextStyle(
-                    color: cream,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  '$serviceCount saved • $preferredCount preferred',
-                  style: TextStyle(
-                    color: cream.withValues(alpha: 0.72),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ServiceCard extends StatelessWidget {
-  final NearbyService service;
-  final IconData icon;
-  final Color accentColor;
-  final String description;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-  final VoidCallback onPreferred;
-
-  const _ServiceCard({
-    required this.service,
-    required this.icon,
-    required this.accentColor,
-    required this.description,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onPreferred,
-  });
-
-  static const Color cream = Color(0xFFFFFBF4);
-  static const Color textDark = Color(0xFF26352F);
-  static const Color mutedText = Color(0xFF7A827D);
-  static const Color darkSage = Color(0xFF46695A);
-  static const Color backgroundColor = Color(0xFFF4EFE5);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cream,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.055),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Icon(
-                  icon,
-                  color: accentColor,
-                  size: 29,
-                ),
-              ),
-
-              const SizedBox(width: 14),
-
-              Expanded(
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            service.name,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                              color: textDark,
-                            ),
-                          ),
-                        ),
-                        PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(
-                            Icons.more_horiz,
-                            color: darkSage,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              onEdit();
-                            }
-
-                            if (value == 'delete') {
-                              onDelete();
-                            }
-
-                            if (value == 'preferred') {
-                              onPreferred();
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.edit_outlined,
-                                    color: darkSage,
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text('Edit'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.delete_outline,
-                                    color: darkSage,
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text('Delete'),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'preferred',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    service.preferred
-                                        ? Icons.star_border
-                                        : Icons.star_outline,
-                                    color: darkSage,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    service.preferred
-                                        ? 'Remove Preferred'
-                                        : 'Make Preferred',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    Icon(
+                      Icons.location_city_outlined,
+                      size: 65,
+                      color: primaryGreen,
                     ),
-
-                    const SizedBox(height: 4),
-
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: backgroundColor,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            service.type,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: darkSage,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          description,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: mutedText,
-                          ),
-                        ),
-                      ],
+                    SizedBox(height: 16),
+                    Text(
+                      'No nearby services added',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            );
+          }
 
-          const SizedBox(height: 18),
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: services.length,
+            itemBuilder: (context, index) {
+              final service = services[index];
 
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(17),
-            ),
-            child: Column(
-              children: [
-                _ContactRow(
-                  icon: Icons.phone_outlined,
-                  text: service.phone.isEmpty
-                      ? 'No phone number added'
-                      : service.phone,
+              return Card(
+                margin: const EdgeInsets.only(bottom: 14),
+                elevation: 2,
+                shadowColor: Colors.black12,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(height: 10),
-                _ContactRow(
-                  icon: Icons.location_on_outlined,
-                  text: service.address.isEmpty
-                      ? 'No address added'
-                      : service.address,
-                ),
-              ],
-            ),
-          ),
-
-          if (service.preferred) ...[
-            const SizedBox(height: 13),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 11,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.13),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.star,
-                        size: 15,
-                        color: accentColor,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        'Preferred service',
-                        style: TextStyle(
-                          color: accentColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
+                      Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: lightGreen,
+                          borderRadius:
+                              BorderRadius.circular(15),
                         ),
+                        child: Icon(
+                          _getServiceIcon(service.type),
+                          size: 29,
+                          color: darkGreen,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    service.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight:
+                                          FontWeight.bold,
+                                      color: textColor,
+                                    ),
+                                  ),
+                                ),
+                                if (service.preferred)
+                                  Container(
+                                    padding:
+                                        const EdgeInsets
+                                            .symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: lightGreen,
+                                      borderRadius:
+                                          BorderRadius.circular(
+                                              20),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize:
+                                          MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          size: 14,
+                                          color: darkGreen,
+                                        ),
+                                        SizedBox(width: 3),
+                                        Text(
+                                          'Preferred',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight:
+                                                FontWeight.bold,
+                                            color: darkGreen,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              service.type,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: darkGreen,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.phone_outlined,
+                                  size: 16,
+                                  color: darkGreen,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    service.phone,
+                                    style:
+                                        const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.location_on_outlined,
+                                  size: 16,
+                                  color: darkGreen,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    service.address,
+                                    style:
+                                        const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black54,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton<String>(
+                        icon: const Icon(
+                          Icons.more_vert,
+                          color: darkGreen,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(12),
+                        ),
+                        onSelected: (value) async {
+                          if (value == 'edit') {
+                            _showServiceForm(
+                              service: service,
+                            );
+                          }
+
+                          if (value == 'delete') {
+                            await _service.deleteService(
+                              widget.elderId,
+                              service.id,
+                            );
+                          }
+
+                          if (value == 'preferred') {
+                            await _service.togglePreferred(
+                              widget.elderId,
+                              service,
+                            );
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.edit_outlined,
+                                  size: 20,
+                                  color: darkGreen,
+                                ),
+                                SizedBox(width: 10),
+                                Text('Edit'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete_outline,
+                                  size: 20,
+                                  color: darkGreen,
+                                ),
+                                SizedBox(width: 10),
+                                Text('Delete'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'preferred',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  service.preferred
+                                      ? Icons.star_border
+                                      : Icons.star,
+                                  size: 20,
+                                  color: darkGreen,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  service.preferred
+                                      ? 'Remove Preferred'
+                                      : 'Make Preferred',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ContactRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _ContactRow({
-    required this.icon,
-    required this.text,
-  });
-
-  static const Color darkSage = Color(0xFF46695A);
-  static const Color mutedText = Color(0xFF7A827D);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: darkSage,
-        ),
-        const SizedBox(width: 9),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 13,
-              color: mutedText,
-              height: 1.35,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InputField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final IconData icon;
-  final TextInputType? keyboardType;
-  final int maxLines;
-
-  const _InputField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    required this.icon,
-    this.keyboardType,
-    this.maxLines = 1,
-  });
-
-  static const Color backgroundColor = Color(0xFFF4EFE5);
-  static const Color darkSage = Color(0xFF46695A);
-  static const Color sage = Color(0xFF7FA68F);
-  static const Color mutedText = Color(0xFF7A827D);
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(
-          icon,
-          color: darkSage,
-        ),
-        filled: true,
-        fillColor: backgroundColor,
-        labelStyle: const TextStyle(
-          color: mutedText,
-        ),
-        hintStyle: const TextStyle(
-          color: mutedText,
-          fontSize: 13,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: sage,
-            width: 1.5,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyServiceState extends StatelessWidget {
-  const _EmptyServiceState();
-
-  static const Color cream = Color(0xFFFFFBF4);
-  static const Color sage = Color(0xFF7FA68F);
-  static const Color darkSage = Color(0xFF46695A);
-  static const Color textDark = Color(0xFF26352F);
-  static const Color mutedText = Color(0xFF7A827D);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Container(
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: cream,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 76,
-                height: 76,
-                decoration: BoxDecoration(
-                  color: sage.withValues(alpha: 0.16),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.location_city_outlined,
-                  size: 36,
-                  color: darkSage,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              const Text(
-                'No nearby services yet',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: textDark,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              const Text(
-                'Add hospitals, care centres, shops or restaurants that are useful for your elder.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: mutedText,
-                  height: 1.5,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Text(
-                'Tap “Add service” to get started.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: darkSage.withValues(alpha: 0.85),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState();
-
-  static const Color cream = Color(0xFFFFFBF4);
-  static const Color terracotta = Color(0xFFC85C50);
-  static const Color textDark = Color(0xFF26352F);
-  static const Color mutedText = Color(0xFF7A827D);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Container(
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: cream,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 68,
-                height: 68,
-                decoration: BoxDecoration(
-                  color: terracotta.withValues(alpha: 0.13),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.error_outline,
-                  size: 34,
-                  color: terracotta,
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              const Text(
-                'Unable to load services',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                  color: textDark,
-                ),
-              ),
-
-              const SizedBox(height: 7),
-
-              const Text(
-                'Please check your connection and try again.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: mutedText,
-                ),
-              ),
-            ],
-          ),
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }

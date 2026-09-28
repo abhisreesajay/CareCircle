@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: cloud_firestore
-      sha256: db785e4d0a995654781835b78a30b8bb203d967e123843bb918df0cdb6a7ec69
+      sha256: "098f59588473be708ac40e8418a3f7b343a8dba45b1c3fb820e39e94251db921"
       url: "https://pub.dev"
     source: hosted
-    version: "6.10.0"
+    version: "6.9.0"
   cloud_firestore_platform_interface:
     dependency: transitive
     description:
@@ -117,10 +117,10 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_core
-      sha256: "5fbbaa2aeb08a52feee559f92a62f5a6b04c9bdff81c8f608636771cf0d7b680"
+      sha256: "2343710d8a164e3157a5e2fbb00663503c669be4aa06185311df48626760fdf1"
       url: "https://pub.dev"
     source: hosted
-    version: "4.15.0"
+    version: "4.14.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -305,10 +305,10 @@ packages:
     dependency: transitive
     description:
       name: speech_to_text_platform_interface
-      sha256: "7e447356be3074c471223c9d179ef3f822475350b67ca923ec71ab3bf2ede214"
+      sha256: a7e16e02853853ed7534ac2bde9a1c4f39c8879970a7974ac6ff832d4bdaa4b0
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.0"
+    version: "2.4.0"
   speech_to_text_windows:
     dependency: transitive
     description:
