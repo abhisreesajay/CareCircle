@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment_model.dart';
-<<<<<<< HEAD
-import '../../services/appointment_service.dart';
-=======
 import '../../services/caregiver/appointment_service.dart';
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
 class AppointmentsScreen extends StatefulWidget {
   final String elderId;
@@ -21,37 +17,6 @@ class AppointmentsScreen extends StatefulWidget {
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
   final AppointmentService _appointmentService = AppointmentService();
 
-<<<<<<< HEAD
-  static const Color primaryGreen = Color(0xFF738F52);
-  static const Color darkGreen = Color(0xFF536B3A);
-  static const Color lightGreen = Color(0xFFE8EFDF);
-  static const Color backgroundColor = Color(0xFFF7F9F3);
-  static const Color textColor = Color(0xFF26301F);
-
-  void _showAppointmentDialog({Appointment? appointment}) {
-    final doctorController =
-        TextEditingController(text: appointment?.doctorName ?? '');
-    final hospitalController =
-        TextEditingController(text: appointment?.hospitalName ?? '');
-    final dateController =
-        TextEditingController(text: appointment?.date ?? '');
-    final timeController =
-        TextEditingController(text: appointment?.time ?? '');
-    final purposeController =
-        TextEditingController(text: appointment?.purpose ?? '');
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            appointment == null
-                ? 'Add Appointment'
-                : 'Edit Appointment',
-            style: const TextStyle(
-              color: darkGreen,
-              fontWeight: FontWeight.bold,
-=======
   static const Color cream = Color(0xFFF4EFE5);
   static const Color darkSage = Color(0xFF46695A);
   static const Color terracotta = Color(0xFFC85C50);
@@ -65,15 +30,19 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final doctorController = TextEditingController(
       text: appointment?.doctorName ?? '',
     );
+
     final hospitalController = TextEditingController(
       text: appointment?.hospitalName ?? '',
     );
+
     final dateController = TextEditingController(
       text: appointment?.date ?? '',
     );
+
     final timeController = TextEditingController(
       text: appointment?.time ?? '',
     );
+
     final purposeController = TextEditingController(
       text: appointment?.purpose ?? '',
     );
@@ -93,118 +62,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             style: const TextStyle(
               color: textDark,
               fontWeight: FontWeight.w800,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
             ),
           ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-<<<<<<< HEAD
-                TextField(
-                  controller: doctorController,
-                  decoration: InputDecoration(
-                    labelText: 'Doctor Name',
-                    prefixIcon: const Icon(
-                      Icons.person,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: hospitalController,
-                  decoration: InputDecoration(
-                    labelText: 'Hospital / Clinic',
-                    prefixIcon: const Icon(
-                      Icons.local_hospital,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: dateController,
-                  decoration: InputDecoration(
-                    labelText: 'Date',
-                    prefixIcon: const Icon(
-                      Icons.calendar_today,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: timeController,
-                  decoration: InputDecoration(
-                    labelText: 'Time',
-                    prefixIcon: const Icon(
-                      Icons.access_time,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: purposeController,
-                  decoration: InputDecoration(
-                    labelText: 'Purpose',
-                    prefixIcon: const Icon(
-                      Icons.description,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-=======
                 _DialogField(
                   controller: doctorController,
                   label: 'Doctor name',
@@ -237,23 +100,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   icon: Icons.notes_rounded,
                   maxLines: 2,
                   hint: 'e.g. Routine check-up',
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                 ),
               ],
             ),
           ),
-<<<<<<< HEAD
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: darkGreen,
-                ),
-=======
           actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           actions: [
             TextButton(
@@ -261,18 +111,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: mutedText),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
               ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-<<<<<<< HEAD
-                backgroundColor: primaryGreen,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () async {
-                if (doctorController.text.trim().isEmpty) {
-=======
                 backgroundColor: darkSage,
                 foregroundColor: Colors.white,
                 elevation: 0,
@@ -295,19 +137,14 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       content: Text('Please fill in all fields.'),
                     ),
                   );
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                   return;
                 }
 
                 final newAppointment = Appointment(
                   id: appointment?.id ??
-<<<<<<< HEAD
                       DateTime.now()
                           .millisecondsSinceEpoch
                           .toString(),
-=======
-                      DateTime.now().millisecondsSinceEpoch.toString(),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                   doctorName: doctorController.text.trim(),
                   hospitalName: hospitalController.text.trim(),
                   date: dateController.text.trim(),
@@ -315,26 +152,6 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   purpose: purposeController.text.trim(),
                 );
 
-<<<<<<< HEAD
-                if (appointment == null) {
-                  await _appointmentService.addAppointment(
-                    widget.elderId,
-                    newAppointment,
-                  );
-                } else {
-                  await _appointmentService.updateAppointment(
-                    widget.elderId,
-                    newAppointment,
-                  );
-                }
-
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: Text(
-                appointment == null ? 'Add' : 'Update',
-=======
                 try {
                   if (appointment == null) {
                     await _appointmentService.addAppointment(
@@ -349,9 +166,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   }
 
                   if (!dialogContext.mounted) return;
+
                   Navigator.pop(dialogContext);
 
                   if (!mounted) return;
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -373,22 +192,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               },
               child: Text(
                 appointment == null ? 'Add' : 'Save',
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
               ),
             ),
           ],
         );
       },
     );
-<<<<<<< HEAD
-  }
-
-  Future<void> _deleteAppointment(String appointmentId) async {
-    await _appointmentService.deleteAppointment(
-      widget.elderId,
-      appointmentId,
-    );
-=======
 
     doctorController.dispose();
     hospitalController.dispose();
@@ -451,14 +260,22 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                false,
+              ),
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: mutedText),
+                style: TextStyle(
+                  color: mutedText,
+                ),
               ),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                true,
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: terracotta,
                 foregroundColor: Colors.white,
@@ -474,36 +291,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     if (confirmed == true) {
       await _deleteAppointment(appointment);
     }
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          'Appointments',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: StreamBuilder<List<Appointment>>(
-        stream: _appointmentService.getAppointments(
-          widget.elderId,
-        ),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState ==
-              ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: primaryGreen,
-=======
       backgroundColor: cream,
       appBar: AppBar(
         backgroundColor: cream,
@@ -530,178 +322,38 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         ),
       ),
       body: StreamBuilder<List<Appointment>>(
-        stream: _appointmentService.getAppointments(widget.elderId),
+        stream: _appointmentService.getAppointments(
+          widget.elderId,
+        ),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
                 color: darkSage,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
               ),
             );
           }
 
           if (snapshot.hasError) {
-<<<<<<< HEAD
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 50,
-                      color: darkGreen,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Error: ${snapshot.error}',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-=======
-            return _ErrorState(
+            return const _ErrorState(
               message: 'Could not load appointments.',
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
             );
           }
 
           final appointments = snapshot.data ?? [];
 
           if (appointments.isEmpty) {
-<<<<<<< HEAD
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.calendar_month,
-                    size: 70,
-                    color: primaryGreen,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'No appointments added yet.',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                    ),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    'Tap + to add an appointment.',
-                    style: TextStyle(
-                      color: darkGreen,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: appointments.length,
-            itemBuilder: (context, index) {
-              final appointment = appointments[index];
-
-              return Card(
-                color: lightGreen,
-                elevation: 2,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  leading: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.calendar_month,
-                      size: 28,
-                      color: darkGreen,
-                    ),
-                  ),
-                  title: Text(
-                    appointment.doctorName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17,
-                      color: textColor,
-                    ),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      '${appointment.hospitalName}\n'
-                      '${appointment.date} • '
-                      '${appointment.time}\n'
-                      '${appointment.purpose}',
-                      style: const TextStyle(
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  isThreeLine: true,
-                  trailing: PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_vert,
-                      color: darkGreen,
-                    ),
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        _showAppointmentDialog(
-                          appointment: appointment,
-                        );
-                      } else if (value == 'delete') {
-                        _deleteAppointment(
-                          appointment.id,
-                        );
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              color: darkGreen,
-                            ),
-                            SizedBox(width: 10),
-                            Text('Edit'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete_outline,
-                              color: darkGreen,
-                            ),
-                            SizedBox(width: 10),
-                            Text('Delete'),
-                          ],
-=======
             return const _EmptyState();
           }
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+            padding: const EdgeInsets.fromLTRB(
+              20,
+              12,
+              20,
+              110,
+            ),
             children: [
               Container(
                 padding: const EdgeInsets.all(24),
@@ -715,7 +367,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       width: 54,
                       height: 54,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
+                        color: Colors.white.withValues(
+                          alpha: 0.14,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -727,7 +381,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
                         children: [
                           const Text(
                             'Upcoming care',
@@ -739,9 +394,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${appointments.length} appointment${appointments.length == 1 ? '' : 's'} scheduled',
+                            '${appointments.length} appointment'
+                            '${appointments.length == 1 ? '' : 's'} scheduled',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.72),
+                              color: Colors.white.withValues(
+                                alpha: 0.72,
+                              ),
                             ),
                           ),
                         ],
@@ -750,7 +408,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 24),
+
               const Text(
                 'Your appointments',
                 style: TextStyle(
@@ -759,16 +419,22 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
+
               const SizedBox(height: 14),
+
               ...appointments.map(
                 (appointment) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.only(
+                    bottom: 14,
+                  ),
                   child: _AppointmentCard(
                     appointment: appointment,
                     onEdit: () => _showAppointmentDialog(
                       appointment: appointment,
                     ),
-                    onDelete: () => _confirmDelete(appointment),
+                    onDelete: () => _confirmDelete(
+                      appointment,
+                    ),
                   ),
                 ),
               ),
@@ -779,6 +445,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     );
   }
 }
+
+// ------------------------------------------------------------
+// Appointment Card
+// ------------------------------------------------------------
 
 class _AppointmentCard extends StatelessWidget {
   final Appointment appointment;
@@ -827,10 +497,13 @@ class _AppointmentCard extends StatelessWidget {
                     color: darkSage,
                   ),
                 ),
+
                 const SizedBox(width: 14),
+
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
                       Text(
                         appointment.purpose,
@@ -847,27 +520,12 @@ class _AppointmentCard extends StatelessWidget {
                           color: mutedText,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                         ),
                       ),
                     ],
                   ),
                 ),
-<<<<<<< HEAD
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        onPressed: () {
-          _showAppointmentDialog();
-        },
-        child: const Icon(Icons.add),
-=======
+
                 PopupMenuButton<String>(
                   color: cardCream,
                   onSelected: (value) {
@@ -902,7 +560,9 @@ class _AppointmentCard extends StatelessWidget {
                 ),
               ],
             ),
+
             const SizedBox(height: 18),
+
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -917,7 +577,9 @@ class _AppointmentCard extends StatelessWidget {
                 ),
               ],
             ),
+
             const SizedBox(height: 14),
+
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
@@ -926,7 +588,8 @@ class _AppointmentCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   const Icon(
                     Icons.local_hospital_outlined,
@@ -952,6 +615,10 @@ class _AppointmentCard extends StatelessWidget {
     );
   }
 }
+
+// ------------------------------------------------------------
+// Info Pill
+// ------------------------------------------------------------
 
 class _InfoPill extends StatelessWidget {
   final IconData icon;
@@ -979,7 +646,6 @@ class _InfoPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(width: 1),
           Icon(
             icon,
             size: 16,
@@ -999,6 +665,10 @@ class _InfoPill extends StatelessWidget {
     );
   }
 }
+
+// ------------------------------------------------------------
+// Dialog Field
+// ------------------------------------------------------------
 
 class _DialogField extends StatelessWidget {
   final TextEditingController controller;
@@ -1054,6 +724,10 @@ class _DialogField extends StatelessWidget {
   }
 }
 
+// ------------------------------------------------------------
+// Empty State
+// ------------------------------------------------------------
+
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
@@ -1106,6 +780,10 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+// ------------------------------------------------------------
+// Error State
+// ------------------------------------------------------------
+
 class _ErrorState extends StatelessWidget {
   final String message;
 
@@ -1140,7 +818,6 @@ class _ErrorState extends StatelessWidget {
             ),
           ],
         ),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
       ),
     );
   }

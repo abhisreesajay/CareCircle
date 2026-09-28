@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import '../../services/elder_status_service.dart';
-=======
 import '../../services/caregiver/elder_status_service.dart';
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
 class ElderStatusScreen extends StatelessWidget {
   final String elderId;
@@ -13,13 +9,6 @@ class ElderStatusScreen extends StatelessWidget {
     required this.elderId,
   });
 
-<<<<<<< HEAD
-  static const Color primaryGreen = Color(0xFF738F52);
-  static const Color darkGreen = Color(0xFF536B3A);
-  static const Color lightGreen = Color(0xFFE8EFDF);
-  static const Color backgroundColor = Color(0xFFF7F9F3);
-  static const Color textColor = Color(0xFF26301F);
-=======
   static const Color backgroundColor = Color(0xFFF4EFE5);
   static const Color sage = Color(0xFF7FA68F);
   static const Color darkSage = Color(0xFF46695A);
@@ -27,7 +16,6 @@ class ElderStatusScreen extends StatelessWidget {
   static const Color cream = Color(0xFFFFFBF4);
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
   @override
   Widget build(BuildContext context) {
@@ -35,20 +23,6 @@ class ElderStatusScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-<<<<<<< HEAD
-      appBar: AppBar(
-        title: const Text(
-          'Elder Status',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-=======
-
       appBar: AppBar(
         backgroundColor: backgroundColor,
         foregroundColor: textDark,
@@ -64,87 +38,25 @@ class ElderStatusScreen extends StatelessWidget {
           ),
         ),
       ),
-
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
       body: StreamBuilder(
         stream: service.getStatus(elderId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-<<<<<<< HEAD
-                color: primaryGreen,
-=======
                 color: darkSage,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
               ),
             );
           }
 
           if (snapshot.hasError) {
-<<<<<<< HEAD
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 55,
-                      color: darkGreen,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Unable to load elder status',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-=======
             return const _ErrorState();
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
           }
 
           final document = snapshot.data;
 
           if (document == null || !document.exists) {
-<<<<<<< HEAD
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 65,
-                      color: primaryGreen,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Elder status not available',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-=======
             return const _UnavailableState();
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
           }
 
           final data = document.data() ?? {};
@@ -162,33 +74,6 @@ class ElderStatusScreen extends StatelessWidget {
               data['lastActivity'] ?? 'Not available';
 
           return SingleChildScrollView(
-<<<<<<< HEAD
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _statusCard(
-                  icon: Icons.check_circle_outline,
-                  title: 'Check-in',
-                  value: checkInStatus.toString(),
-                ),
-                const SizedBox(height: 14),
-                _statusCard(
-                  icon: Icons.home_outlined,
-                  title: 'Safe Zone',
-                  value: safeZoneStatus.toString(),
-                ),
-                const SizedBox(height: 14),
-                _statusCard(
-                  icon: Icons.medication_outlined,
-                  title: 'Medicine',
-                  value: medicineStatus.toString(),
-                ),
-                const SizedBox(height: 14),
-                _statusCard(
-                  icon: Icons.access_time,
-                  title: 'Last Activity',
-                  value: lastActivity.toString(),
-=======
             padding: const EdgeInsets.fromLTRB(
               20,
               8,
@@ -258,7 +143,6 @@ class ElderStatusScreen extends StatelessWidget {
                   title: 'Last activity',
                   value: lastActivity.toString(),
                   accentColor: darkSage,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                 ),
               ],
             ),
@@ -267,67 +151,6 @@ class ElderStatusScreen extends StatelessWidget {
       ),
     );
   }
-<<<<<<< HEAD
-
-  Widget _statusCard({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black12,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: lightGreen,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Icon(
-                icon,
-                size: 30,
-                color: darkGreen,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: darkGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: textColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-=======
 }
 
 class _OverviewCard extends StatelessWidget {
@@ -368,9 +191,7 @@ class _OverviewCard extends StatelessWidget {
                   size: 29,
                 ),
               ),
-
               const SizedBox(width: 15),
-
               const Expanded(
                 child: Text(
                   'How are things?',
@@ -692,7 +513,6 @@ class _ErrorState extends StatelessWidget {
               ),
             ],
           ),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
         ),
       ),
     );

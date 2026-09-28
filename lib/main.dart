@@ -1,16 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-<<<<<<< HEAD
-
-import 'firebase_options.dart';
-import 'screens/auth/login_screen.dart';import 'screens/caregiver/caregiver_dashboard.dart';
-
-import 'screens/elder/elder_home.dart';
-
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-=======
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -43,7 +31,6 @@ Future<void> main() async {
     firebaseMessagingBackgroundHandler,
   );
 
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   runApp(const CareCircleApp());
 }
 
@@ -116,8 +103,7 @@ class RoleRouter extends StatefulWidget {
 }
 
 class _RoleRouterState extends State<RoleRouter> {
-  final MessagingService _messagingService =
-      MessagingService();
+  final MessagingService _messagingService = MessagingService();
 
   @override
   void initState() {
@@ -148,15 +134,13 @@ class _RoleRouterState extends State<RoleRouter> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<
-        DocumentSnapshot<Map<String, dynamic>>>(
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('users')
           .doc(widget.uid)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState ==
-            ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
@@ -164,17 +148,6 @@ class _RoleRouterState extends State<RoleRouter> {
           );
         }
 
-<<<<<<< HEAD
-        if (snapshot.hasData && snapshot.data!.exists) {
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-          final role = data['role'] ?? 'elder';
-
-          if (role == 'caregiver') {
-            return const CaregiverDashboard(elderId: 'temporary_test_id');
-          } else {
-            return const ElderHome();
-          }
-=======
         if (snapshot.hasError) {
           return Scaffold(
             body: Center(
@@ -188,11 +161,9 @@ class _RoleRouterState extends State<RoleRouter> {
               ),
             ),
           );
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
         }
 
-        if (!snapshot.hasData ||
-            !snapshot.data!.exists) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
           return const Scaffold(
             body: Center(
               child: Padding(
@@ -207,30 +178,26 @@ class _RoleRouterState extends State<RoleRouter> {
         }
 
         final data =
-            snapshot.data!.data() ??
-                <String, dynamic>{};
+            snapshot.data!.data() ?? <String, dynamic>{};
 
-        final role =
-            data['role']?.toString().toLowerCase();
+        final role = data['role']?.toString().toLowerCase();
 
         // -----------------------------
         // CAREGIVER
         // -----------------------------
 
         if (role == 'caregiver') {
-          final linkedElders =
-              data['linkedElders'] is List
-                  ? List<dynamic>.from(
-                      data['linkedElders'] as List,
-                    )
-                  : <dynamic>[];
+          final linkedElders = data['linkedElders'] is List
+              ? List<dynamic>.from(
+                  data['linkedElders'] as List,
+                )
+              : <dynamic>[];
 
           if (linkedElders.isEmpty) {
             return const CaregiverConnectElderScreen();
           }
 
-          final elderId =
-              linkedElders.first.toString().trim();
+          final elderId = linkedElders.first.toString().trim();
 
           if (elderId.isEmpty) {
             return const CaregiverConnectElderScreen();
@@ -248,6 +215,10 @@ class _RoleRouterState extends State<RoleRouter> {
         if (role == 'elder') {
           return const ElderHome();
         }
+
+        // -----------------------------
+        // UNKNOWN ROLE
+        // -----------------------------
 
         return Scaffold(
           body: Center(

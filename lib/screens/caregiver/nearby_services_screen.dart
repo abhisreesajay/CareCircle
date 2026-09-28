@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../models/nearby_service_model.dart';
-<<<<<<< HEAD
-import '../../services/nearby_service_service.dart';
-=======
 import '../../services/caregiver/nearby_service_service.dart';
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
 class NearbyServicesScreen extends StatefulWidget {
   final String elderId;
@@ -19,22 +16,13 @@ class NearbyServicesScreen extends StatefulWidget {
       _NearbyServicesScreenState();
 }
 
-<<<<<<< HEAD
-class _NearbyServicesScreenState
-    extends State<NearbyServicesScreen> {
-  final NearbyServiceService _service =
-      NearbyServiceService();
-
-  static const Color primaryGreen = Color(0xFF738F52);
-  static const Color darkGreen = Color(0xFF536B3A);
-  static const Color lightGreen = Color(0xFFE8EFDF);
-  static const Color backgroundColor = Color(0xFFF7F9F3);
-  static const Color textColor = Color(0xFF26301F);
-=======
 class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
   final NearbyServiceService _service = NearbyServiceService();
 
-  // CareCircle palette
+  // -----------------------------------------------------------------------
+  // CARECIRCLE PALETTE
+  // -----------------------------------------------------------------------
+
   static const Color sage = Color(0xFF7FA68F);
   static const Color darkSage = Color(0xFF46695A);
   static const Color cream = Color(0xFFFFFBF4);
@@ -42,7 +30,10 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
   static const Color terracotta = Color(0xFFC85C50);
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+
+  // -----------------------------------------------------------------------
+  // ADD / EDIT SERVICE
+  // -----------------------------------------------------------------------
 
   void _showServiceForm({NearbyService? service}) {
     final nameController =
@@ -58,68 +49,6 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 
     showDialog(
       context: context,
-<<<<<<< HEAD
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              title: Text(
-                service == null
-                    ? 'Add Nearby Service'
-                    : 'Edit Nearby Service',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: darkGreen,
-                ),
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        prefixIcon: const Icon(
-                          Icons.business_outlined,
-                          color: darkGreen,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: primaryGreen,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      initialValue: type,
-                      decoration: InputDecoration(
-                        labelText: 'Type',
-                        prefixIcon: const Icon(
-                          Icons.category_outlined,
-                          color: darkGreen,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: primaryGreen,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-=======
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
@@ -215,7 +144,6 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                         ),
                       ),
                       dropdownColor: cream,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                       items: const [
                         DropdownMenuItem(
                           value: 'Hospital',
@@ -235,56 +163,6 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                         ),
                       ],
                       onChanged: (value) {
-<<<<<<< HEAD
-                        setDialogState(() {
-                          type = value!;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Phone',
-                        prefixIcon: const Icon(
-                          Icons.phone_outlined,
-                          color: darkGreen,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: primaryGreen,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: addressController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        labelText: 'Address',
-                        prefixIcon: const Icon(
-                          Icons.location_on_outlined,
-                          color: darkGreen,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: primaryGreen,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-=======
                         if (value == null) return;
 
                         setDialogState(() {
@@ -342,7 +220,9 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                             ),
                           ),
                         ),
+
                         const SizedBox(width: 12),
+
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () async {
@@ -391,7 +271,9 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                               ),
                             ),
                             child: Text(
-                              service == null ? 'Add service' : 'Save changes',
+                              service == null
+                                  ? 'Add service'
+                                  : 'Save changes',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -399,91 +281,20 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                           ),
                         ),
                       ],
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                     ),
                   ],
                 ),
               ),
-<<<<<<< HEAD
-              actionsPadding: const EdgeInsets.fromLTRB(
-                16,
-                0,
-                16,
-                16,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: darkGreen,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                  ),
-                  onPressed: () async {
-                    final newService = NearbyService(
-                      id: service?.id ??
-                          DateTime.now()
-                              .millisecondsSinceEpoch
-                              .toString(),
-                      name: nameController.text,
-                      type: type,
-                      phone: phoneController.text,
-                      address: addressController.text,
-                      preferred:
-                          service?.preferred ?? false,
-                    );
-
-                    final navigator =
-                        Navigator.of(context);
-
-                    if (service == null) {
-                      await _service.addService(
-                        widget.elderId,
-                        newService,
-                      );
-                    } else {
-                      await _service.updateService(
-                        widget.elderId,
-                        newService,
-                      );
-                    }
-
-                    if (!mounted) {
-                      return;
-                    }
-
-                    navigator.pop();
-                  },
-                  child: Text(
-                    service == null ? 'Add' : 'Update',
-                  ),
-                ),
-              ],
-=======
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
             );
           },
         );
       },
     );
   }
+
+  // -----------------------------------------------------------------------
+  // SERVICE ICON
+  // -----------------------------------------------------------------------
 
   IconData _getServiceIcon(String type) {
     if (type == 'Hospital') {
@@ -501,8 +312,10 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
     return Icons.medical_services_outlined;
   }
 
-<<<<<<< HEAD
-=======
+  // -----------------------------------------------------------------------
+  // SERVICE COLOR
+  // -----------------------------------------------------------------------
+
   Color _getServiceColor(String type) {
     if (type == 'Hospital') {
       return terracotta;
@@ -519,6 +332,10 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
     return sage;
   }
 
+  // -----------------------------------------------------------------------
+  // SERVICE DESCRIPTION
+  // -----------------------------------------------------------------------
+
   String _getServiceDescription(String type) {
     if (type == 'Hospital') {
       return 'Medical care';
@@ -534,6 +351,10 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 
     return 'Food & dining';
   }
+
+  // -----------------------------------------------------------------------
+  // DELETE SERVICE
+  // -----------------------------------------------------------------------
 
   Future<void> _deleteService(NearbyService service) async {
     final shouldDelete = await showDialog<bool>(
@@ -598,31 +419,14 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
     );
   }
 
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+  // -----------------------------------------------------------------------
+  // BUILD
+  // -----------------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-<<<<<<< HEAD
-      appBar: AppBar(
-        title: const Text(
-          'Nearby Services',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 3,
-        onPressed: () => _showServiceForm(),
-        child: const Icon(Icons.add),
-      ),
-=======
 
       appBar: AppBar(
         backgroundColor: backgroundColor,
@@ -654,323 +458,24 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
         ),
       ),
 
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
       body: StreamBuilder<List<NearbyService>>(
         stream: _service.getServices(widget.elderId),
         builder: (context, snapshot) {
-          if (snapshot.connectionState ==
-              ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-<<<<<<< HEAD
-                color: primaryGreen,
-=======
                 color: darkSage,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
               ),
             );
           }
 
           if (snapshot.hasError) {
-<<<<<<< HEAD
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 55,
-                      color: darkGreen,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Unable to load nearby services',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-=======
             return const _ErrorState();
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
           }
 
           final services = snapshot.data ?? [];
 
           if (services.isEmpty) {
-<<<<<<< HEAD
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.location_city_outlined,
-                      size: 65,
-                      color: primaryGreen,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'No nearby services added',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: services.length,
-            itemBuilder: (context, index) {
-              final service = services[index];
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 14),
-                elevation: 2,
-                shadowColor: Colors.black12,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 54,
-                        height: 54,
-                        decoration: BoxDecoration(
-                          color: lightGreen,
-                          borderRadius:
-                              BorderRadius.circular(15),
-                        ),
-                        child: Icon(
-                          _getServiceIcon(service.type),
-                          size: 29,
-                          color: darkGreen,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    service.name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight:
-                                          FontWeight.bold,
-                                      color: textColor,
-                                    ),
-                                  ),
-                                ),
-                                if (service.preferred)
-                                  Container(
-                                    padding:
-                                        const EdgeInsets
-                                            .symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: lightGreen,
-                                      borderRadius:
-                                          BorderRadius.circular(
-                                              20),
-                                    ),
-                                    child: const Row(
-                                      mainAxisSize:
-                                          MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          size: 14,
-                                          color: darkGreen,
-                                        ),
-                                        SizedBox(width: 3),
-                                        Text(
-                                          'Preferred',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight:
-                                                FontWeight.bold,
-                                            color: darkGreen,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              service.type,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: darkGreen,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.phone_outlined,
-                                  size: 16,
-                                  color: darkGreen,
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    service.phone,
-                                    style:
-                                        const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            Row(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.location_on_outlined,
-                                  size: 16,
-                                  color: darkGreen,
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    service.address,
-                                    style:
-                                        const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      PopupMenuButton<String>(
-                        icon: const Icon(
-                          Icons.more_vert,
-                          color: darkGreen,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(12),
-                        ),
-                        onSelected: (value) async {
-                          if (value == 'edit') {
-                            _showServiceForm(
-                              service: service,
-                            );
-                          }
-
-                          if (value == 'delete') {
-                            await _service.deleteService(
-                              widget.elderId,
-                              service.id,
-                            );
-                          }
-
-                          if (value == 'preferred') {
-                            await _service.togglePreferred(
-                              widget.elderId,
-                              service,
-                            );
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.edit_outlined,
-                                  size: 20,
-                                  color: darkGreen,
-                                ),
-                                SizedBox(width: 10),
-                                Text('Edit'),
-                              ],
-                            ),
-                          ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.delete_outline,
-                                  size: 20,
-                                  color: darkGreen,
-                                ),
-                                SizedBox(width: 10),
-                                Text('Delete'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'preferred',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  service.preferred
-                                      ? Icons.star_border
-                                      : Icons.star,
-                                  size: 20,
-                                  color: darkGreen,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  service.preferred
-                                      ? 'Remove Preferred'
-                                      : 'Make Preferred',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-=======
             return const _EmptyServiceState();
           }
 
@@ -1040,15 +545,16 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                 ),
               ),
             ],
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
           );
         },
       ),
     );
   }
-<<<<<<< HEAD
-=======
 }
+
+// =======================================================================
+// INTRO CARD
+// =======================================================================
 
 class _IntroCard extends StatelessWidget {
   final int serviceCount;
@@ -1085,7 +591,9 @@ class _IntroCard extends StatelessWidget {
               size: 28,
             ),
           ),
+
           const SizedBox(width: 16),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1114,6 +622,10 @@ class _IntroCard extends StatelessWidget {
     );
   }
 }
+
+// =======================================================================
+// SERVICE CARD
+// =======================================================================
 
 class _ServiceCard extends StatelessWidget {
   final NearbyService service;
@@ -1193,6 +705,7 @@ class _ServiceCard extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
                           icon: const Icon(
@@ -1230,6 +743,7 @@ class _ServiceCard extends StatelessWidget {
                                 ],
                               ),
                             ),
+
                             const PopupMenuItem(
                               value: 'delete',
                               child: Row(
@@ -1244,6 +758,7 @@ class _ServiceCard extends StatelessWidget {
                                 ],
                               ),
                             ),
+
                             PopupMenuItem(
                               value: 'preferred',
                               child: Row(
@@ -1291,12 +806,16 @@ class _ServiceCard extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         const SizedBox(width: 8),
-                        Text(
-                          description,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: mutedText,
+
+                        Expanded(
+                          child: Text(
+                            description,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: mutedText,
+                            ),
                           ),
                         ),
                       ],
@@ -1323,7 +842,9 @@ class _ServiceCard extends StatelessWidget {
                       ? 'No phone number added'
                       : service.phone,
                 ),
+
                 const SizedBox(height: 10),
+
                 _ContactRow(
                   icon: Icons.location_on_outlined,
                   text: service.address.isEmpty
@@ -1336,6 +857,7 @@ class _ServiceCard extends StatelessWidget {
 
           if (service.preferred) ...[
             const SizedBox(height: 13),
+
             Row(
               children: [
                 Container(
@@ -1376,6 +898,10 @@ class _ServiceCard extends StatelessWidget {
   }
 }
 
+// =======================================================================
+// CONTACT ROW
+// =======================================================================
+
 class _ContactRow extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -1398,7 +924,9 @@ class _ContactRow extends StatelessWidget {
           size: 18,
           color: darkSage,
         ),
+
         const SizedBox(width: 9),
+
         Expanded(
           child: Text(
             text,
@@ -1413,6 +941,10 @@ class _ContactRow extends StatelessWidget {
     );
   }
 }
+
+// =======================================================================
+// INPUT FIELD
+// =======================================================================
 
 class _InputField extends StatelessWidget {
   final TextEditingController controller;
@@ -1477,6 +1009,10 @@ class _InputField extends StatelessWidget {
     );
   }
 }
+
+// =======================================================================
+// EMPTY STATE
+// =======================================================================
 
 class _EmptyServiceState extends StatelessWidget {
   const _EmptyServiceState();
@@ -1558,6 +1094,10 @@ class _EmptyServiceState extends StatelessWidget {
   }
 }
 
+// =======================================================================
+// ERROR STATE
+// =======================================================================
+
 class _ErrorState extends StatelessWidget {
   const _ErrorState();
 
@@ -1622,5 +1162,4 @@ class _ErrorState extends StatelessWidget {
       ),
     );
   }
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 }

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../models/activity_history_model.dart';
-<<<<<<< HEAD
-import '../../services/activity_history_service.dart';
-=======
 import '../../services/caregiver/activity_history_service.dart';
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
 class ActivityHistoryScreen extends StatelessWidget {
   final String elderId;
@@ -14,13 +11,6 @@ class ActivityHistoryScreen extends StatelessWidget {
     required this.elderId,
   });
 
-<<<<<<< HEAD
-  static const Color primaryGreen = Color(0xFF738F52);
-  static const Color darkGreen = Color(0xFF536B3A);
-  static const Color lightGreen = Color(0xFFE8EFDF);
-  static const Color backgroundColor = Color(0xFFF7F9F3);
-  static const Color textColor = Color(0xFF26301F);
-=======
   // CareCircle palette
   static const Color sage = Color(0xFF7FA68F);
   static const Color darkSage = Color(0xFF46695A);
@@ -29,29 +19,13 @@ class ActivityHistoryScreen extends StatelessWidget {
   static const Color terracotta = Color(0xFFC85C50);
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
   @override
   Widget build(BuildContext context) {
     final service = ActivityHistoryService();
 
     return Scaffold(
-<<<<<<< HEAD
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          'Activity History',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-=======
       backgroundColor: background,
-
       appBar: AppBar(
         backgroundColor: background,
         foregroundColor: textDark,
@@ -66,86 +40,31 @@ class ActivityHistoryScreen extends StatelessWidget {
           ),
         ),
       ),
-
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
       body: StreamBuilder<List<ActivityHistory>>(
         stream: service.getActivityHistory(elderId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-<<<<<<< HEAD
-                color: primaryGreen,
-=======
                 color: darkSage,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
               ),
             );
           }
 
           if (snapshot.hasError) {
-<<<<<<< HEAD
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 55,
-                      color: darkGreen,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Unable to load activity history',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-=======
             return const _ErrorState();
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
           }
 
           final activities = snapshot.data ?? [];
 
           if (activities.isEmpty) {
-<<<<<<< HEAD
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.history,
-                      size: 65,
-                      color: primaryGreen,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'No activity history available',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: textColor,
-=======
             return const _EmptyActivityState();
           }
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
             children: [
-              // Header / summary card
+              // Summary card
               Container(
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
@@ -190,107 +109,11 @@ class ActivityHistoryScreen extends StatelessWidget {
                             ),
                           ),
                         ],
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                       ),
                     ),
                   ],
                 ),
               ),
-<<<<<<< HEAD
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: activities.length,
-            itemBuilder: (context, index) {
-              final activity = activities[index];
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 14),
-                elevation: 2,
-                shadowColor: Colors.black12,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: lightGreen,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.history,
-                          size: 28,
-                          color: darkGreen,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              activity.activity,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.calendar_today_outlined,
-                                  size: 15,
-                                  color: darkGreen,
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    activity.date,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                const Icon(
-                                  Icons.access_time,
-                                  size: 15,
-                                  color: darkGreen,
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  activity.time,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-=======
 
               const SizedBox(height: 24),
 
@@ -311,14 +134,11 @@ class ActivityHistoryScreen extends StatelessWidget {
                 ),
               ),
             ],
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
           );
         },
       ),
     );
   }
-<<<<<<< HEAD
-=======
 }
 
 // ------------------------------------------------------------
@@ -402,9 +222,7 @@ class _ActivityCard extends StatelessWidget {
                         color: darkSage,
                       ),
                     ),
-
                     const SizedBox(width: 9),
-
                     Expanded(
                       child: Text(
                         activity.date,
@@ -436,9 +254,7 @@ class _ActivityCard extends StatelessWidget {
                         color: darkSage,
                       ),
                     ),
-
                     const SizedBox(width: 9),
-
                     Text(
                       activity.time,
                       style: const TextStyle(
@@ -581,5 +397,4 @@ class _ErrorState extends StatelessWidget {
       ),
     );
   }
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 }

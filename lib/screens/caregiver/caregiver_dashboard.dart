@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 import 'package:flutter/material.dart';
 
 import 'medicines_screen.dart';
@@ -15,14 +12,12 @@ import 'check_in_history_screen.dart';
 import 'activity_history_screen.dart';
 import 'medical_summary_screen.dart';
 import 'alerts_screen.dart';
-<<<<<<< HEAD
-
-class CaregiverDashboard extends StatelessWidget {
-=======
+import 'hospital_documents_screen.dart';
 import '../safe_zone_screen.dart';
+import '../../services/auth_service.dart';
+import '../auth/login_screen.dart';
 
 class CaregiverDashboard extends StatefulWidget {
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   final String elderId;
 
   const CaregiverDashboard({
@@ -30,373 +25,6 @@ class CaregiverDashboard extends StatefulWidget {
     required this.elderId,
   });
 
-<<<<<<< HEAD
-  static const Color primaryGreen = Color(0xFF738F52);
-  static const Color darkGreen = Color(0xFF536B3A);
-  static const Color lightGreen = Color(0xFFE8EFDF);
-  static const Color backgroundColor = Color(0xFFF7F9F3);
-  static const Color textColor = Color(0xFF26301F);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          'Caregiver Dashboard',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          int crossAxisCount;
-
-          if (constraints.maxWidth >= 1100) {
-            crossAxisCount = 3;
-          } else if (constraints.maxWidth >= 650) {
-            crossAxisCount = 2;
-          } else {
-            crossAxisCount = 1;
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _welcomeCard(),
-                const SizedBox(height: 28),
-
-                const Text(
-                  'Care Management',
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                GridView.count(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio:
-                      crossAxisCount == 3 ? 2.0 : 1.7,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _dashboardCard(
-                      context,
-                      title: 'Medicines',
-                      description: 'Manage medicines',
-                      icon: Icons.medication_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MedicinesScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _dashboardCard(
-                      context,
-                      title: 'Appointments',
-                      description: 'Manage appointments',
-                      icon: Icons.calendar_month_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AppointmentsScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _dashboardCard(
-                      context,
-                      title: 'Emergency Contacts',
-                      description: 'Manage contacts',
-                      icon: Icons.contact_phone_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                EmergencyContactsScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _dashboardCard(
-                      context,
-                      title: 'Nearby Services',
-                      description: 'Hospitals, shops & more',
-                      icon: Icons.location_on_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                NearbyServicesScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    _dashboardCard(
-                      context,
-                      title: 'Medical Summary',
-                      description: 'View medical information',
-                      icon: Icons.medical_information_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                MedicalSummaryScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                const Text(
-                  'Monitoring & History',
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                GridView.count(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio:
-                      crossAxisCount == 3 ? 2.0 : 1.7,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _dashboardCard(
-                      context,
-                      title: 'Elder Status',
-                      description: 'View current status',
-                      icon: Icons.person_outline,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ElderStatusScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _dashboardCard(
-                      context,
-                      title: 'Check-in History',
-                      description: 'View check-in records',
-                      icon: Icons.check_circle_outline,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CheckInHistoryScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _dashboardCard(
-                      context,
-                      title: 'Activity History',
-                      description: 'View elder activities',
-                      icon: Icons.history,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ActivityHistoryScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _dashboardCard(
-                      context,
-                      title: 'Alerts',
-                      description: 'View important alerts',
-                      icon: Icons.notifications_outlined,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AlertsScreen(
-                              elderId: elderId,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _welcomeCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: primaryGreen,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.favorite_outline,
-              color: Colors.white,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 18),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Caregiver Dashboard',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  'Manage and monitor your elder’s care in one place.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _dashboardCard(
-    BuildContext context, {
-    required String title,
-    required String description,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: lightGreen,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: darkGreen,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
-=======
   @override
   State<CaregiverDashboard> createState() =>
       _CaregiverDashboardState();
@@ -406,10 +34,51 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
       _sosSubscription;
 
+  // =====================================================================
+  // COLOUR PALETTE
+  // =====================================================================
+
+  static const background = Color(0xFFFFF9F1);
+  static const cream = Color(0xFFFFFCF7);
+  static const darkText = Color(0xFF173B36);
+  static const mutedText = Color(0xFF60736E);
+
+  static const green = Color(0xFF39A982);
+  static const greenDark = Color(0xFF21866A);
+  static const mint = Color(0xFFDDF4E8);
+
+  static const orange = Color(0xFFFFA62B);
+  static const orangeLight = Color(0xFFFFE1B5);
+
+  static const blue = Color(0xFF4C9FEF);
+  static const blueLight = Color(0xFFD7EAFF);
+
+  static const coral = Color(0xFFF06464);
+  static const coralLight = Color(0xFFFFD1D1);
+
+  static const purple = Color(0xFF8172D6);
+  static const purpleLight = Color(0xFFE5DEFF);
+
+  static const yellow = Color(0xFFFFC857);
+  static const yellowLight = Color(0xFFFFE8B5);
+
+  static const teal = Color(0xFF28A9A0);
+  static const tealLight = Color(0xFFD2F2EF);
+
+  // =====================================================================
+  // LIFECYCLE
+  // =====================================================================
+
   @override
   void initState() {
     super.initState();
     _startSosListener();
+  }
+
+  @override
+  void dispose() {
+    _sosSubscription?.cancel();
+    super.dispose();
   }
 
   // =====================================================================
@@ -428,13 +97,18 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
           isEqualTo: 'ACTIVE',
         )
         .snapshots()
-        .listen((snapshot) {
-      for (final change in snapshot.docChanges) {
-        if (change.type == DocumentChangeType.added) {
-          _showSosDialog(change.doc);
+        .listen(
+      (snapshot) {
+        for (final change in snapshot.docChanges) {
+          if (change.type == DocumentChangeType.added) {
+            _showSosDialog(change.doc);
+          }
         }
-      }
-    });
+      },
+      onError: (error) {
+        debugPrint('SOS listener error: $error');
+      },
+    );
   }
 
   // =====================================================================
@@ -453,14 +127,15 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
       barrierDismissible: false,
       builder: (dialogContext) {
         return AlertDialog(
+          backgroundColor: cream,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(26),
           ),
           title: const Row(
             children: [
               Icon(
                 Icons.warning_rounded,
-                color: Color(0xFFC85C50),
+                color: coral,
                 size: 30,
               ),
               SizedBox(width: 10),
@@ -469,7 +144,7 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                   'SOS Alert',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF26352F),
+                    color: darkText,
                   ),
                 ),
               ),
@@ -484,31 +159,27 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF26352F),
+                  color: darkText,
                 ),
               ),
-
               const SizedBox(height: 18),
-
               if (data['timestamp'] != null)
                 _SosDetailRow(
                   icon: Icons.access_time_rounded,
                   label: 'Time',
-                  value: data['timestamp'].toString(),
+                  value: _formatValue(data['timestamp']),
                 ),
-
               if (data['latitude'] != null)
                 _SosDetailRow(
                   icon: Icons.location_on_rounded,
                   label: 'Latitude',
-                  value: data['latitude'].toString(),
+                  value: _formatValue(data['latitude']),
                 ),
-
               if (data['longitude'] != null)
                 _SosDetailRow(
                   icon: Icons.location_on_rounded,
                   label: 'Longitude',
-                  value: data['longitude'].toString(),
+                  value: _formatValue(data['longitude']),
                 ),
             ],
           ),
@@ -520,8 +191,8 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
               child: const Text(
                 'OK',
                 style: TextStyle(
-                  color: Color(0xFF46695A),
-                  fontWeight: FontWeight.w700,
+                  color: greenDark,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
@@ -531,18 +202,104 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
     );
   }
 
-  // =====================================================================
-  // DISPOSE
-  // =====================================================================
+  String _formatValue(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate().toString();
+    }
 
-  @override
-  void dispose() {
-    _sosSubscription?.cancel();
-    super.dispose();
+    return value.toString();
   }
 
   // =====================================================================
-  // OPEN PAGE
+  // LOGOUT
+  // =====================================================================
+
+  Future<void> _logout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: cream,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
+          ),
+          title: const Row(
+            children: [
+              Icon(
+                Icons.logout_rounded,
+                color: coral,
+                size: 27,
+              ),
+              SizedBox(width: 10),
+              Text(
+                'Logout',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: darkText,
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(
+              fontSize: 16,
+              color: mutedText,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: mutedText,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: coral,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text(
+                'Logout',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLogout != true || !mounted) return;
+
+    await AuthService().signOut();
+
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
+      (route) => false,
+    );
+  }
+
+  // =====================================================================
+  // NAVIGATION
   // =====================================================================
 
   void _openPage(
@@ -563,124 +320,182 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    const background = Color(0xFFF4EFE5);
-    const sage = Color(0xFF7FA68F);
-    const darkSage = Color(0xFF46695A);
-    const terracotta = Color(0xFFC85C50);
-    const cream = Color(0xFFFFFBF4);
-    const textDark = Color(0xFF26352F);
-
     return Scaffold(
       backgroundColor: background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
-            22,
+            20,
             18,
-            22,
-            30,
+            20,
+            32,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               // ===========================================================
               // HEADER
               // ===========================================================
 
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Good morning',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: textDark.withValues(alpha: .60),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: yellowLight,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.wb_sunny_rounded,
+                                color: orange,
+                                size: 18,
+                              ),
+                            ),
+                            const SizedBox(width: 9),
+                            const Text(
+                              'Good morning',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: mutedText,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-
-                      const SizedBox(height: 3),
-
-                      const Text(
-                        'Care Circle',
-                        style: TextStyle(
-                          fontSize: 31,
-                          fontWeight: FontWeight.w800,
-                          color: textDark,
-                          letterSpacing: -1,
+                        const SizedBox(height: 5),
+                        const Text(
+                          'Care Circle',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            color: darkText,
+                            letterSpacing: -1.2,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Better care. Brighter days.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: mutedText,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
 
-                  Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      color: terracotta,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(
-                      Icons.favorite_rounded,
-                      color: Colors.white,
-                      size: 25,
+                  // Logout button
+                  GestureDetector(
+                    onTap: _logout,
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            coral,
+                            Color(0xFFFF7770),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(17),
+                        boxShadow: [
+                          BoxShadow(
+                            color: coral.withValues(alpha: .22),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.logout_rounded,
+                        color: Colors.white,
+                        size: 23,
+                      ),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 24),
 
               // ===========================================================
-              // ELDER PROFILE CARD
+              // ELDER PROFILE HERO
               // ===========================================================
 
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: sage,
-                  borderRadius: BorderRadius.circular(28),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF36A981),
+                      Color(0xFF299B7A),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(29),
+                  boxShadow: [
+                    BoxShadow(
+                      color: green.withValues(alpha: .20),
+                      blurRadius: 22,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
                 child: Stack(
                   children: [
                     Positioned(
-                      right: -35,
-                      top: -40,
+                      right: -45,
+                      top: -45,
                       child: Container(
-                        height: 145,
-                        width: 145,
+                        height: 170,
+                        width: 170,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: .10),
+                          color: Colors.white.withValues(alpha: .08),
                           shape: BoxShape.circle,
                         ),
                       ),
                     ),
-
+                    Positioned(
+                      right: 15,
+                      bottom: -30,
+                      child: Icon(
+                        Icons.favorite_outline_rounded,
+                        color: Colors.white.withValues(alpha: .10),
+                        size: 120,
+                      ),
+                    ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             Container(
-                              height: 58,
-                              width: 58,
+                              height: 62,
+                              width: 62,
                               decoration: BoxDecoration(
                                 color: cream,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius:
+                                    BorderRadius.circular(20),
                               ),
                               child: const Icon(
                                 Icons.person_rounded,
-                                size: 32,
-                                color: darkSage,
+                                size: 34,
+                                color: greenDark,
                               ),
                             ),
-
                             const SizedBox(width: 14),
-
                             const Column(
                               crossAxisAlignment:
                                   CrossAxisAlignment.start,
@@ -690,17 +505,16 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 13,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-
-                                SizedBox(height: 2),
-
+                                SizedBox(height: 3),
                                 Text(
                                   'Today at a glance',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ],
@@ -708,54 +522,95 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                           ],
                         ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 22),
 
                         Row(
                           children: [
-                            const _MiniStatus(
-                              icon: Icons.check_circle_rounded,
-                              title: 'Check-in',
-                              value: 'Pending',
+                            Expanded(
+                              child: StreamBuilder<
+                                  DocumentSnapshot<
+                                      Map<String, dynamic>>>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('elders')
+                                    .doc(widget.elderId)
+                                    .collection('status')
+                                    .doc('current')
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  String status = 'Pending';
+
+                                  if (snapshot.hasData &&
+                                      snapshot.data!.exists) {
+                                    final data =
+                                        snapshot.data!.data();
+
+                                    final String firestoreStatus =
+                                        data?['checkInStatus']
+                                                ?.toString()
+                                                .toUpperCase() ??
+                                            'PENDING';
+
+                                    switch (firestoreStatus) {
+                                      case 'COMPLETED':
+                                        status = 'Completed';
+                                        break;
+
+                                      case 'HELP_REQUESTED':
+                                        status = 'Help requested';
+                                        break;
+
+                                      case 'MISSED':
+                                        status = 'Missed';
+                                        break;
+
+                                      default:
+                                        status = 'Pending';
+                                    }
+                                  }
+
+                                  return _MiniStatus(
+                                    icon: status == 'Completed'
+                                        ? Icons.check_circle_rounded
+                                        : status ==
+                                                'Help requested'
+                                            ? Icons.warning_rounded
+                                            : Icons.schedule_rounded,
+                                    title: 'Check-in',
+                                    value: status,
+                                    iconColor: status == 'Completed'
+                                        ? Colors.green
+                                        : status ==
+                                                'Help requested'
+                                            ? Colors.red
+                                            : Colors.orange,
+                                  );
+                                },
+                              ),
                             ),
-
                             const SizedBox(width: 10),
-
-                            const _MiniStatus(
-                              icon: Icons.shield_rounded,
-                              title: 'Safe zone',
-                              value: 'Active',
+                            Expanded(
+                              child: _MiniStatus(
+                                icon: Icons.shield_rounded,
+                                title: 'Safe zone',
+                                value: 'Active',
+                                iconColor: Colors.green,
+                              ),
                             ),
                           ],
                         ),
                       ],
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                     ),
                   ],
                 ),
               ),
-<<<<<<< HEAD
-              const SizedBox(width: 8),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: primaryGreen,
-=======
 
-              const SizedBox(height: 26),
+              const SizedBox(height: 27),
 
               // ===========================================================
               // TODAY
               // ===========================================================
 
-              const Text(
-                'Today',
-                style: TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w800,
-                  color: textDark,
-                  letterSpacing: -.5,
-                ),
-              ),
+              const _SectionTitle(title: 'Today'),
 
               const SizedBox(height: 13),
 
@@ -763,11 +618,13 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                 children: [
                   Expanded(
                     child: _DashboardCard(
-                      color: cream,
-                      iconBackground: const Color(0xFFE5D3C8),
+                      color: orangeLight,
+                      iconBackground: orange,
                       icon: Icons.medication_rounded,
+                      iconColor: Colors.white,
                       title: 'Medicines',
                       subtitle: 'Manage medication',
+                      titleColor: darkText,
                       onTap: () {
                         _openPage(
                           context,
@@ -778,16 +635,16 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                       },
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   Expanded(
                     child: _DashboardCard(
-                      color: cream,
-                      iconBackground: const Color(0xFFD8E4D9),
+                      color: blueLight,
+                      iconBackground: blue,
                       icon: Icons.calendar_month_rounded,
+                      iconColor: Colors.white,
                       title: 'Appointments',
                       subtitle: 'Upcoming visits',
+                      titleColor: const Color(0xFF174C7D),
                       onTap: () {
                         _openPage(
                           context,
@@ -804,15 +661,19 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
               const SizedBox(height: 12),
 
               // ===========================================================
-              // EMERGENCY CONTACTS
+              // CARE CIRCLE
               // ===========================================================
 
               _WideCard(
-                color: const Color(0xFFF0D5CE),
+                color: coralLight,
+                iconBackground: coral,
                 icon: Icons.phone_in_talk_rounded,
+                iconColor: Colors.white,
                 title: 'Care circle',
+                titleColor: const Color(0xFFA52D38),
                 subtitle: 'Emergency contacts & trusted people',
                 trailing: Icons.arrow_forward_rounded,
+                trailingColor: coral,
                 onTap: () {
                   _openPage(
                     context,
@@ -830,12 +691,15 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
               // ===========================================================
 
               _WideCard(
-                color: const Color(0xFFDCE8DD),
+                color: mint,
+                iconBackground: green,
                 icon: Icons.shield_rounded,
+                iconColor: Colors.white,
                 title: 'Safe zone',
+                titleColor: greenDark,
                 subtitle: 'Create and manage the elder safe zone',
                 trailing: Icons.arrow_forward_rounded,
-                darkIcon: true,
+                trailingColor: greenDark,
                 onTap: () {
                   _openPage(
                     context,
@@ -846,21 +710,39 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                 },
               ),
 
-              const SizedBox(height: 26),
+              const SizedBox(height: 12),
+
+              // ===========================================================
+              // HOSPITAL DOCUMENTS
+              // ===========================================================
+
+              _WideCard(
+                color: tealLight,
+                iconBackground: teal,
+                icon: Icons.folder_shared_rounded,
+                iconColor: Colors.white,
+                title: 'Hospital documents',
+                titleColor: const Color(0xFF176C68),
+                subtitle: 'Medical reports & hospital records',
+                trailing: Icons.arrow_forward_rounded,
+                trailingColor: teal,
+                onTap: () {
+                  _openPage(
+                    context,
+                    HospitalDocumentsScreen(
+                      elderId: widget.elderId,
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 28),
 
               // ===========================================================
               // CARE OVERVIEW
               // ===========================================================
 
-              const Text(
-                'Care overview',
-                style: TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w800,
-                  color: textDark,
-                  letterSpacing: -.5,
-                ),
-              ),
+              const _SectionTitle(title: 'Care overview'),
 
               const SizedBox(height: 13),
 
@@ -868,9 +750,11 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                 children: [
                   Expanded(
                     child: _SmallFeatureCard(
-                      color: darkSage,
+                      color: tealLight,
+                      iconBackground: teal,
                       icon: Icons.favorite_rounded,
                       title: 'Elder status',
+                      titleColor: const Color(0xFF176C68),
                       onTap: () {
                         _openPage(
                           context,
@@ -881,14 +765,14 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                       },
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   Expanded(
                     child: _SmallFeatureCard(
-                      color: terracotta,
+                      color: coralLight,
+                      iconBackground: coral,
                       icon: Icons.notifications_rounded,
                       title: 'Alerts',
+                      titleColor: const Color(0xFFA52D38),
                       onTap: () {
                         _openPage(
                           context,
@@ -908,9 +792,11 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                 children: [
                   Expanded(
                     child: _SmallFeatureCard(
-                      color: const Color(0xFF657C91),
+                      color: blueLight,
+                      iconBackground: blue,
                       icon: Icons.history_rounded,
                       title: 'Check-in history',
+                      titleColor: const Color(0xFF245A96),
                       onTap: () {
                         _openPage(
                           context,
@@ -921,14 +807,14 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                       },
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   Expanded(
                     child: _SmallFeatureCard(
-                      color: const Color(0xFF8A7460),
+                      color: yellowLight,
+                      iconBackground: orange,
                       icon: Icons.timeline_rounded,
                       title: 'Activity',
+                      titleColor: const Color(0xFF9A6300),
                       onTap: () {
                         _openPage(
                           context,
@@ -959,10 +845,14 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                 },
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(19),
                   decoration: BoxDecoration(
                     color: cream,
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(27),
+                    border: Border.all(
+                      color: const Color(0xFFEEDCC8),
+                      width: 1.2,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -970,48 +860,48 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                         height: 58,
                         width: 58,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE3E9E1),
+                          gradient: const LinearGradient(
+                            colors: [
+                              tealLight,
+                              Color(0xFFB7E8DF),
+                            ],
+                          ),
                           borderRadius: BorderRadius.circular(19),
                         ),
                         child: const Icon(
                           Icons.medical_information_rounded,
-                          color: darkSage,
-                          size: 28,
+                          color: teal,
+                          size: 29,
                         ),
                       ),
-
                       const SizedBox(width: 15),
-
                       const Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Medical summary',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
-                                color: textDark,
+                                color: darkText,
                               ),
                             ),
-
                             SizedBox(height: 4),
-
                             Text(
                               'Health information at a glance',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.black54,
+                                color: mutedText,
                               ),
                             ),
                           ],
                         ),
                       ),
-
-                      const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 17,
-                        color: Colors.black45,
+                      _ArrowCircle(
+                        color: orangeLight,
+                        iconColor: orange,
                       ),
                     ],
                   ),
@@ -1025,13 +915,16 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
               // ===========================================================
 
               _WideCard(
-                color: const Color(0xFFE4DCCB),
+                color: purpleLight,
+                iconBackground: purple,
                 icon: Icons.location_on_rounded,
+                iconColor: Colors.white,
                 title: 'Nearby services',
+                titleColor: const Color(0xFF50439B),
                 subtitle:
                     'Hospitals, care centres & local services',
                 trailing: Icons.arrow_forward_rounded,
-                darkIcon: true,
+                trailingColor: purple,
                 onTap: () {
                   _openPage(
                     context,
@@ -1049,15 +942,32 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
               // ===========================================================
 
               Center(
-                child: Text(
-                  'Taking care, one day at a time ♥',
-                  style: TextStyle(
-                    color: textDark.withValues(alpha: .45),
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 35,
+                      height: 1,
+                      color: green.withValues(alpha: .35),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'Taking care, one day at a time ♥',
+                      style: TextStyle(
+                        color: mutedText,
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      width: 35,
+                      height: 1,
+                      color: green.withValues(alpha: .35),
+                    ),
+                  ],
                 ),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
               ),
             ],
           ),
@@ -1065,8 +975,31 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
       ),
     );
   }
-<<<<<<< HEAD
-=======
+}
+
+// =======================================================================
+// SECTION TITLE
+// =======================================================================
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+
+  const _SectionTitle({
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w900,
+        color: Color(0xFF173B36),
+        letterSpacing: -.6,
+      ),
+    );
+  }
 }
 
 // =======================================================================
@@ -1091,14 +1024,15 @@ class _SosDetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: 19,
-            color: const Color(0xFF46695A),
+          SizedBox(
+            width: 20,
+            child: Icon(
+              icon,
+              size: 16,
+              color: const Color(0xFF39A982),
+            ),
           ),
-
-          const SizedBox(width: 9),
-
+          const SizedBox(width: 8),
           Expanded(
             child: RichText(
               text: TextSpan(
@@ -1106,8 +1040,9 @@ class _SosDetailRow extends StatelessWidget {
                   TextSpan(
                     text: '$label: ',
                     style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF26352F),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF173B36),
                     ),
                   ),
                   TextSpan(
@@ -1134,61 +1069,67 @@ class _MiniStatus extends StatelessWidget {
   final IconData icon;
   final String title;
   final String value;
+  final Color iconColor;
 
   const _MiniStatus({
     required this.icon,
     required this.title,
     required this.value,
+    this.iconColor = Colors.white,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .18),
-          borderRadius: BorderRadius.circular(17),
-        ),
-        child: Row(
-          children: [
-            Icon(
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 11,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .92),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 32,
+            width: 32,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: .14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
               icon,
-              color: Colors.white,
-              size: 20,
+              color: iconColor,
+              size: 19,
             ),
-
-            const SizedBox(width: 8),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 11,
-                    ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF60736E),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
                   ),
-
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
+                ),
+                Text(
+                  value,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: iconColor,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1202,16 +1143,20 @@ class _DashboardCard extends StatelessWidget {
   final Color color;
   final Color iconBackground;
   final IconData icon;
+  final Color iconColor;
   final String title;
   final String subtitle;
+  final Color titleColor;
   final VoidCallback onTap;
 
   const _DashboardCard({
     required this.color,
     required this.iconBackground,
     required this.icon,
+    required this.iconColor,
     required this.title,
     required this.subtitle,
+    required this.titleColor,
     required this.onTap,
   });
 
@@ -1220,49 +1165,68 @@ class _DashboardCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 170,
+        height: 158,
         padding: const EdgeInsets.all(17),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(25),
         ),
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                icon,
-                color: const Color(0xFF34453E),
-                size: 25,
-              ),
-            ),
-
-            const Spacer(),
-
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF26352F),
+            Positioned(
+              right: -25,
+              bottom: -30,
+              child: Container(
+                height: 90,
+                width: 90,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .20),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-
-            const SizedBox(height: 3),
-
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Colors.black54,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 49,
+                  width: 49,
+                  decoration: BoxDecoration(
+                    color: iconBackground,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            iconBackground.withValues(alpha: .20),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: 25,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: titleColor,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: titleColor.withValues(alpha: .70),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1277,21 +1241,27 @@ class _DashboardCard extends StatelessWidget {
 
 class _WideCard extends StatelessWidget {
   final Color color;
+  final Color iconBackground;
   final IconData icon;
+  final Color iconColor;
   final String title;
+  final Color titleColor;
   final String subtitle;
   final IconData trailing;
+  final Color trailingColor;
   final VoidCallback onTap;
-  final bool darkIcon;
 
   const _WideCard({
     required this.color,
+    required this.iconBackground,
     required this.icon,
+    required this.iconColor,
     required this.title,
+    required this.titleColor,
     required this.subtitle,
     required this.trailing,
+    required this.trailingColor,
     required this.onTap,
-    this.darkIcon = false,
   });
 
   @override
@@ -1299,7 +1269,7 @@ class _WideCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(17),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(25),
@@ -1307,54 +1277,54 @@ class _WideCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              height: 52,
-              width: 52,
+              height: 54,
+              width: 54,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .55),
-                borderRadius: BorderRadius.circular(17),
+                color: iconBackground,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color:
+                        iconBackground.withValues(alpha: .18),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Icon(
                 icon,
-                color: darkIcon
-                    ? const Color(0xFF46695A)
-                    : const Color(0xFF9C5047),
+                color: iconColor,
                 size: 26,
               ),
             ),
-
             const SizedBox(width: 14),
-
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF26352F),
+                      fontWeight: FontWeight.w900,
+                      color: titleColor,
                     ),
                   ),
-
                   const SizedBox(height: 3),
-
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11.5,
-                      color: Colors.black54,
+                      color:
+                          titleColor.withValues(alpha: .70),
                     ),
                   ),
                 ],
               ),
             ),
-
-            Icon(
-              trailing,
-              size: 20,
-              color: Colors.black54,
+            _ArrowCircle(
+              color: Colors.white.withValues(alpha: .60),
+              iconColor: trailingColor,
             ),
           ],
         ),
@@ -1369,14 +1339,18 @@ class _WideCard extends StatelessWidget {
 
 class _SmallFeatureCard extends StatelessWidget {
   final Color color;
+  final Color iconBackground;
   final IconData icon;
   final String title;
+  final Color titleColor;
   final VoidCallback onTap;
 
   const _SmallFeatureCard({
     required this.color,
+    required this.iconBackground,
     required this.icon,
     required this.title,
+    required this.titleColor,
     required this.onTap,
   });
 
@@ -1391,45 +1365,66 @@ class _SmallFeatureCard extends StatelessWidget {
           color: color,
           borderRadius: BorderRadius.circular(24),
         ),
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Icon(
-              icon,
-              color: Colors.white,
-              size: 27,
-            ),
-
-            const Spacer(),
-
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+            Positioned(
+              right: -18,
+              bottom: -25,
+              child: Container(
+                height: 75,
+                width: 75,
+                decoration: BoxDecoration(
+                  color:
+                      Colors.white.withValues(alpha: .30),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-
-            const SizedBox(height: 3),
-
-            const Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Open',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
+                Container(
+                  height: 42,
+                  width: 42,
+                  decoration: BoxDecoration(
+                    color: iconBackground,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: 22,
                   ),
                 ),
-
-                SizedBox(width: 4),
-
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white70,
-                  size: 13,
+                const Spacer(),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: titleColor,
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Text(
+                      'Open',
+                      style: TextStyle(
+                        color:
+                            titleColor.withValues(alpha: .72),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      color:
+                          titleColor.withValues(alpha: .72),
+                      size: 13,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1438,5 +1433,35 @@ class _SmallFeatureCard extends StatelessWidget {
       ),
     );
   }
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+}
+
+// =======================================================================
+// ARROW CIRCLE
+// =======================================================================
+
+class _ArrowCircle extends StatelessWidget {
+  final Color color;
+  final Color iconColor;
+
+  const _ArrowCircle({
+    required this.color,
+    required this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 38,
+      width: 38,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        Icons.arrow_forward_rounded,
+        color: iconColor,
+        size: 20,
+      ),
+    );
+  }
 }

@@ -1,76 +1,339 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/care_circle_model.dart';
 
 class CareCircleService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _db =
+      FirebaseFirestore.instance;
 
-  // Link caregiver to an elder using the 6-character invite code
-  Future<String> linkCaregiverWithInviteCode({
+  // ============================================================
+  // GENERATE INVITE CODE
+  // ============================================================
+
+  String generateInviteCode() {
+    const String chars =
+        'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+    final Random random = Random();
+
+    return List.generate(
+      6,
+      (_) => chars[
+          random.nextInt(chars.length)
+      ],
+    ).join();
+  }
+
+  // ============================================================
+  // CREATE / GET ELDER INVITE CODE
+  // ============================================================
+
+  Future<String> createElderInviteCode(
+    String elderUid,
+  ) async {
+    final String uid =
+        elderUid.trim();
+
+    if (uid.isEmpty) {
+      throw Exception(
+        'Elder UID is required.',
+      );
+    }
+
+    final DocumentReference<
+            Map<String, dynamic>>
+        elderRef =
+        _db.collection('users').doc(uid);
+
+    final DocumentSnapshot<
+            Map<String, dynamic>>
+        elderSnapshot =
+        await elderRef.get();
+
+    if (!elderSnapshot.exists) {
+      throw Exception(
+        'Elder account was not found.',
+      );
+    }
+
+    final Map<String, dynamic>
+        elderData =
+        elderSnapshot.data() ?? {};
+
+    final String role =
+        elderData['role']
+                ?.toString()
+                .trim()
+                .toLowerCase() ??
+            '';
+
+    if (role != 'elder') {
+      throw Exception(
+        'Only elder accounts can create an invite code.',
+      );
+    }
+
+    // ----------------------------------------------------------
+    // EXISTING CODE
+    // ----------------------------------------------------------
+
+    final String existingCode =
+        elderData['inviteCode']
+                ?.toString()
+                .trim()
+                .toUpperCase() ??
+            '';
+
+    if (existingCode.isNotEmpty) {
+      final DocumentReference<
+              Map<String, dynamic>>
+          inviteRef =
+          _db
+              .collection('inviteCodes')
+              .doc(existingCode);
+
+      final DocumentSnapshot<
+              Map<String, dynamic>>
+          inviteSnapshot =
+          await inviteRef.get();
+
+      if (!inviteSnapshot.exists) {
+        await inviteRef.set({
+          'code': existingCode,
+          'elderId': uid,
+          'createdAt':
+              FieldValue.serverTimestamp(),
+        });
+      }
+
+      return existingCode;
+    }
+
+    // ----------------------------------------------------------
+    // GENERATE UNIQUE CODE
+    // ----------------------------------------------------------
+
+    String code = '';
+
+    while (true) {
+      final String generated =
+          generateInviteCode();
+
+      final DocumentSnapshot<
+              Map<String, dynamic>>
+          existing =
+          await _db
+              .collection('inviteCodes')
+              .doc(generated)
+              .get();
+
+      if (!existing.exists) {
+        code = generated;
+        break;
+      }
+    }
+
+    // Save on elder profile.
+    await elderRef.update({
+      'inviteCode': code,
+    });
+
+    // Create lookup document.
+    await _db
+        .collection('inviteCodes')
+        .doc(code)
+        .set({
+      'code': code,
+      'elderId': uid,
+      'createdAt':
+          FieldValue.serverTimestamp(),
+    });
+
+    return code;
+  }
+
+  // ============================================================
+  // LINK CAREGIVER TO ELDER
+  // ============================================================
+
+  Future<void> linkCaregiverWithInviteCode({
     required String inviteCode,
     required String caregiverUid,
   }) async {
-    final cleanCode = inviteCode.trim().toUpperCase();
+    final String code =
+        inviteCode.trim().toUpperCase();
 
-    // 1. Locate elder with matching invite code
-    final query = await _firestore
+    final String caregiverId =
+        caregiverUid.trim();
+
+    if (code.isEmpty) {
+      throw Exception(
+        'Please enter the elder invite code.',
+      );
+    }
+
+    if (code.length != 6) {
+      throw Exception(
+        'Invite code must contain exactly 6 characters.',
+      );
+    }
+
+    if (caregiverId.isEmpty) {
+      throw Exception(
+        'Caregiver account was not found.',
+      );
+    }
+
+    // ----------------------------------------------------------
+    // FIND INVITE CODE
+    // ----------------------------------------------------------
+
+    final DocumentSnapshot<
+            Map<String, dynamic>>
+        inviteSnapshot =
+        await _db
+            .collection('inviteCodes')
+            .doc(code)
+            .get();
+
+    if (!inviteSnapshot.exists) {
+      throw Exception(
+        'Invalid invite code. Please check the code and try again.',
+      );
+    }
+
+    final Map<String, dynamic>
+        inviteData =
+        inviteSnapshot.data() ?? {};
+
+    final String elderId =
+        inviteData['elderId']
+                ?.toString()
+                .trim() ??
+            '';
+
+    if (elderId.isEmpty) {
+      throw Exception(
+        'This invite code is not linked to an elder.',
+      );
+    }
+
+    if (elderId == caregiverId) {
+      throw Exception(
+        'A caregiver cannot connect to their own account.',
+      );
+    }
+
+    // ----------------------------------------------------------
+    // GET ELDER
+    // ----------------------------------------------------------
+
+    final DocumentSnapshot<
+            Map<String, dynamic>>
+        elderSnapshot =
+        await _db
+            .collection('users')
+            .doc(elderId)
+            .get();
+
+    if (!elderSnapshot.exists) {
+      throw Exception(
+        'The elder account was not found.',
+      );
+    }
+
+    final Map<String, dynamic>
+        elderData =
+        elderSnapshot.data() ?? {};
+
+    final String elderRole =
+        elderData['role']
+                ?.toString()
+                .trim()
+                .toLowerCase() ??
+            '';
+
+    if (elderRole != 'elder') {
+      throw Exception(
+        'This invite code does not belong to an elder.',
+      );
+    }
+
+    // ----------------------------------------------------------
+    // GET CAREGIVER
+    // ----------------------------------------------------------
+
+    final DocumentSnapshot<
+            Map<String, dynamic>>
+        caregiverSnapshot =
+        await _db
+            .collection('users')
+            .doc(caregiverId)
+            .get();
+
+    if (!caregiverSnapshot.exists) {
+      throw Exception(
+        'Caregiver account profile was not found.',
+      );
+    }
+
+    final Map<String, dynamic>
+        caregiverData =
+        caregiverSnapshot.data() ?? {};
+
+    final String caregiverRole =
+        caregiverData['role']
+                ?.toString()
+                .trim()
+                .toLowerCase() ??
+            '';
+
+    if (caregiverRole != 'caregiver') {
+      throw Exception(
+        'Only caregiver accounts can connect to an elder.',
+      );
+    }
+
+    // ----------------------------------------------------------
+    // CONNECT CAREGIVER -> ELDER
+    // ----------------------------------------------------------
+
+    await _db
         .collection('users')
-        .where('role', isEqualTo: 'elder')
-        .where('inviteCode', isEqualTo: cleanCode)
-        .limit(1)
-        .get();
+        .doc(caregiverId)
+        .update({
+      'linkedElders':
+          FieldValue.arrayUnion([
+        elderId,
+      ]),
+    });
 
-    if (query.docs.isEmpty) {
-      throw Exception('Invalid invite code. Please check and try again.');
-    }
+    // ----------------------------------------------------------
+    // CONNECT ELDER -> CAREGIVER
+    // ----------------------------------------------------------
 
-    final elderId = query.docs.first.id;
-
-    // 2. Add caregiver to the elder's care circle collection
-    await _firestore.collection('care_circles').doc(elderId).set({
-      'elderId': elderId,
-      'caregiverIds': FieldValue.arrayUnion([caregiverUid]),
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
-
-    return elderId;
-  }
-
-  // Get the linked elder ID for a specific caregiver
-  Future<String?> getElderIdForCaregiver(String caregiverUid) async {
-    final query = await _firestore
-        .collection('care_circles')
-        .where('caregiverIds', arrayContains: caregiverUid)
-        .limit(1)
-        .get();
-
-    if (query.docs.isNotEmpty) {
-      return query.docs.first.id;
-    }
-    return null;
-  }
-
-  // Stream caregiver list for a specific elder (used in Elder UI)
-  Stream<CareCircleModel?> streamCareCircle(String elderId) {
-    return _firestore
-        .collection('care_circles')
+    await _db
+        .collection('users')
         .doc(elderId)
-        .snapshots()
-        .map((doc) {
-      if (doc.exists && doc.data() != null) {
-        return CareCircleModel.fromMap(doc.data()!, doc.id);
-      }
-      return null;
+        .update({
+      'caregivers':
+          FieldValue.arrayUnion([
+        caregiverId,
+      ]),
     });
   }
 
-  // Unlink a caregiver from an elder
-  Future<void> removeCaregiver({
-    required String elderId,
+  // ============================================================
+  // BACKWARD COMPATIBILITY
+  // ============================================================
+
+  Future<void> linkCaregiverToElder({
     required String caregiverUid,
+    required String inviteCode,
   }) async {
-    await _firestore.collection('care_circles').doc(elderId).update({
-      'caregiverIds': FieldValue.arrayRemove([caregiverUid]),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    await linkCaregiverWithInviteCode(
+      inviteCode: inviteCode,
+      caregiverUid: caregiverUid,
+    );
   }
 }

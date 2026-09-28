@@ -1,19 +1,5 @@
-<<<<<<< HEAD
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-<<<<<<<< HEAD:lib/screens/caregiver/emergency_contacts_screen.dart
-import '../../models/emergency_contact_model.dart';
-import '../../services/emergency_contact_service.dart';
-========
 
-import 'auth/login_screen.dart';
->>>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317:lib/screens/emergency_contacts_screen.dart
-
-class EmergencyContactsScreen extends StatefulWidget {
-  const EmergencyContactsScreen({super.key});
-=======
-import 'package:flutter/material.dart';
 import '../../models/emergency_contact_model.dart';
 import '../../services/caregiver/emergency_contact_service.dart';
 
@@ -24,7 +10,6 @@ class EmergencyContactsScreen extends StatefulWidget {
     super.key,
     required this.elderId,
   });
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
   @override
   State<EmergencyContactsScreen> createState() =>
@@ -33,54 +18,12 @@ class EmergencyContactsScreen extends StatefulWidget {
 
 class _EmergencyContactsScreenState
     extends State<EmergencyContactsScreen> {
-<<<<<<< HEAD
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance;
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  final TextEditingController _nameController =
-      TextEditingController();
-
-  final TextEditingController _phoneController =
-      TextEditingController();
-
-  bool _isLoading = false;
-
-  User? get _currentUser => _auth.currentUser;
-
-  String? get _userId => _currentUser?.uid;
-
-  CollectionReference<Map<String, dynamic>>
-      get _contactsCollection =>
-          _firestore.collection('emergencyContacts');
-
-  /// Opens the current login screen.
-  Future<void> _openLoginScreen() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
-  }
-
-  Future<void> _showAddContactDialog() async {
-    final userId = _userId;
-
-    if (userId == null) {
-      await _openLoginScreen();
-      return;
-    }
-
-    _nameController.clear();
-    _phoneController.clear();
-=======
   final EmergencyContactService _contactService =
       EmergencyContactService();
 
   static const Color cream = Color(0xFFF4EFE5);
   static const Color darkSage = Color(0xFF46695A);
+  static const Color sage = Color(0xFF7FA68F);
   static const Color terracotta = Color(0xFFC85C50);
   static const Color cardCream = Color(0xFFFFFBF4);
   static const Color textDark = Color(0xFF26352F);
@@ -92,237 +35,19 @@ class _EmergencyContactsScreenState
     final nameController = TextEditingController(
       text: contact?.name ?? '',
     );
+
     final phoneController = TextEditingController(
       text: contact?.phone ?? '',
     );
+
     final relationshipController = TextEditingController(
       text: contact?.relationship ?? '',
     );
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
     await showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-<<<<<<< HEAD
-          title: const Text('Add Emergency Contact'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Contact name',
-                  hintText: 'Enter contact name',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Phone number',
-                  hintText: 'Enter phone number',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('CANCEL'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final name = _nameController.text.trim();
-                final phone = _phoneController.text.trim();
-
-                if (name.isEmpty || phone.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Please enter both name and phone number',
-                      ),
-                    ),
-                  );
-                  return;
-                }
-
-                if (phone.length < 10) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Please enter a valid phone number',
-                      ),
-                    ),
-                  );
-                  return;
-                }
-
-                try {
-                  await _contactsCollection.add({
-                    'userId': userId,
-                    'name': name,
-                    'phone': phone,
-                    'createdAt':
-                        FieldValue.serverTimestamp(),
-                  });
-
-                  if (dialogContext.mounted) {
-                    Navigator.pop(dialogContext);
-                  }
-
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Emergency contact saved successfully',
-                        ),
-                      ),
-                    );
-                  }
-                } catch (error) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Failed to save contact: $error',
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text('ADD'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _deleteContact(String documentId) async {
-    final userId = _userId;
-
-    if (userId == null) {
-      await _openLoginScreen();
-      return;
-    }
-
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      await _contactsCollection
-          .doc(documentId)
-          .delete();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Emergency contact deleted',
-            ),
-          ),
-        );
-      }
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Failed to delete contact: $error',
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _confirmDeleteContact(
-    String documentId,
-    String contactName,
-  ) async {
-    final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Delete Contact?'),
-          content: Text(
-            'Are you sure you want to delete $contactName?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, false);
-              },
-              child: const Text('CANCEL'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, true);
-              },
-              child: const Text('DELETE'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (shouldDelete == true) {
-      await _deleteContact(documentId);
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final userId = _userId;
-
-    // User is not logged in.
-    if (userId == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Emergency Contacts'),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment:
-                  MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.lock_outline,
-                  size: 60,
-                  color: Colors.grey,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Please login to manage emergency contacts.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 17),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _openLoginScreen,
-                  child: const Text('LOGIN REQUIRED'),
-=======
           backgroundColor: cardCream,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -360,37 +85,26 @@ class _EmergencyContactsScreenState
                   label: 'Relationship',
                   icon: Icons.people_outline_rounded,
                   hint: 'e.g. Daughter',
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                 ),
               ],
             ),
           ),
-<<<<<<< HEAD
-        ),
-      );
-    }
-
-    // User is logged in.
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Emergency Contacts'),
-      ),
-      body: StreamBuilder<
-          QuerySnapshot<Map<String, dynamic>>>(
-        stream: _contactsCollection
-            .where(
-              'userId',
-              isEqualTo: userId,
-            )
-            .snapshots(),
-=======
-          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          actionsPadding: const EdgeInsets.fromLTRB(
+            20,
+            0,
+            20,
+            20,
+          ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: mutedText),
+                style: TextStyle(
+                  color: mutedText,
+                ),
               ),
             ),
             ElevatedButton(
@@ -407,12 +121,19 @@ class _EmergencyContactsScreenState
                 ),
               ),
               onPressed: () async {
-                if (nameController.text.trim().isEmpty ||
-                    phoneController.text.trim().isEmpty ||
-                    relationshipController.text.trim().isEmpty) {
+                final name = nameController.text.trim();
+                final phone = phoneController.text.trim();
+                final relationship =
+                    relationshipController.text.trim();
+
+                if (name.isEmpty ||
+                    phone.isEmpty ||
+                    relationship.isEmpty) {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
                     const SnackBar(
-                      content: Text('Please fill in all fields.'),
+                      content: Text(
+                        'Please fill in all fields.',
+                      ),
                     ),
                   );
                   return;
@@ -423,10 +144,9 @@ class _EmergencyContactsScreenState
                       DateTime.now()
                           .millisecondsSinceEpoch
                           .toString(),
-                  name: nameController.text.trim(),
-                  phone: phoneController.text.trim(),
-                  relationship:
-                      relationshipController.text.trim(),
+                  name: name,
+                  phone: phone,
+                  relationship: relationship,
                 );
 
                 try {
@@ -462,7 +182,9 @@ class _EmergencyContactsScreenState
 
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
                     SnackBar(
-                      content: Text('Error: $e'),
+                      content: Text(
+                        'Error: $e',
+                      ),
                     ),
                   );
                 }
@@ -494,7 +216,9 @@ class _EmergencyContactsScreenState
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Emergency contact deleted'),
+          content: Text(
+            'Emergency contact deleted',
+          ),
         ),
       );
     } catch (e) {
@@ -502,7 +226,9 @@ class _EmergencyContactsScreenState
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error deleting contact: $e'),
+          content: Text(
+            'Error deleting contact: $e',
+          ),
         ),
       );
     }
@@ -535,20 +261,26 @@ class _EmergencyContactsScreenState
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                false,
-              ),
+              onPressed: () {
+                Navigator.pop(
+                  dialogContext,
+                  false,
+                );
+              },
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: mutedText),
+                style: TextStyle(
+                  color: mutedText,
+                ),
               ),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                true,
-              ),
+              onPressed: () {
+                Navigator.pop(
+                  dialogContext,
+                  true,
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: terracotta,
                 foregroundColor: Colors.white,
@@ -582,11 +314,15 @@ class _EmergencyContactsScreenState
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showContactDialog(),
+        onPressed: () {
+          _showContactDialog();
+        },
         backgroundColor: terracotta,
         foregroundColor: Colors.white,
         elevation: 4,
-        icon: const Icon(Icons.add_rounded),
+        icon: const Icon(
+          Icons.add_rounded,
+        ),
         label: const Text(
           'Add contact',
           style: TextStyle(
@@ -595,95 +331,20 @@ class _EmergencyContactsScreenState
         ),
       ),
       body: StreamBuilder<List<EmergencyContact>>(
-        stream: _contactService.getContacts(widget.elderId),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+        stream: _contactService.getContacts(
+          widget.elderId,
+        ),
         builder: (context, snapshot) {
           if (snapshot.connectionState ==
               ConnectionState.waiting) {
             return const Center(
-<<<<<<< HEAD
-              child: CircularProgressIndicator(),
-=======
               child: CircularProgressIndicator(
                 color: darkSage,
               ),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
             );
           }
 
           if (snapshot.hasError) {
-<<<<<<< HEAD
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  'Error loading contacts:\n${snapshot.error}',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            );
-          }
-
-          final documents =
-              snapshot.data?.docs ?? [];
-
-          if (documents.isEmpty) {
-            return const Center(
-              child: Text(
-                'No emergency contacts added yet.',
-                style: TextStyle(fontSize: 16),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: documents.length,
-            itemBuilder: (context, index) {
-              final document = documents[index];
-              final data = document.data();
-
-              final String name =
-                  data['name']?.toString() ??
-                      'Unknown';
-
-              final String phone =
-                  data['phone']?.toString() ??
-                      'No phone number';
-
-              return Card(
-                child: ListTile(
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.person),
-                  ),
-                  title: Text(name),
-                  subtitle: Text(phone),
-                  trailing: IconButton(
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                    onPressed: _isLoading
-                        ? null
-                        : () {
-                            _confirmDeleteContact(
-                              document.id,
-                              name,
-                            );
-                          },
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton:
-          FloatingActionButton.extended(
-        onPressed: _showAddContactDialog,
-        icon: const Icon(Icons.add),
-        label: const Text('Add Contact'),
-=======
             return const _ErrorState(
               message: 'Could not load emergency contacts.',
             );
@@ -742,7 +403,8 @@ class _EmergencyContactsScreenState
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${contacts.length} emergency contact${contacts.length == 1 ? '' : 's'} available',
+                            '${contacts.length} emergency contact'
+                            '${contacts.length == 1 ? '' : 's'} available',
                             style: TextStyle(
                               color: Colors.white.withValues(
                                 alpha: 0.72,
@@ -767,13 +429,19 @@ class _EmergencyContactsScreenState
               const SizedBox(height: 14),
               ...contacts.map(
                 (contact) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.only(
+                    bottom: 14,
+                  ),
                   child: _ContactCard(
                     contact: contact,
-                    onEdit: () => _showContactDialog(
-                      contact: contact,
-                    ),
-                    onDelete: () => _confirmDelete(contact),
+                    onEdit: () {
+                      _showContactDialog(
+                        contact: contact,
+                      );
+                    },
+                    onDelete: () {
+                      _confirmDelete(contact);
+                    },
                   ),
                 ),
               ),
@@ -809,7 +477,9 @@ class _ContactCard extends StatelessWidget {
         color: cardCream,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: sage.withValues(alpha: 0.18),
+          color: sage.withValues(
+            alpha: 0.18,
+          ),
         ),
       ),
       child: Padding(
@@ -826,7 +496,9 @@ class _ContactCard extends StatelessWidget {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: sage.withValues(alpha: 0.16),
+                    color: sage.withValues(
+                      alpha: 0.16,
+                    ),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -851,12 +523,15 @@ class _ContactCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
                       Container(
-                        padding: const EdgeInsets.symmetric(
+                        padding:
+                            const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: sage.withValues(alpha: 0.10),
+                          color: sage.withValues(
+                            alpha: 0.10,
+                          ),
                           borderRadius:
                               BorderRadius.circular(10),
                         ),
@@ -886,7 +561,9 @@ class _ContactCard extends StatelessWidget {
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit_outlined),
+                          Icon(
+                            Icons.edit_outlined,
+                          ),
                           SizedBox(width: 10),
                           Text('Edit'),
                         ],
@@ -896,7 +573,9 @@ class _ContactCard extends StatelessWidget {
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline),
+                          Icon(
+                            Icons.delete_outline,
+                          ),
                           SizedBox(width: 10),
                           Text('Delete'),
                         ],
@@ -911,8 +590,11 @@ class _ContactCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: sage.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(16),
+                color: sage.withValues(
+                  alpha: 0.08,
+                ),
+                borderRadius:
+                    BorderRadius.circular(16),
               ),
               child: Row(
                 children: [
@@ -932,7 +614,8 @@ class _ContactCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
+                    padding:
+                        const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 8,
                     ),
@@ -1030,7 +713,9 @@ class _EmptyState extends StatelessWidget {
               width: 90,
               height: 90,
               decoration: BoxDecoration(
-                color: darkSage.withValues(alpha: 0.10),
+                color: darkSage.withValues(
+                  alpha: 0.10,
+                ),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -1099,7 +784,6 @@ class _ErrorState extends StatelessWidget {
             ),
           ],
         ),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
       ),
     );
   }

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../models/medicine_model.dart';
-<<<<<<< HEAD
-import '../../services/medicine_service.dart';
-=======
 import '../../services/caregiver/medicine_service.dart';
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
 class MedicinesScreen extends StatefulWidget {
   final String elderId;
@@ -15,19 +12,14 @@ class MedicinesScreen extends StatefulWidget {
   });
 
   @override
-  State<MedicinesScreen> createState() => _MedicinesScreenState();
+  State<MedicinesScreen> createState() =>
+      _MedicinesScreenState();
 }
 
 class _MedicinesScreenState extends State<MedicinesScreen> {
-  final MedicineService _medicineService = MedicineService();
+  final MedicineService _medicineService =
+      MedicineService();
 
-<<<<<<< HEAD
-  static const Color primaryGreen = Color(0xFF738F52);
-  static const Color darkGreen = Color(0xFF536B3A);
-  static const Color lightGreen = Color(0xFFE8EFDF);
-  static const Color backgroundColor = Color(0xFFF7F9F3);
-  static const Color textColor = Color(0xFF26301F);
-=======
   static const Color background = Color(0xFFF4EFE5);
   static const Color sage = Color(0xFF7FA68F);
   static const Color darkSage = Color(0xFF46695A);
@@ -35,120 +27,29 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   static const Color cream = Color(0xFFFFFBF4);
   static const Color textDark = Color(0xFF26352F);
 
-  // -----------------------------------------------------------------------
-  // ADD / EDIT MEDICINE
-  // -----------------------------------------------------------------------
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
-
   void _showMedicineDialog({Medicine? medicine}) {
     final nameController =
-        TextEditingController(text: medicine?.name ?? '');
+        TextEditingController(
+      text: medicine?.name ?? '',
+    );
+
     final dosageController =
-        TextEditingController(text: medicine?.dosage ?? '');
+        TextEditingController(
+      text: medicine?.dosage ?? '',
+    );
+
     final timeController =
-        TextEditingController(text: medicine?.time ?? '');
+        TextEditingController(
+      text: medicine?.time ?? '',
+    );
+
     final frequencyController =
-        TextEditingController(text: medicine?.frequency ?? '');
+        TextEditingController(
+      text: medicine?.frequency ?? '',
+    );
 
     showDialog(
       context: context,
-<<<<<<< HEAD
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            medicine == null ? 'Add Medicine' : 'Edit Medicine',
-            style: const TextStyle(
-              color: darkGreen,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Medicine Name',
-                    prefixIcon: const Icon(
-                      Icons.medication,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: dosageController,
-                  decoration: InputDecoration(
-                    labelText: 'Dosage',
-                    prefixIcon: const Icon(
-                      Icons.medical_information,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: timeController,
-                  decoration: InputDecoration(
-                    labelText: 'Time',
-                    prefixIcon: const Icon(
-                      Icons.access_time,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: frequencyController,
-                  decoration: InputDecoration(
-                    labelText: 'Frequency',
-                    prefixIcon: const Icon(
-                      Icons.repeat,
-                      color: primaryGreen,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: primaryGreen,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-=======
       builder: (dialogContext) {
         return Dialog(
           backgroundColor: cream,
@@ -159,7 +60,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
@@ -168,7 +70,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                       width: 48,
                       decoration: BoxDecoration(
                         color: const Color(0xFFE3E9E1),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius:
+                            BorderRadius.circular(16),
                       ),
                       child: const Icon(
                         Icons.medication_rounded,
@@ -190,41 +93,31 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
-
                 _InputField(
                   controller: nameController,
                   label: 'Medicine name',
                   icon: Icons.medication_rounded,
                 ),
-
                 const SizedBox(height: 12),
-
                 _InputField(
                   controller: dosageController,
                   label: 'Dosage',
                   icon: Icons.medical_information_rounded,
                 ),
-
                 const SizedBox(height: 12),
-
                 _InputField(
                   controller: timeController,
                   label: 'Time',
                   icon: Icons.access_time_rounded,
                 ),
-
                 const SizedBox(height: 12),
-
                 _InputField(
                   controller: frequencyController,
                   label: 'Frequency',
                   icon: Icons.repeat_rounded,
                 ),
-
                 const SizedBox(height: 24),
-
                 Row(
                   children: [
                     Expanded(
@@ -237,23 +130,26 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                           side: const BorderSide(
                             color: sage,
                           ),
-                          padding: const EdgeInsets.symmetric(
+                          padding:
+                              const EdgeInsets.symmetric(
                             vertical: 14,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                          shape:
+                              RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(16),
                           ),
                         ),
                         child: const Text('Cancel'),
                       ),
                     ),
-
                     const SizedBox(width: 12),
-
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
-                          if (nameController.text.trim().isEmpty) {
+                          if (nameController.text
+                              .trim()
+                              .isEmpty) {
                             return;
                           }
 
@@ -262,21 +158,29 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                                 DateTime.now()
                                     .millisecondsSinceEpoch
                                     .toString(),
-                            name: nameController.text.trim(),
-                            dosage: dosageController.text.trim(),
-                            time: timeController.text.trim(),
-                            frequency: frequencyController.text.trim(),
+                            name: nameController.text
+                                .trim(),
+                            dosage: dosageController.text
+                                .trim(),
+                            time: timeController.text
+                                .trim(),
+                            frequency:
+                                frequencyController.text
+                                    .trim(),
                             acknowledged:
-                                medicine?.acknowledged ?? false,
+                                medicine?.acknowledged ??
+                                    false,
                           );
 
                           if (medicine == null) {
-                            await _medicineService.addMedicine(
+                            await _medicineService
+                                .addMedicine(
                               widget.elderId,
                               newMedicine,
                             );
                           } else {
-                            await _medicineService.updateMedicine(
+                            await _medicineService
+                                .updateMedicine(
                               widget.elderId,
                               newMedicine,
                             );
@@ -290,94 +194,33 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                           backgroundColor: darkSage,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(
+                          padding:
+                              const EdgeInsets.symmetric(
                             vertical: 14,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                          shape:
+                              RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(16),
                           ),
                         ),
                         child: Text(
-                          medicine == null ? 'Add medicine' : 'Save changes',
+                          medicine == null
+                              ? 'Add medicine'
+                              : 'Save changes',
                         ),
                       ),
                     ),
                   ],
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                 ),
               ],
             ),
           ),
-<<<<<<< HEAD
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: darkGreen,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryGreen,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () async {
-                if (nameController.text.trim().isEmpty) {
-                  return;
-                }
-
-                final newMedicine = Medicine(
-                  id: medicine?.id ??
-                      DateTime.now()
-                          .millisecondsSinceEpoch
-                          .toString(),
-                  name: nameController.text.trim(),
-                  dosage: dosageController.text.trim(),
-                  time: timeController.text.trim(),
-                  frequency: frequencyController.text.trim(),
-                  acknowledged: medicine?.acknowledged ?? false,
-                );
-
-                if (medicine == null) {
-                  await _medicineService.addMedicine(
-                    widget.elderId,
-                    newMedicine,
-                  );
-                } else {
-                  await _medicineService.updateMedicine(
-                    widget.elderId,
-                    newMedicine,
-                  );
-                }
-
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: Text(
-                medicine == null ? 'Add' : 'Update',
-              ),
-            ),
-          ],
-=======
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
         );
       },
     );
   }
 
-<<<<<<< HEAD
-=======
-  // -----------------------------------------------------------------------
-  // DELETE
-  // -----------------------------------------------------------------------
-
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   void _deleteMedicine(String medicineId) async {
     await _medicineService.deleteMedicine(
       widget.elderId,
@@ -385,13 +228,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     );
   }
 
-<<<<<<< HEAD
-=======
-  // -----------------------------------------------------------------------
-  // ACKNOWLEDGE
-  // -----------------------------------------------------------------------
-
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   void _acknowledgeMedicine(String medicineId) async {
     await _medicineService.acknowledgeMedicine(
       widget.elderId,
@@ -399,40 +235,10 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     );
   }
 
-<<<<<<< HEAD
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          'Medicines',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: StreamBuilder<List<Medicine>>(
-        stream: _medicineService.getMedicines(widget.elderId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState ==
-              ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: primaryGreen,
-=======
-  // -----------------------------------------------------------------------
-  // BUILD
-  // -----------------------------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: background,
-
       appBar: AppBar(
         backgroundColor: background,
         foregroundColor: textDark,
@@ -455,217 +261,40 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
           ),
         ),
       ),
-
       body: StreamBuilder<List<Medicine>>(
-        stream: _medicineService.getMedicines(widget.elderId),
+        stream: _medicineService
+            .getMedicines(widget.elderId),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
                 color: darkSage,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
               ),
             );
           }
 
           if (snapshot.hasError) {
-<<<<<<< HEAD
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 50,
-                      color: darkGreen,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Error: ${snapshot.error}',
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-=======
             return _ErrorState(
               error: snapshot.error.toString(),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
             );
           }
 
           final medicines = snapshot.data ?? [];
 
-<<<<<<< HEAD
-          if (medicines.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.medication_outlined,
-                    size: 70,
-                    color: primaryGreen,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'No medicines added yet.',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                    ),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    'Tap + to add a medicine.',
-                    style: TextStyle(
-                      color: darkGreen,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: medicines.length,
-            itemBuilder: (context, index) {
-              final medicine = medicines[index];
-
-              return Card(
-                color: medicine.acknowledged
-                    ? lightGreen
-                    : Colors.white,
-                elevation: 2,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  title: Text(
-                    medicine.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17,
-                      color: textColor,
-                    ),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      '${medicine.dosage}\n'
-                      '${medicine.time} • ${medicine.frequency}',
-                      style: const TextStyle(
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  isThreeLine: true,
-                  leading: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: lightGreen,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      medicine.acknowledged
-                          ? Icons.check_circle
-                          : Icons.medication,
-                      color: darkGreen,
-                      size: 28,
-                    ),
-                  ),
-                  trailing: PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_vert,
-                      color: darkGreen,
-                    ),
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        _showMedicineDialog(
-                          medicine: medicine,
-                        );
-                      } else if (value == 'delete') {
-                        _deleteMedicine(medicine.id);
-                      } else if (value == 'acknowledge') {
-                        _acknowledgeMedicine(medicine.id);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              color: darkGreen,
-                            ),
-                            SizedBox(width: 10),
-                            Text('Edit'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete_outline,
-                              color: darkGreen,
-                            ),
-                            SizedBox(width: 10),
-                            Text('Delete'),
-                          ],
-                        ),
-                      ),
-                      if (!medicine.acknowledged)
-                        const PopupMenuItem(
-                          value: 'acknowledge',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle_outline,
-                                color: darkGreen,
-                              ),
-                              SizedBox(width: 10),
-                              Text('Mark as Acknowledged'),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: primaryGreen,
-=======
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
-              // -----------------------------------------------------------
-              // INTRO
-              // -----------------------------------------------------------
-
               Padding(
-                padding: const EdgeInsets.fromLTRB(22, 4, 22, 18),
+                padding:
+                    const EdgeInsets.fromLTRB(22, 4, 22, 18),
                 child: Row(
                   children: [
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
                         children: [
                           const Text(
                             'Medication',
@@ -689,13 +318,13 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                         ],
                       ),
                     ),
-
                     Container(
                       height: 50,
                       width: 50,
                       decoration: BoxDecoration(
                         color: const Color(0xFFE5D3C8),
-                        borderRadius: BorderRadius.circular(17),
+                        borderRadius:
+                            BorderRadius.circular(17),
                       ),
                       child: const Icon(
                         Icons.medication_rounded,
@@ -706,11 +335,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                   ],
                 ),
               ),
-
-              // -----------------------------------------------------------
-              // EMPTY STATE
-              // -----------------------------------------------------------
-
               if (medicines.isEmpty)
                 const Expanded(
                   child: Center(
@@ -718,15 +342,19 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                   ),
                 )
               else
-                // ---------------------------------------------------------
-                // MEDICINE LIST
-                // ---------------------------------------------------------
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(22, 0, 22, 110),
+                    padding:
+                        const EdgeInsets.fromLTRB(
+                      22,
+                      0,
+                      22,
+                      110,
+                    ),
                     itemCount: medicines.length,
                     itemBuilder: (context, index) {
-                      final medicine = medicines[index];
+                      final medicine =
+                          medicines[index];
 
                       return _MedicineCard(
                         medicine: medicine,
@@ -736,10 +364,14 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                           );
                         },
                         onDelete: () {
-                          _deleteMedicine(medicine.id);
+                          _deleteMedicine(
+                            medicine.id,
+                          );
                         },
                         onAcknowledge: () {
-                          _acknowledgeMedicine(medicine.id);
+                          _acknowledgeMedicine(
+                            medicine.id,
+                          );
                         },
                       );
                     },
@@ -749,22 +381,14 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
           );
         },
       ),
-
-      // ---------------------------------------------------------------
-      // ADD BUTTON
-      // ---------------------------------------------------------------
-
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton:
+          FloatingActionButton.extended(
         backgroundColor: darkSage,
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
         foregroundColor: Colors.white,
         elevation: 4,
         onPressed: () {
           _showMedicineDialog();
         },
-<<<<<<< HEAD
-        child: const Icon(Icons.add),
-=======
         icon: const Icon(
           Icons.add_rounded,
         ),
@@ -778,11 +402,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     );
   }
 }
-
-
-// =======================================================================
-// MEDICINE CARD
-// =======================================================================
 
 class _MedicineCard extends StatelessWidget {
   final Medicine medicine;
@@ -818,9 +437,9 @@ class _MedicineCard extends StatelessWidget {
       child: Column(
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
-              // Medicine icon
               Container(
                 height: 58,
                 width: 58,
@@ -828,7 +447,8 @@ class _MedicineCard extends StatelessWidget {
                   color: taken
                       ? const Color(0xFFD3E1D0)
                       : const Color(0xFFE5D3C8),
-                  borderRadius: BorderRadius.circular(19),
+                  borderRadius:
+                      BorderRadius.circular(19),
                 ),
                 child: Icon(
                   taken
@@ -840,13 +460,11 @@ class _MedicineCard extends StatelessWidget {
                   size: 29,
                 ),
               ),
-
               const SizedBox(width: 14),
-
-              // Name + dosage
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     Text(
                       medicine.name,
@@ -869,14 +487,14 @@ class _MedicineCard extends StatelessWidget {
                   ],
                 ),
               ),
-
               PopupMenuButton<String>(
                 icon: const Icon(
                   Icons.more_horiz_rounded,
                   color: Color(0xFF46695A),
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius:
+                      BorderRadius.circular(16),
                 ),
                 onSelected: (value) {
                   if (value == 'edit') {
@@ -920,7 +538,8 @@ class _MedicineCard extends StatelessWidget {
                       child: Row(
                         children: [
                           Icon(
-                            Icons.check_circle_outline_rounded,
+                            Icons
+                                .check_circle_outline_rounded,
                             color: Color(0xFF46695A),
                           ),
                           SizedBox(width: 10),
@@ -932,13 +551,7 @@ class _MedicineCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 18),
-
-          // -------------------------------------------------------------
-          // TIME / FREQUENCY
-          // -------------------------------------------------------------
-
           Row(
             children: [
               Expanded(
@@ -950,9 +563,7 @@ class _MedicineCard extends StatelessWidget {
                       : medicine.time,
                 ),
               ),
-
               const SizedBox(width: 10),
-
               Expanded(
                 child: _MedicineDetail(
                   icon: Icons.repeat_rounded,
@@ -964,18 +575,13 @@ class _MedicineCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 14),
-
-          // -------------------------------------------------------------
-          // STATUS
-          // -------------------------------------------------------------
-
           GestureDetector(
             onTap: taken ? null : onAcknowledge,
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
+              padding:
+                  const EdgeInsets.symmetric(
                 horizontal: 15,
                 vertical: 12,
               ),
@@ -983,14 +589,16 @@ class _MedicineCard extends StatelessWidget {
                 color: taken
                     ? const Color(0xFFD3E1D0)
                     : const Color(0xFFF0D5CE),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius:
+                    BorderRadius.circular(16),
               ),
               child: Row(
                 children: [
                   Icon(
                     taken
                         ? Icons.check_circle_rounded
-                        : Icons.radio_button_unchecked_rounded,
+                        : Icons
+                            .radio_button_unchecked_rounded,
                     color: taken
                         ? const Color(0xFF46695A)
                         : const Color(0xFFC85C50),
@@ -1027,11 +635,6 @@ class _MedicineCard extends StatelessWidget {
   }
 }
 
-
-// =======================================================================
-// MEDICINE DETAIL
-// =======================================================================
-
 class _MedicineDetail extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1046,13 +649,15 @@ class _MedicineDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding:
+          const EdgeInsets.symmetric(
         horizontal: 12,
         vertical: 11,
       ),
       decoration: BoxDecoration(
         color: const Color(0xFFF1ECE2),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius:
+            BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -1064,7 +669,8 @@ class _MedicineDetail extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
@@ -1076,7 +682,8 @@ class _MedicineDetail extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  overflow: TextOverflow.ellipsis,
+                  overflow:
+                      TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -1091,11 +698,6 @@ class _MedicineDetail extends StatelessWidget {
     );
   }
 }
-
-
-// =======================================================================
-// INPUT FIELD
-// =======================================================================
 
 class _InputField extends StatelessWidget {
   final TextEditingController controller;
@@ -1122,11 +724,13 @@ class _InputField extends StatelessWidget {
         filled: true,
         fillColor: const Color(0xFFF1ECE2),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(17),
+          borderRadius:
+              BorderRadius.circular(17),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(17),
+          borderRadius:
+              BorderRadius.circular(17),
           borderSide: const BorderSide(
             color: Color(0xFF7FA68F),
             width: 2,
@@ -1137,12 +741,8 @@ class _InputField extends StatelessWidget {
   }
 }
 
-
-// =======================================================================
-// EMPTY STATE
-// =======================================================================
-
-class _EmptyMedicineState extends StatelessWidget {
+class _EmptyMedicineState
+    extends StatelessWidget {
   const _EmptyMedicineState();
 
   @override
@@ -1157,7 +757,8 @@ class _EmptyMedicineState extends StatelessWidget {
             width: 92,
             decoration: BoxDecoration(
               color: const Color(0xFFE5D3C8),
-              borderRadius: BorderRadius.circular(30),
+              borderRadius:
+                  BorderRadius.circular(30),
             ),
             child: const Icon(
               Icons.medication_rounded,
@@ -1165,9 +766,7 @@ class _EmptyMedicineState extends StatelessWidget {
               color: Color(0xFFC85C50),
             ),
           ),
-
           const SizedBox(height: 20),
-
           const Text(
             'No medicines yet',
             style: TextStyle(
@@ -1176,9 +775,7 @@ class _EmptyMedicineState extends StatelessWidget {
               color: Color(0xFF26352F),
             ),
           ),
-
           const SizedBox(height: 7),
-
           const Text(
             'Add the medicines your elder needs to take.',
             textAlign: TextAlign.center,
@@ -1194,11 +791,6 @@ class _EmptyMedicineState extends StatelessWidget {
   }
 }
 
-
-// =======================================================================
-// ERROR STATE
-// =======================================================================
-
 class _ErrorState extends StatelessWidget {
   final String error;
 
@@ -1212,14 +804,16 @@ class _ErrorState extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment:
+              MainAxisAlignment.center,
           children: [
             Container(
               height: 80,
               width: 80,
               decoration: BoxDecoration(
                 color: const Color(0xFFF0D5CE),
-                borderRadius: BorderRadius.circular(26),
+                borderRadius:
+                    BorderRadius.circular(26),
               ),
               child: const Icon(
                 Icons.error_outline_rounded,
@@ -1227,9 +821,7 @@ class _ErrorState extends StatelessWidget {
                 size: 40,
               ),
             ),
-
             const SizedBox(height: 18),
-
             const Text(
               'Something went wrong',
               style: TextStyle(
@@ -1238,9 +830,7 @@ class _ErrorState extends StatelessWidget {
                 color: Color(0xFF26352F),
               ),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               error,
               textAlign: TextAlign.center,
@@ -1251,7 +841,6 @@ class _ErrorState extends StatelessWidget {
             ),
           ],
         ),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
       ),
     );
   }
