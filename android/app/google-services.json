@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "227094038804",
-    "project_id": "carecircle-62a1c",
-    "storage_bucket": "carecircle-62a1c.firebasestorage.app"
+    "project_number": "616798473724",
+    "project_id": "carecircle-755eb",
+    "storage_bucket": "carecircle-755eb.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:227094038804:android:9cf5717aa34d920f745a01",
+        "mobilesdk_app_id": "1:616798473724:android:369540cb3baf56d7077679",
         "android_client_info": {
           "package_name": "com.example.care_circle"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBKPIOBTZIS2CXBTxCSjHk9lIwKhmvVZHA"
+          "current_key": "AIzaSyCVPqA0gcyk78kiu95798iMXdXfZ-Hz7KA"
         }
       ],
       "services": {

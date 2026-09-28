@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/nearby_service_model.dart';
+import '../../models/nearby_service_model.dart';
 
 class NearbyServiceService {
   final FirebaseFirestore _firestore =

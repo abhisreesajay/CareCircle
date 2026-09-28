@@ -13,6 +13,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+<<<<<<< HEAD
   bool _isLoading = false;
 
   final AuthService _authService = AuthService();
@@ -38,6 +39,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
+=======
+
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+>>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 
   @override
   void dispose() {
@@ -46,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+<<<<<<< HEAD
   Future<void> _showForgotPasswordDialog() async {
     final resetEmailController = TextEditingController(text: _emailController.text);
     
@@ -98,21 +105,56 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
     );
+=======
+  void _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await AuthService().loginUser(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      // Firebase authStateChanges stream in AuthWrapper automatically handles routing upon successful login.
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll(RegExp(r'\[.*?\]'), '').trim()),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+>>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   }
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
+=======
+    final theme = Theme.of(context);
+
+>>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
+<<<<<<< HEAD
             padding: const EdgeInsets.all(24.0),
+=======
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+>>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+<<<<<<< HEAD
                   const Icon(Icons.favorite, size: 80, color: Colors.deepPurple),
                   const SizedBox(height: 16),
                   const Text(
@@ -171,6 +213,133 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     },
                     child: const Text('Don\'t have an account? Sign Up'),
+=======
+                  // Logo Header
+                  Icon(
+                    Icons.favorite_rounded,
+                    size: 72,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'CareCircle',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  Text(
+                    'Connecting Caregivers & Elders',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+
+                  // Email Field
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    decoration: InputDecoration(
+                      labelText: 'Email Address',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+                        return 'Enter a valid email address';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Password Field
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _handleLogin(),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() => _obscurePassword = !_obscurePassword);
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Submit Button
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Sign In',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // SignUp Link
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SignUpScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('Sign Up'),
+                      ),
+                    ],
+>>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
                   ),
                 ],
               ),
