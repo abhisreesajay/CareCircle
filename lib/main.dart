@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Fixed import syntax
 
 import 'firebase_options.dart';
-import 'screens/admin/admin_dashboard_screen.dart'; // Added Admin Screen import
+import 'theme/app_theme.dart';
+import 'screens/admin/admin_dashboard_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/caregiver/caregiver_dashboard.dart';
 import 'screens/elder/elder_home.dart';
@@ -23,10 +24,7 @@ class CareCircleApp extends StatelessWidget {
     return MaterialApp(
       title: 'CareCircle',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.caregiverTheme,
       home: const AuthWrapper(),
     );
   }
@@ -41,16 +39,14 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         if (snapshot.hasData) {
           return RoleRouter(uid: snapshot.data!.uid);
         }
 
-        return LoginScreen();
+        return const LoginScreen();
       },
     );
   }
@@ -66,9 +62,7 @@ class RoleRouter extends StatelessWidget {
       future: FirebaseFirestore.instance.collection('users').doc(uid).get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         if (snapshot.hasData && snapshot.data!.exists) {
@@ -77,16 +71,27 @@ class RoleRouter extends StatelessWidget {
 
           switch (role) {
             case 'admin':
-              return const AdminDashboardScreen();
+              return Theme(
+                data: AppTheme.adminTheme,
+                child: const AdminDashboardScreen(),
+              );
             case 'caregiver':
-              return const CaregiverDashboard(elderId: 'test-elder-001');
+              final linkedElders = List<String>.from(data['linkedElders'] ?? []);
+              final activeElderId = linkedElders.isNotEmpty ? linkedElders.first : 'test-elder-001';
+              return Theme(
+                data: AppTheme.caregiverTheme,
+                child: CaregiverDashboard(elderId: activeElderId),
+              );
             case 'elder':
             default:
-              return const ElderHome();
+              return Theme(
+                data: AppTheme.elderTheme,
+                child: const ElderHome(),
+              );
           }
         }
 
-        return LoginScreen();
+        return const LoginScreen();
       },
     );
   }

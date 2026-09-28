@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/app_logo.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,22 +21,25 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final messenger = ScaffoldMessenger.of(context);
     setState(() => _isLoading = true);
+
     try {
-      // Calls the correct signIn method from Step 1
       await _authService.signIn(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // If successful, main.dart's AuthWrapper will automatically route the user
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login Failed: ${e.toString().split(']').last}')),
-        );
-      }
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Login Failed: ${e.toString().split(']').last}'),
+        ),
+      );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -47,16 +51,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _showForgotPasswordDialog() async {
-    final resetEmailController = TextEditingController(text: _emailController.text);
-    
+    final resetEmailController =
+        TextEditingController(text: _emailController.text);
+
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Reset Password'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Enter your email address to receive a password reset link.'),
+            const Text(
+              'Enter your email address to receive a password reset link.',
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: resetEmailController,
@@ -70,26 +77,34 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
-              if (resetEmailController.text.isNotEmpty) {
+              final email = resetEmailController.text.trim();
+              if (email.isNotEmpty) {
+                final navigator = Navigator.of(dialogContext);
+                final messenger = ScaffoldMessenger.of(context);
+
                 try {
-                  await _authService.sendPasswordResetEmail(resetEmailController.text.trim());
-                  if (mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Password reset email sent! Check your inbox.')),
-                    );
-                  }
+                  await _authService.sendPasswordResetEmail(email);
+                  if (!mounted) return;
+                  navigator.pop();
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Password reset email sent! Check your inbox.',
+                      ),
+                    ),
+                  );
                 } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: ${e.toString().split(']').last}')),
-                    );
-                  }
+                  if (!mounted) return;
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text('Error: ${e.toString().split(']').last}'),
+                    ),
+                  );
                 }
               }
             },
@@ -98,10 +113,14 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
     );
+
+    resetEmailController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -113,12 +132,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.favorite, size: 80, color: Colors.deepPurple),
-                  const SizedBox(height: 16),
-                  const Text(
+                  const Center(child: AppLogo(iconSize: 44)),
+                  const SizedBox(height: 32),
+                  Text(
                     'Welcome to CareCircle',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Sign in to access your dashboard',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                   ),
                   const SizedBox(height: 32),
                   TextFormField(
@@ -126,10 +155,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Email',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: Icon(Icons.email_outlined),
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    validator: (v) => v!.isEmpty || !v.contains('@') ? 'Enter a valid email' : null,
+                    validator: (v) => v == null || v.isEmpty || !v.contains('@')
+                        ? 'Enter a valid email'
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -137,40 +168,41 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: const InputDecoration(
                       labelText: 'Password',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: Icon(Icons.lock_outline),
                     ),
                     obscureText: true,
-                    validator: (v) => v!.isEmpty ? 'Enter your password' : null,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Enter your password' : null,
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                      backgroundColor: Colors.deepPurple,
-                      foregroundColor: Colors.white,
-                    ),
                     child: _isLoading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white))
-                        : const Text('Login', style: TextStyle(fontSize: 16)),
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Login'),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // FIXED: Forgot Password Button
+                  const SizedBox(height: 12),
                   TextButton(
                     onPressed: _showForgotPasswordDialog,
                     child: const Text('Forgot Password?'),
-                  ), 
-                  
-                  // FIXED: Sign Up Button
+                  ),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const SignupScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const SignupScreen(),
+                        ),
                       );
                     },
-                    child: const Text('Don\'t have an account? Sign Up'),
+                    child: const Text("Don't have an account? Sign Up"),
                   ),
                 ],
               ),
