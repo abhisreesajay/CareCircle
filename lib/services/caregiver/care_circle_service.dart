@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/care_circle_model.dart';
+import '../../models/care_circle_model.dart';
 
 class CareCircleService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

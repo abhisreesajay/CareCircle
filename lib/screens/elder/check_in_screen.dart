@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/check_in_history_service.dart';
+import '../../services/caregiver/check_in_history_service.dart';
 import '../../services/check_in_reminder_service.dart';
 
 class CheckInScreen extends StatefulWidget {

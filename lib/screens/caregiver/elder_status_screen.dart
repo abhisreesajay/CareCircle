@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/elder_status_service.dart';
+import '../../services/caregiver/elder_status_service.dart';
 
 class ElderStatusScreen extends StatelessWidget {
   final String elderId;

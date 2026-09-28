@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/alert_model.dart';
-import '../../services/alert_service.dart';
+import '../../services/caregiver/alert_service.dart';
 
 class AlertsScreen extends StatelessWidget {
   final String elderId;

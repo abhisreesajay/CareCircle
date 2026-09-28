@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment_model.dart';
-import '../../services/appointment_service.dart';
+import '../../services/caregiver/appointment_service.dart';
 
 class AppointmentsScreen extends StatefulWidget {
   final String elderId;

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'alert_service.dart';
+import 'caregiver/alert_service.dart';
 import 'check_in_reminder_service.dart';
 
 class CheckInReminderScheduler {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/nearby_service_model.dart';
-import '../../services/nearby_service_service.dart';
+import '../../services/caregiver/nearby_service_service.dart';
 
 class NearbyServicesScreen extends StatefulWidget {
   final String elderId;
