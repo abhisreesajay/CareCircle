@@ -4,10 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'firebase_options.dart';
-import 'screens/auth/login_screen.dart';import 'screens/caregiver/caregiver_dashboard.dart';
-
+import 'screens/admin/admin_dashboard_screen.dart'; // Added Admin Screen import
+import 'screens/auth/login_screen.dart';
+import 'screens/caregiver/caregiver_dashboard.dart';
 import 'screens/elder/elder_home.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,10 +75,14 @@ class RoleRouter extends StatelessWidget {
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final role = data['role'] ?? 'elder';
 
-          if (role == 'caregiver') {
-            return const CaregiverDashboard(elderId: 'temporary_test_id');
-          } else {
-            return const ElderHome();
+          switch (role) {
+            case 'admin':
+              return const AdminDashboardScreen();
+            case 'caregiver':
+              return const CaregiverDashboard(elderId: 'test-elder-001');
+            case 'elder':
+            default:
+              return const ElderHome();
           }
         }
 
