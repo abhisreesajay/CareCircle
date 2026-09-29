@@ -31,6 +31,9 @@ class CaregiverDashboard extends StatefulWidget {
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
   static const Color darkGreen = Color(0xFF536B3A);
   static const Color lightGreen = Color(0xFFE8EFDF);
@@ -396,6 +399,7 @@ class CaregiverDashboard extends StatefulWidget {
                         fontSize: 12,
                         color: Colors.black54,
                       ),
+<<<<<<< HEAD
 =======
   @override
   State<CaregiverDashboard> createState() =>
@@ -729,16 +733,22 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                         ),
                       ],
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                     ),
                   ],
                 ),
               ),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
               const SizedBox(width: 8),
               const Icon(
                 Icons.arrow_forward_ios,
                 size: 14,
                 color: primaryGreen,
+<<<<<<< HEAD
 =======
 
               const SizedBox(height: 26),
@@ -1058,6 +1068,8 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                   ),
                 ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
               ),
             ],
           ),
@@ -1065,6 +1077,7 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
       ),
     );
   }
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 }
@@ -1439,4 +1452,6 @@ class _SmallFeatureCard extends StatelessWidget {
     );
   }
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 }

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment_model.dart';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import '../../services/appointment_service.dart';
 =======
 import '../../services/caregiver/appointment_service.dart';
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+import '../../services/caregiver/appointment_service.dart';
+>>>>>>> develop
 
 class AppointmentsScreen extends StatefulWidget {
   final String elderId;
@@ -22,6 +26,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   final AppointmentService _appointmentService = AppointmentService();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
   static const Color darkGreen = Color(0xFF536B3A);
   static const Color lightGreen = Color(0xFFE8EFDF);
@@ -51,6 +58,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             style: const TextStyle(
               color: darkGreen,
               fontWeight: FontWeight.bold,
+<<<<<<< HEAD
 =======
   static const Color cream = Color(0xFFF4EFE5);
   static const Color darkSage = Color(0xFF46695A);
@@ -94,6 +102,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               color: textDark,
               fontWeight: FontWeight.w800,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
             ),
           ),
           content: SingleChildScrollView(
@@ -101,6 +111,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
                 TextField(
                   controller: doctorController,
                   decoration: InputDecoration(
@@ -204,6 +217,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+<<<<<<< HEAD
 =======
                 _DialogField(
                   controller: doctorController,
@@ -238,11 +252,16 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   maxLines: 2,
                   hint: 'e.g. Routine check-up',
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                 ),
               ],
             ),
           ),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
           actions: [
             TextButton(
               onPressed: () {
@@ -253,6 +272,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 style: TextStyle(
                   color: darkGreen,
                 ),
+<<<<<<< HEAD
 =======
           actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           actions: [
@@ -262,16 +282,22 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 'Cancel',
                 style: TextStyle(color: mutedText),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
               ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
                 backgroundColor: primaryGreen,
                 foregroundColor: Colors.white,
               ),
               onPressed: () async {
                 if (doctorController.text.trim().isEmpty) {
+<<<<<<< HEAD
 =======
                 backgroundColor: darkSage,
                 foregroundColor: Colors.white,
@@ -296,11 +322,14 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     ),
                   );
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                   return;
                 }
 
                 final newAppointment = Appointment(
                   id: appointment?.id ??
+<<<<<<< HEAD
 <<<<<<< HEAD
                       DateTime.now()
                           .millisecondsSinceEpoch
@@ -308,6 +337,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 =======
                       DateTime.now().millisecondsSinceEpoch.toString(),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+                      DateTime.now()
+                          .millisecondsSinceEpoch
+                          .toString(),
+>>>>>>> develop
                   doctorName: doctorController.text.trim(),
                   hospitalName: hospitalController.text.trim(),
                   date: dateController.text.trim(),
@@ -316,6 +350,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 );
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
                 if (appointment == null) {
                   await _appointmentService.addAppointment(
                     widget.elderId,
@@ -334,6 +371,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               },
               child: Text(
                 appointment == null ? 'Add' : 'Update',
+<<<<<<< HEAD
 =======
                 try {
                   if (appointment == null) {
@@ -374,6 +412,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               child: Text(
                 appointment == null ? 'Add' : 'Save',
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
               ),
             ),
           ],
@@ -381,6 +421,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       },
     );
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   }
 
   Future<void> _deleteAppointment(String appointmentId) async {
@@ -388,6 +431,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       widget.elderId,
       appointmentId,
     );
+<<<<<<< HEAD
 =======
 
     doctorController.dispose();
@@ -475,12 +519,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       await _deleteAppointment(appointment);
     }
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(
@@ -503,6 +552,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             return const Center(
               child: CircularProgressIndicator(
                 color: primaryGreen,
+<<<<<<< HEAD
 =======
       backgroundColor: cream,
       appBar: AppBar(
@@ -537,12 +587,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               child: CircularProgressIndicator(
                 color: darkSage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
               ),
             );
           }
 
           if (snapshot.hasError) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -562,10 +617,13 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   ],
                 ),
               ),
+<<<<<<< HEAD
 =======
             return _ErrorState(
               message: 'Could not load appointments.',
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
             );
           }
 
@@ -573,6 +631,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
           if (appointments.isEmpty) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -696,6 +757,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                             SizedBox(width: 10),
                             Text('Delete'),
                           ],
+<<<<<<< HEAD
 =======
             return const _EmptyState();
           }
@@ -848,12 +910,17 @@ class _AppointmentCard extends StatelessWidget {
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                         ),
                       ),
                     ],
                   ),
                 ),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
               );
             },
           );
@@ -867,6 +934,7 @@ class _AppointmentCard extends StatelessWidget {
           _showAppointmentDialog();
         },
         child: const Icon(Icons.add),
+<<<<<<< HEAD
 =======
                 PopupMenuButton<String>(
                   color: cardCream,
@@ -1141,6 +1209,8 @@ class _ErrorState extends StatelessWidget {
           ],
         ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
       ),
     );
   }

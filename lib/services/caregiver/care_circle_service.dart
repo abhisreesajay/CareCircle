@@ -1,6 +1,10 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+<<<<<<< HEAD
+=======
+import '../../models/care_circle_model.dart';
+>>>>>>> develop
 
 class CareCircleService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;

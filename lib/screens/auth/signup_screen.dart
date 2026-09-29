@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import 'login_screen.dart';
 =======
 <<<<<<< HEAD
 import '../../services/care_circle_service.dart';
 >>>>>>> main
+=======
+import '../../services/caregiver/care_circle_service.dart';
+
+>>>>>>> develop
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -58,6 +63,7 @@ class _SignupScreenState extends State<SignupScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Signup Failed: ${e.toString().split(']').last}')),
+<<<<<<< HEAD
 =======
 
 class SignUpScreen extends StatefulWidget {
@@ -108,6 +114,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
         );
       }
     } finally {
@@ -118,6 +126,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
@@ -406,6 +417,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
             ],
+<<<<<<< HEAD
 =======
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -585,6 +597,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           ),
         ),
       ),

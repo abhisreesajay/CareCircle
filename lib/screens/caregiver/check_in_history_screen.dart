@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 <<<<<<< HEAD
 import '../../models/check_in_history_model.dart';
+<<<<<<< HEAD
 import '../../services/check_in_history_service.dart';
+=======
+import '../../services/caregiver/check_in_history_service.dart';
+>>>>>>> develop
 
 class CheckInHistoryScreen extends StatelessWidget {
 =======
@@ -34,6 +38,7 @@ class CheckInHistoryScreen extends StatefulWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(),
+<<<<<<< HEAD
 =======
   State<CheckInHistoryScreen> createState() =>
       _CheckInHistoryScreenState();
@@ -139,6 +144,8 @@ class _CheckInHistoryScreenState
                 color: darkSage,
               ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
             );
           }
 
@@ -207,6 +214,7 @@ class _CheckInHistoryScreenState
                 ),
               );
             },
+<<<<<<< HEAD
 =======
           final completed =
               history.where(
@@ -411,11 +419,14 @@ class _CheckInHistoryScreenState
               ),
             ],
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           );
         },
       ),
     );
   }
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 }
@@ -461,4 +472,6 @@ class _SummaryPill
     );
   }
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 }

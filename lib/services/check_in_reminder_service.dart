@@ -2,12 +2,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/check_in_reminder_model.dart';
 
 class CheckInReminderService {
+<<<<<<< HEAD
   final FirebaseFirestore _firestore =
       FirebaseFirestore.instance;
 
   Stream<List<CheckInReminder>> getReminders(
     String elderId,
   ) {
+=======
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> createReminder({
+    required String elderId,
+    required String scheduledTime,
+  }) async {
+    await _firestore
+        .collection('elders')
+        .doc(elderId)
+        .collection('checkInReminders')
+        .add({
+      'elderId': elderId,
+      'scheduledTime': scheduledTime,
+      'status': 'PENDING',
+      'firstReminderSent': false,
+      'secondReminderSent': false,
+      'caregiverNotified': false,
+    });
+  }
+
+  Stream<List<CheckInReminder>> getReminders(String elderId) {
+>>>>>>> develop
     return _firestore
         .collection('elders')
         .doc(elderId)
@@ -78,6 +102,7 @@ class CheckInReminderService {
         .doc(reminderId)
         .update({
       'status': 'COMPLETED',
+<<<<<<< HEAD
       'completedAt': FieldValue.serverTimestamp(),
     });
   }
@@ -106,10 +131,17 @@ class CheckInReminderService {
         '${now.month.toString().padLeft(2, '0')}-'
         '${now.day.toString().padLeft(2, '0')}';
 
+=======
+    });
+  }
+
+  Future<String?> getPendingReminderId(String elderId) async {
+>>>>>>> develop
     final snapshot = await _firestore
         .collection('elders')
         .doc(elderId)
         .collection('checkInReminders')
+<<<<<<< HEAD
         .where(
           'scheduledDate',
           isEqualTo: today,
@@ -143,6 +175,9 @@ class CheckInReminderService {
           'status',
           isEqualTo: 'PENDING',
         )
+=======
+        .where('status', isEqualTo: 'PENDING')
+>>>>>>> develop
         .limit(1)
         .get();
 

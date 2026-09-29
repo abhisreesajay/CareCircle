@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../models/nearby_service_model.dart';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import '../../services/nearby_service_service.dart';
 =======
 import '../../services/caregiver/nearby_service_service.dart';
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+import '../../services/caregiver/nearby_service_service.dart';
+>>>>>>> develop
 
 class NearbyServicesScreen extends StatefulWidget {
   final String elderId;
@@ -20,6 +24,9 @@ class NearbyServicesScreen extends StatefulWidget {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
 class _NearbyServicesScreenState
     extends State<NearbyServicesScreen> {
   final NearbyServiceService _service =
@@ -30,6 +37,7 @@ class _NearbyServicesScreenState
   static const Color lightGreen = Color(0xFFE8EFDF);
   static const Color backgroundColor = Color(0xFFF7F9F3);
   static const Color textColor = Color(0xFF26301F);
+<<<<<<< HEAD
 =======
 class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
   final NearbyServiceService _service = NearbyServiceService();
@@ -43,6 +51,8 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 
   void _showServiceForm({NearbyService? service}) {
     final nameController =
@@ -59,6 +69,9 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
     showDialog(
       context: context,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
@@ -119,6 +132,7 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                           ),
                         ),
                       ),
+<<<<<<< HEAD
 =======
       builder: (dialogContext) {
         return StatefulBuilder(
@@ -216,6 +230,8 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                       ),
                       dropdownColor: cream,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                       items: const [
                         DropdownMenuItem(
                           value: 'Hospital',
@@ -236,6 +252,9 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                       ],
                       onChanged: (value) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
                         setDialogState(() {
                           type = value!;
                         });
@@ -284,6 +303,7 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                           ),
                         ),
                       ),
+<<<<<<< HEAD
 =======
                         if (value == null) return;
 
@@ -400,11 +420,16 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                         ),
                       ],
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                     ),
                   ],
                 ),
               ),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
               actionsPadding: const EdgeInsets.fromLTRB(
                 16,
                 0,
@@ -476,8 +501,11 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                   ),
                 ),
               ],
+<<<<<<< HEAD
 =======
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
             );
           },
         );
@@ -501,6 +529,7 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
     return Icons.medical_services_outlined;
   }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
   Color _getServiceColor(String type) {
@@ -599,11 +628,16 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
   }
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
       appBar: AppBar(
         title: const Text(
           'Nearby Services',
@@ -622,6 +656,7 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
         onPressed: () => _showServiceForm(),
         child: const Icon(Icons.add),
       ),
+<<<<<<< HEAD
 =======
 
       appBar: AppBar(
@@ -655,6 +690,8 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
       ),
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
       body: StreamBuilder<List<NearbyService>>(
         stream: _service.getServices(widget.elderId),
         builder: (context, snapshot) {
@@ -663,16 +700,23 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
             return const Center(
               child: CircularProgressIndicator(
 <<<<<<< HEAD
+<<<<<<< HEAD
                 color: primaryGreen,
 =======
                 color: darkSage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+                color: primaryGreen,
+>>>>>>> develop
               ),
             );
           }
 
           if (snapshot.hasError) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -698,15 +742,21 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                 ),
               ),
             );
+<<<<<<< HEAD
 =======
             return const _ErrorState();
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           }
 
           final services = snapshot.data ?? [];
 
           if (services.isEmpty) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
@@ -970,6 +1020,7 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                 ),
               );
             },
+<<<<<<< HEAD
 =======
             return const _EmptyServiceState();
           }
@@ -1041,11 +1092,14 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
               ),
             ],
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           );
         },
       ),
     );
   }
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 }
@@ -1623,4 +1677,6 @@ class _ErrorState extends StatelessWidget {
     );
   }
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 }

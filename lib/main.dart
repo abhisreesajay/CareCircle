@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'services/messaging_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+<<<<<<< HEAD
 import 'models/user_model.dart';
 import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
@@ -63,6 +64,20 @@ Future<void> main() async {
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 >>>>>>> main
+=======
+import 'package:cloud_firestore/cloud_firestore.dart'; // Fixed import syntax
+
+import 'firebase_options.dart';
+import 'theme/app_theme.dart';
+import 'screens/admin/admin_dashboard_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/caregiver/caregiver_dashboard.dart';
+import 'screens/elder/elder_home.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+>>>>>>> develop
   runApp(const CareCircleApp());
 }
 
@@ -74,6 +89,7 @@ class CareCircleApp extends StatelessWidget {
     return MaterialApp(
       title: 'CareCircle',
       debugShowCheckedModeBanner: false,
+<<<<<<< HEAD
       theme: ThemeData(
 <<<<<<< HEAD
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF164A63)),
@@ -93,6 +109,9 @@ class CareCircleApp extends StatelessWidget {
         '/safe-zone': (context) => const SafeZoneScreen(),
         '/invite-code': (context) => const InviteCodeScreen(),
       },
+=======
+      theme: AppTheme.caregiverTheme,
+>>>>>>> develop
       home: const AuthWrapper(),
     );
   }
@@ -107,16 +126,17 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         if (!snapshot.hasData || snapshot.data == null) {
           return const LoginScreen();
+=======
+        if (snapshot.hasData) {
+          return RoleRouter(uid: snapshot.data!.uid);
+>>>>>>> develop
         }
 
         final user = snapshot.data!;
@@ -156,11 +176,7 @@ class AuthWrapper extends StatelessWidget {
 
 class RoleRouter extends StatefulWidget {
   final String uid;
-
-  const RoleRouter({
-    super.key,
-    required this.uid,
-  });
+  const RoleRouter({super.key, required this.uid});
 
   @override
   State<RoleRouter> createState() => _RoleRouterState();
@@ -199,6 +215,7 @@ class _RoleRouterState extends State<RoleRouter> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return StreamBuilder<
         DocumentSnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
@@ -216,15 +233,40 @@ class _RoleRouterState extends State<RoleRouter> {
         }
 
 <<<<<<< HEAD
+=======
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance.collection('users').doc(uid).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+>>>>>>> develop
         if (snapshot.hasData && snapshot.data!.exists) {
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final role = data['role'] ?? 'elder';
 
-          if (role == 'caregiver') {
-            return const CaregiverDashboard(elderId: 'temporary_test_id');
-          } else {
-            return const ElderHome();
+          switch (role) {
+            case 'admin':
+              return Theme(
+                data: AppTheme.adminTheme,
+                child: const AdminDashboardScreen(),
+              );
+            case 'caregiver':
+              final linkedElders = List<String>.from(data['linkedElders'] ?? []);
+              final activeElderId = linkedElders.isNotEmpty ? linkedElders.first : 'test-elder-001';
+              return Theme(
+                data: AppTheme.caregiverTheme,
+                child: CaregiverDashboard(elderId: activeElderId),
+              );
+            case 'elder':
+            default:
+              return Theme(
+                data: AppTheme.elderTheme,
+                child: const ElderHome(),
+              );
           }
+<<<<<<< HEAD
 =======
         if (snapshot.hasError) {
           return Scaffold(
@@ -313,6 +355,11 @@ class _RoleRouterState extends State<RoleRouter> {
           ),
 >>>>>>> main
         );
+=======
+        }
+
+        return const LoginScreen();
+>>>>>>> develop
       },
     );
   }

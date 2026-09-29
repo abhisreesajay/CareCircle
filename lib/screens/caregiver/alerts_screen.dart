@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../models/alert_model.dart';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import '../../services/alert_service.dart';
 =======
 import '../../services/caregiver/alert_service.dart';
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+import '../../services/caregiver/alert_service.dart';
+>>>>>>> develop
 
 class AlertsScreen extends StatelessWidget {
   final String elderId;
@@ -15,11 +19,15 @@ class AlertsScreen extends StatelessWidget {
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
   static const Color darkGreen = Color(0xFF536B3A);
   static const Color lightGreen = Color(0xFFE8EFDF);
   static const Color backgroundColor = Color(0xFFF7F9F3);
   static const Color textColor = Color(0xFF26301F);
+<<<<<<< HEAD
 =======
   // CareCircle palette
   static const Color darkSage = Color(0xFF46695A);
@@ -29,6 +37,8 @@ class AlertsScreen extends StatelessWidget {
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +46,9 @@ class AlertsScreen extends StatelessWidget {
 
     return Scaffold(
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(
@@ -48,6 +61,7 @@ class AlertsScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
+<<<<<<< HEAD
 =======
       backgroundColor: background,
 
@@ -67,6 +81,8 @@ class AlertsScreen extends StatelessWidget {
       ),
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
       body: StreamBuilder<List<CareAlert>>(
         stream: service.getAlerts(elderId),
         builder: (context, snapshot) {
@@ -74,16 +90,23 @@ class AlertsScreen extends StatelessWidget {
             return const Center(
               child: CircularProgressIndicator(
 <<<<<<< HEAD
+<<<<<<< HEAD
                 color: primaryGreen,
 =======
                 color: darkSage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+                color: primaryGreen,
+>>>>>>> develop
               ),
             );
           }
 
           if (snapshot.hasError) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
@@ -108,15 +131,21 @@ class AlertsScreen extends StatelessWidget {
                 ),
               ),
             );
+<<<<<<< HEAD
 =======
             return const _ErrorState();
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           }
 
           final alerts = snapshot.data ?? [];
 
           if (alerts.isEmpty) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -205,6 +234,7 @@ class AlertsScreen extends StatelessWidget {
                 ),
               );
             },
+<<<<<<< HEAD
 =======
             return const _EmptyAlertState();
           }
@@ -330,11 +360,14 @@ class AlertsScreen extends StatelessWidget {
               ),
             ],
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           );
         },
       ),
     );
   }
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 }
@@ -618,4 +651,6 @@ class _ErrorState extends StatelessWidget {
     );
   }
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 }

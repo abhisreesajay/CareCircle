@@ -58,6 +58,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'carecircle-755eb.firebasestorage.app',
   );
   static const FirebaseOptions ios = FirebaseOptions(
+<<<<<<< HEAD
     apiKey: 'AIzaSyCaHNPcn7zjyR1XYX6Xh0McF0y01Q9VcL4',
     appId: '1:616798473724:ios:ff501c86b732ae6c077679',
     messagingSenderId: '616798473724',
@@ -71,6 +72,23 @@ class DefaultFirebaseOptions {
     messagingSenderId: '616798473724',
     projectId: 'carecircle-755eb',
     storageBucket: 'carecircle-755eb.firebasestorage.app',
+=======
+    apiKey: 'AIzaSyD7KEeRn7jMQW7tPNaZ4y8-M1JZDVCcYKQ',
+    appId: '1:227094038804:ios:9cebd7f73d4f6639745a01',
+    messagingSenderId: '227094038804',
+    projectId: 'carecircle-62a1c',
+    storageBucket: 'carecircle-62a1c.firebasestorage.app',
+    iosClientId: '227094038804-t6edun6ne0848beedgpse4afslnrnmg6.apps.googleusercontent.com',
+    iosBundleId: 'com.example.careCircle',
+  );
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyD7KEeRn7jMQW7tPNaZ4y8-M1JZDVCcYKQ',
+    appId: '1:227094038804:ios:9cebd7f73d4f6639745a01',
+    messagingSenderId: '227094038804',
+    projectId: 'carecircle-62a1c',
+    storageBucket: 'carecircle-62a1c.firebasestorage.app',
+    iosClientId: '227094038804-t6edun6ne0848beedgpse4afslnrnmg6.apps.googleusercontent.com',
+>>>>>>> develop
     iosBundleId: 'com.example.careCircle',
   );
 

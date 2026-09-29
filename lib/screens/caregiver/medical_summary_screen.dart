@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../models/medical_summary_model.dart';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import '../../services/medical_summary_service.dart';
 =======
 import '../../services/caregiver/medical_summary_service.dart';
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+import '../../services/caregiver/medical_summary_service.dart';
+>>>>>>> develop
 
 class MedicalSummaryScreen extends StatelessWidget {
   final String elderId;
@@ -15,11 +19,15 @@ class MedicalSummaryScreen extends StatelessWidget {
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
   static const Color darkGreen = Color(0xFF536B3A);
   static const Color lightGreen = Color(0xFFE8EFDF);
   static const Color backgroundColor = Color(0xFFF7F9F3);
   static const Color textColor = Color(0xFF26301F);
+<<<<<<< HEAD
 =======
   static const Color sage = Color(0xFF7FA68F);
   static const Color darkSage = Color(0xFF46695A);
@@ -29,6 +37,8 @@ class MedicalSummaryScreen extends StatelessWidget {
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +46,9 @@ class MedicalSummaryScreen extends StatelessWidget {
 
     return Scaffold(
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(
@@ -47,6 +60,7 @@ class MedicalSummaryScreen extends StatelessWidget {
         backgroundColor: primaryGreen,
         foregroundColor: Colors.white,
         elevation: 0,
+<<<<<<< HEAD
 =======
       backgroundColor: background,
       appBar: AppBar(
@@ -61,6 +75,8 @@ class MedicalSummaryScreen extends StatelessWidget {
           ),
         ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
       ),
       body: FutureBuilder<MedicalSummary?>(
         future: service.getMedicalSummary(elderId),
@@ -69,16 +85,23 @@ class MedicalSummaryScreen extends StatelessWidget {
             return const Center(
               child: CircularProgressIndicator(
 <<<<<<< HEAD
+<<<<<<< HEAD
                 color: primaryGreen,
 =======
                 color: darkSage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+                color: primaryGreen,
+>>>>>>> develop
               ),
             );
           }
 
           if (snapshot.hasError) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -104,15 +127,21 @@ class MedicalSummaryScreen extends StatelessWidget {
                 ),
               ),
             );
+<<<<<<< HEAD
 =======
             return const _ErrorState();
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           }
 
           final summary = snapshot.data;
 
           if (summary == null) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -163,6 +192,7 @@ class MedicalSummaryScreen extends StatelessWidget {
                   'Notes',
                   summary.notes,
                   Icons.notes,
+<<<<<<< HEAD
 =======
             return const _EmptyState();
           }
@@ -257,6 +287,8 @@ class MedicalSummaryScreen extends StatelessWidget {
                   icon: Icons.notes_rounded,
                   iconColor: sage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                 ),
               ],
             ),
@@ -266,6 +298,9 @@ class MedicalSummaryScreen extends StatelessWidget {
     );
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
 
   Widget _infoCard(
     String title,
@@ -324,6 +359,7 @@ class MedicalSummaryScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+<<<<<<< HEAD
 =======
 }
 
@@ -478,6 +514,8 @@ class _ErrorState extends StatelessWidget {
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
               ),
             ),
           ],

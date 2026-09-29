@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine_model.dart';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import '../../services/medicine_service.dart';
 =======
 import '../../services/caregiver/medicine_service.dart';
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+import '../../services/caregiver/medicine_service.dart';
+>>>>>>> develop
 
 class MedicinesScreen extends StatefulWidget {
   final String elderId;
@@ -22,11 +26,15 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   final MedicineService _medicineService = MedicineService();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
   static const Color darkGreen = Color(0xFF536B3A);
   static const Color lightGreen = Color(0xFFE8EFDF);
   static const Color backgroundColor = Color(0xFFF7F9F3);
   static const Color textColor = Color(0xFF26301F);
+<<<<<<< HEAD
 =======
   static const Color background = Color(0xFFF4EFE5);
   static const Color sage = Color(0xFF7FA68F);
@@ -39,6 +47,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   // ADD / EDIT MEDICINE
   // -----------------------------------------------------------------------
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 
   void _showMedicineDialog({Medicine? medicine}) {
     final nameController =
@@ -53,6 +63,9 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     showDialog(
       context: context,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
       builder: (context) {
         return AlertDialog(
           title: Text(
@@ -148,6 +161,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+<<<<<<< HEAD
 =======
       builder: (dialogContext) {
         return Dialog(
@@ -304,11 +318,16 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                     ),
                   ],
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                 ),
               ],
             ),
           ),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
           actions: [
             TextButton(
               onPressed: () {
@@ -364,13 +383,17 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
               ),
             ),
           ],
+<<<<<<< HEAD
 =======
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
         );
       },
     );
   }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
   // -----------------------------------------------------------------------
@@ -378,6 +401,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   // -----------------------------------------------------------------------
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
   void _deleteMedicine(String medicineId) async {
     await _medicineService.deleteMedicine(
       widget.elderId,
@@ -386,12 +411,15 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   // -----------------------------------------------------------------------
   // ACKNOWLEDGE
   // -----------------------------------------------------------------------
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
   void _acknowledgeMedicine(String medicineId) async {
     await _medicineService.acknowledgeMedicine(
       widget.elderId,
@@ -400,6 +428,9 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -423,6 +454,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
             return const Center(
               child: CircularProgressIndicator(
                 color: primaryGreen,
+<<<<<<< HEAD
 =======
   // -----------------------------------------------------------------------
   // BUILD
@@ -464,12 +496,17 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
               child: CircularProgressIndicator(
                 color: darkSage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
               ),
             );
           }
 
           if (snapshot.hasError) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -489,16 +526,22 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                   ],
                 ),
               ),
+<<<<<<< HEAD
 =======
             return _ErrorState(
               error: snapshot.error.toString(),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
             );
           }
 
           final medicines = snapshot.data ?? [];
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
           if (medicines.isEmpty) {
             return const Center(
               child: Column(
@@ -651,6 +694,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: primaryGreen,
+<<<<<<< HEAD
 =======
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -757,11 +801,14 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: darkSage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
         foregroundColor: Colors.white,
         elevation: 4,
         onPressed: () {
           _showMedicineDialog();
         },
+<<<<<<< HEAD
 <<<<<<< HEAD
         child: const Icon(Icons.add),
 =======
@@ -1252,6 +1299,9 @@ class _ErrorState extends StatelessWidget {
           ],
         ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+        child: const Icon(Icons.add),
+>>>>>>> develop
       ),
     );
   }

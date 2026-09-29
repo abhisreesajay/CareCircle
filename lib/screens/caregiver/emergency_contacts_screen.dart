@@ -79,6 +79,7 @@ class _EmergencyContactsScreenState
   final EmergencyContactService _contactService =
       EmergencyContactService();
 
+<<<<<<< HEAD
   static const Color cream = Color(0xFFF4EFE5);
   static const Color darkSage = Color(0xFF46695A);
   static const Color terracotta = Color(0xFFC85C50);
@@ -334,12 +335,40 @@ class _EmergencyContactsScreenState
             style: const TextStyle(
               color: textDark,
               fontWeight: FontWeight.w800,
+=======
+  static const Color primaryGreen = Color(0xFF738F52);
+  static const Color darkGreen = Color(0xFF536B3A);
+  static const Color lightGreen = Color(0xFFE8EFDF);
+  static const Color backgroundColor = Color(0xFFF7F9F3);
+  static const Color textColor = Color(0xFF26301F);
+
+  void _showContactDialog({EmergencyContact? contact}) {
+    final nameController =
+        TextEditingController(text: contact?.name ?? '');
+    final phoneController =
+        TextEditingController(text: contact?.phone ?? '');
+    final relationshipController =
+        TextEditingController(text: contact?.relationship ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            contact == null
+                ? 'Add Emergency Contact'
+                : 'Edit Emergency Contact',
+            style: const TextStyle(
+              color: darkGreen,
+              fontWeight: FontWeight.bold,
+>>>>>>> develop
             ),
           ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+<<<<<<< HEAD
                 _DialogField(
                   controller: nameController,
                   label: 'Name',
@@ -361,10 +390,75 @@ class _EmergencyContactsScreenState
                   icon: Icons.people_outline_rounded,
                   hint: 'e.g. Daughter',
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    prefixIcon: const Icon(
+                      Icons.person,
+                      color: primaryGreen,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: primaryGreen,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Phone Number',
+                    prefixIcon: const Icon(
+                      Icons.phone,
+                      color: primaryGreen,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: primaryGreen,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: relationshipController,
+                  decoration: InputDecoration(
+                    labelText: 'Relationship',
+                    prefixIcon: const Icon(
+                      Icons.people,
+                      color: primaryGreen,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: primaryGreen,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+>>>>>>> develop
                 ),
               ],
             ),
           ),
+<<<<<<< HEAD
 <<<<<<< HEAD
         ),
       );
@@ -391,10 +485,23 @@ class _EmergencyContactsScreenState
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: mutedText),
+=======
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: darkGreen,
+                ),
+>>>>>>> develop
               ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
+<<<<<<< HEAD
                 backgroundColor: darkSage,
                 foregroundColor: Colors.white,
                 elevation: 0,
@@ -415,6 +522,14 @@ class _EmergencyContactsScreenState
                       content: Text('Please fill in all fields.'),
                     ),
                   );
+=======
+                backgroundColor: primaryGreen,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                if (nameController.text.trim().isEmpty ||
+                    phoneController.text.trim().isEmpty) {
+>>>>>>> develop
                   return;
                 }
 
@@ -429,6 +544,7 @@ class _EmergencyContactsScreenState
                       relationshipController.text.trim(),
                 );
 
+<<<<<<< HEAD
                 try {
                   if (contact == null) {
                     await _contactService.addContact(
@@ -469,12 +585,33 @@ class _EmergencyContactsScreenState
               },
               child: Text(
                 contact == null ? 'Add' : 'Save',
+=======
+                if (contact == null) {
+                  await _contactService.addContact(
+                    widget.elderId,
+                    newContact,
+                  );
+                } else {
+                  await _contactService.updateContact(
+                    widget.elderId,
+                    newContact,
+                  );
+                }
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: Text(
+                contact == null ? 'Add' : 'Update',
+>>>>>>> develop
               ),
             ),
           ],
         );
       },
     );
+<<<<<<< HEAD
 
     nameController.dispose();
     phoneController.dispose();
@@ -564,11 +701,21 @@ class _EmergencyContactsScreenState
     if (confirmed == true) {
       await _deleteContact(contact);
     }
+=======
+  }
+
+  Future<void> _deleteContact(String contactId) async {
+    await _contactService.deleteContact(
+      widget.elderId,
+      contactId,
+    );
+>>>>>>> develop
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       backgroundColor: cream,
       appBar: AppBar(
         backgroundColor: cream,
@@ -597,6 +744,24 @@ class _EmergencyContactsScreenState
       body: StreamBuilder<List<EmergencyContact>>(
         stream: _contactService.getContacts(widget.elderId),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        title: const Text(
+          'Emergency Contacts',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: primaryGreen,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: StreamBuilder<List<EmergencyContact>>(
+        stream: _contactService.getContacts(
+          widget.elderId,
+        ),
+>>>>>>> develop
         builder: (context, snapshot) {
           if (snapshot.connectionState ==
               ConnectionState.waiting) {
@@ -605,7 +770,11 @@ class _EmergencyContactsScreenState
               child: CircularProgressIndicator(),
 =======
               child: CircularProgressIndicator(
+<<<<<<< HEAD
                 color: darkSage,
+=======
+                color: primaryGreen,
+>>>>>>> develop
               ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
             );
@@ -613,6 +782,9 @@ class _EmergencyContactsScreenState
 
           if (snapshot.hasError) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -627,7 +799,11 @@ class _EmergencyContactsScreenState
           final documents =
               snapshot.data?.docs ?? [];
 
+<<<<<<< HEAD
           if (documents.isEmpty) {
+=======
+          if (contacts.isEmpty) {
+>>>>>>> develop
             return const Center(
               child: Text(
                 'No emergency contacts added yet.',
@@ -663,6 +839,7 @@ class _EmergencyContactsScreenState
                       Icons.delete,
                       color: Colors.red,
                     ),
+<<<<<<< HEAD
                     onPressed: _isLoading
                         ? null
                         : () {
@@ -867,11 +1044,48 @@ class _ContactCard extends StatelessWidget {
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
+=======
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        _showContactDialog(
+                          contact: contact,
+                        );
+                      } else if (value == 'delete') {
+                        _deleteContact(contact.id);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.edit,
+                              color: darkGreen,
+                            ),
+                            SizedBox(width: 10),
+                            Text('Edit'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline,
+                              color: darkGreen,
+                            ),
+                            SizedBox(width: 10),
+                            Text('Delete'),
+                          ],
+>>>>>>> develop
                         ),
                       ),
                     ],
                   ),
                 ),
+<<<<<<< HEAD
                 PopupMenuButton<String>(
                   color: cardCream,
                   onSelected: (value) {
@@ -1100,6 +1314,21 @@ class _ErrorState extends StatelessWidget {
           ],
         ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: primaryGreen,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        onPressed: () {
+          _showContactDialog();
+        },
+        child: const Icon(Icons.add),
+>>>>>>> develop
       ),
     );
   }

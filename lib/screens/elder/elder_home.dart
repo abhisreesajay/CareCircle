@@ -111,6 +111,133 @@ class ElderHome extends StatelessWidget {
                 ),
               ),
 
+<<<<<<< HEAD
+=======
+              const SizedBox(height: 28),
+
+              const Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF163B4D),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              // Check-in
+              _buildActionCard(
+                context: context,
+                title: 'Daily Check-in',
+                subtitle: 'Tell us how you are feeling',
+                icon: Icons.check_circle_outline_rounded,
+                iconColor: const Color(0xFF16845B),
+                backgroundColor: const Color(0xFFE8F6EF),
+                route: '/checkin',
+              ),
+
+                           const SizedBox(height: 14),
+
+              // Check-in Reminders
+              _buildActionCard(
+                context: context,
+                title: 'Check-in Reminders',
+                subtitle: 'Set and manage daily reminders',
+                icon: Icons.alarm_rounded,
+                iconColor: const Color(0xFFB36B00),
+                backgroundColor: const Color(0xFFFFF2DE),
+                route: '/checkin-reminder',
+              ),
+
+              const SizedBox(height: 14),
+
+              // Voice Check-in
+              // Voice Check-in
+              _buildActionCard(
+                context: context,
+                title: 'Voice Check-in',
+                subtitle: 'Speak instead of typing',
+                icon: Icons.mic_none_rounded,
+                iconColor: const Color(0xFF3867A6),
+                backgroundColor: const Color(0xFFEAF1FB),
+                route: '/voice-checkin',
+              ),
+
+              const SizedBox(height: 14),
+
+              // SOS
+              _buildActionCard(
+                context: context,
+                title: 'Emergency SOS',
+                subtitle: 'Get immediate emergency help',
+                icon: Icons.warning_amber_rounded,
+                iconColor: const Color(0xFFC62828),
+                backgroundColor: const Color(0xFFFFEAEA),
+                route: '/sos',
+                isEmergency: true,
+              ),
+
+              const SizedBox(height: 14),
+
+              // Hospitals
+              _buildActionCard(
+                context: context,
+                title: 'Nearby Hospitals',
+                subtitle: 'Find hospitals near you',
+                icon: Icons.local_hospital_outlined,
+                iconColor: const Color(0xFF7A4FA3),
+                backgroundColor: const Color(0xFFF3EAF8),
+                route: '/hospitals',
+              ),
+
+              const SizedBox(height: 14),
+
+              // Services
+              _buildActionCard(
+                context: context,
+                title: 'Nearby Services',
+                subtitle: 'Find shops and restaurants nearby',
+                icon: Icons.storefront_outlined,
+                iconColor: const Color(0xFFB36B00),
+                backgroundColor: const Color(0xFFFFF2DE),
+                route: '/services',
+              ),
+
+              const SizedBox(height: 28),
+
+              // Help information
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF164A63),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                    SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        'Need help? Use the Emergency SOS button or contact your caregiver.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          height: 1.4,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+>>>>>>> develop
               const SizedBox(height: 18),
 
               const Text(

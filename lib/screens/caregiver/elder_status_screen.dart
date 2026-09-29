@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import '../../services/elder_status_service.dart';
 =======
 import '../../services/caregiver/elder_status_service.dart';
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+import '../../services/caregiver/elder_status_service.dart';
+>>>>>>> develop
 
 class ElderStatusScreen extends StatelessWidget {
   final String elderId;
@@ -14,11 +18,15 @@ class ElderStatusScreen extends StatelessWidget {
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
   static const Color darkGreen = Color(0xFF536B3A);
   static const Color lightGreen = Color(0xFFE8EFDF);
   static const Color backgroundColor = Color(0xFFF7F9F3);
   static const Color textColor = Color(0xFF26301F);
+<<<<<<< HEAD
 =======
   static const Color backgroundColor = Color(0xFFF4EFE5);
   static const Color sage = Color(0xFF7FA68F);
@@ -28,6 +36,8 @@ class ElderStatusScreen extends StatelessWidget {
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +46,9 @@ class ElderStatusScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
       appBar: AppBar(
         title: const Text(
           'Elder Status',
@@ -47,6 +60,7 @@ class ElderStatusScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
+<<<<<<< HEAD
 =======
 
       appBar: AppBar(
@@ -66,6 +80,8 @@ class ElderStatusScreen extends StatelessWidget {
       ),
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
       body: StreamBuilder(
         stream: service.getStatus(elderId),
         builder: (context, snapshot) {
@@ -73,16 +89,23 @@ class ElderStatusScreen extends StatelessWidget {
             return const Center(
               child: CircularProgressIndicator(
 <<<<<<< HEAD
+<<<<<<< HEAD
                 color: primaryGreen,
 =======
                 color: darkSage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+                color: primaryGreen,
+>>>>>>> develop
               ),
             );
           }
 
           if (snapshot.hasError) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
@@ -108,15 +131,21 @@ class ElderStatusScreen extends StatelessWidget {
                 ),
               ),
             );
+<<<<<<< HEAD
 =======
             return const _ErrorState();
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           }
 
           final document = snapshot.data;
 
           if (document == null || !document.exists) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
@@ -142,9 +171,12 @@ class ElderStatusScreen extends StatelessWidget {
                 ),
               ),
             );
+<<<<<<< HEAD
 =======
             return const _UnavailableState();
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
           }
 
           final data = document.data() ?? {};
@@ -163,6 +195,9 @@ class ElderStatusScreen extends StatelessWidget {
 
           return SingleChildScrollView(
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
@@ -188,6 +223,7 @@ class ElderStatusScreen extends StatelessWidget {
                   icon: Icons.access_time,
                   title: 'Last Activity',
                   value: lastActivity.toString(),
+<<<<<<< HEAD
 =======
             padding: const EdgeInsets.fromLTRB(
               20,
@@ -259,6 +295,8 @@ class ElderStatusScreen extends StatelessWidget {
                   value: lastActivity.toString(),
                   accentColor: darkSage,
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
                 ),
               ],
             ),
@@ -268,6 +306,9 @@ class ElderStatusScreen extends StatelessWidget {
     );
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> develop
 
   Widget _statusCard({
     required IconData icon,
@@ -327,6 +368,7 @@ class ElderStatusScreen extends StatelessWidget {
               ),
             ),
           ],
+<<<<<<< HEAD
 =======
 }
 
@@ -693,6 +735,8 @@ class _ErrorState extends StatelessWidget {
             ],
           ),
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+=======
+>>>>>>> develop
         ),
       ),
     );
