@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
 import 'services/messaging_service.dart';
+import 'services/medication_notification_service.dart';
 
 // Shared project screens
 import 'screens/auth/login_screen.dart';
@@ -33,12 +34,7 @@ Future<void> main() async {
   // FCM BACKGROUND MESSAGE HANDLER
   // --------------------------------------------------
   //
-  // Registers the handler that is used when an FCM
-  // message is received while the application is
-  // running in the background or terminated.
-  //
-  // This must be registered after Flutter is initialized
-  // and Firebase is initialized, but before runApp().
+  // Existing FCM functionality is kept unchanged.
   //
 
   FirebaseMessaging.onBackgroundMessage(
@@ -154,15 +150,88 @@ class RoleRouter extends StatelessWidget {
         final data = snapshot.data!.data() ?? {};
         final role = data['role'] ?? 'elder';
 
+        // --------------------------------------------------
+        // CAREGIVER
+        // --------------------------------------------------
+
         if (role == 'caregiver') {
           return const CaregiverDashboard(
             elderId: 'test_elder_001',
           );
         }
 
-        return const ElderHome();
+        // --------------------------------------------------
+        // ELDER
+        // --------------------------------------------------
+        //
+        // The Elder notification initializer starts the
+        // local medication reminder listener.
+        //
+
+        return ElderNotificationInitializer(
+          elderId: uid,
+        );
       },
     );
+  }
+}
+
+/// Initializes medication notifications for the logged-in Elder.
+///
+/// This wrapper keeps ElderHome unchanged.
+///
+/// When the Elder logs in:
+///     RoleRouter
+///          ↓
+///     ElderNotificationInitializer
+///          ↓
+///     MedicationNotificationService
+///          ↓
+///     Firestore medicines
+///          ↓
+///     Local Android notification
+class ElderNotificationInitializer extends StatefulWidget {
+  final String elderId;
+
+  const ElderNotificationInitializer({
+    super.key,
+    required this.elderId,
+  });
+
+  @override
+  State<ElderNotificationInitializer> createState() =>
+      _ElderNotificationInitializerState();
+}
+
+class _ElderNotificationInitializerState
+    extends State<ElderNotificationInitializer> {
+  @override
+  void initState() {
+    super.initState();
+
+    _initializeMedicationNotifications();
+  }
+
+  Future<void> _initializeMedicationNotifications() async {
+    try {
+      await MedicationNotificationService.instance.startForElder(
+        widget.elderId,
+      );
+    } catch (e) {
+      // Notification failure should not prevent the Elder
+      // from opening the CareCircle application.
+    }
+  }
+
+  @override
+  void dispose() {
+    MedicationNotificationService.instance.stop();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const ElderHome();
   }
 }
 
