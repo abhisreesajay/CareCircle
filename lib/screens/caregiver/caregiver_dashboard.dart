@@ -729,9 +729,9 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                 onTap: () {
                   _openPage(
                     context,
-                    HospitalDocumentsScreen(
+                    CaregiverHospitalDocumentsScreen(
                       elderId: widget.elderId,
-                    ),
+                    )
                   );
                 },
               ),

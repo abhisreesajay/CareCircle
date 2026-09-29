@@ -1,309 +1,396 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../app/theme.dart';
+import '../../services/supabase_service.dart';
 
-class HospitalDocumentsScreen extends StatelessWidget {
+class ElderHospitalDocumentsScreen extends StatelessWidget {
   final String elderId;
 
-  const HospitalDocumentsScreen({
+  const ElderHospitalDocumentsScreen({
     super.key,
     required this.elderId,
   });
 
-  Stream<QuerySnapshot<Map<String, dynamic>>>
-      _documentsStream() {
-    return FirebaseFirestore.instance
-        .collection('elders')
-        .doc(elderId)
-        .collection('hospitalDocuments')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
+  Future<void> _openDocument(
+    BuildContext context,
+    String? filePath,
+  ) async {
+    if (filePath == null || filePath.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'This document does not have a valid file.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final String url =
+          SupabaseService.getHospitalDocumentUrl(
+        filePath,
+      );
+
+      final Uri uri = Uri.parse(url);
+
+      final bool opened = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!opened && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not open the document.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Could not open document:\n$e',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (elderId.trim().isEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Hospital Documents'),
-        ),
-        body: const Center(
-          child: Text(
-            'Unable to identify your account.',
-            style: TextStyle(fontSize: 18),
+    final FirebaseFirestore firestore =
+        FirebaseFirestore.instance;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF9F1),
+
+      appBar: AppBar(
+        title: const Text(
+          'Hospital Documents',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
           ),
         ),
-      );
-    }
+        backgroundColor: const Color(0xFFFFF9F1),
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
 
-    return Theme(
-      data: elderTheme(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Hospital Documents',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        body: StreamBuilder<
-            QuerySnapshot<Map<String, dynamic>>>(
-          stream: _documentsStream(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState ==
-                ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: ElderColors.secondary,
-                ),
-              );
-            }
+      body: StreamBuilder<
+          QuerySnapshot<Map<String, dynamic>>>(
+        stream: firestore
+            .collection('elders')
+            .doc(elderId)
+            .collection('hospitalDocuments')
+            .orderBy(
+              'createdAt',
+              descending: true,
+            )
+            .snapshots(),
 
-            if (snapshot.hasError) {
-              return _ErrorState(
-                message:
-                    'Unable to load hospital documents.',
-                details:
-                    '${snapshot.error}',
-              );
-            }
-
-            final documents =
-                snapshot.data?.docs ?? [];
-
-            if (documents.isEmpty) {
-              return const _EmptyState();
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: documents.length,
-              itemBuilder: (context, index) {
-                final document =
-                    documents[index];
-
-                final data = document.data();
-
-                final String title =
-                    data['title']?.toString() ??
-                        'Hospital Document';
-
-                final String description =
-                    data['description']?.toString() ??
-                        '';
-
-                final String documentType =
-                    data['type']?.toString() ??
-                        'Medical Document';
-
-                final String url =
-                    data['url']?.toString() ?? '';
-
-                return _DocumentCard(
-                  title: title,
-                  description: description,
-                  documentType: documentType,
-                  url: url,
-                );
-              },
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<
+                  QuerySnapshot<Map<String, dynamic>>>
+              snapshot,
+        ) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF21866A),
+              ),
             );
-          },
-        ),
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'Unable to load hospital documents.\n\n'
+                  '${snapshot.error}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final documents =
+              snapshot.data?.docs ?? [];
+
+          if (documents.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.folder_open_rounded,
+                      size: 70,
+                      color: Color(0xFF21866A),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'No hospital documents',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF173B36),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Documents uploaded by your caregiver '
+                      'will appear here.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF60736E),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5F4EC),
+                  borderRadius:
+                      BorderRadius.circular(22),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.folder_shared_rounded,
+                      size: 42,
+                      color: Color(0xFF21866A),
+                    ),
+                    SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Your Medical Documents',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF173B36),
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            'Documents uploaded by your caregiver.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF60736E),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 22),
+
+              ...documents.map(
+                (
+                  QueryDocumentSnapshot<
+                          Map<String, dynamic>>
+                      document,
+                ) {
+                  final data = document.data();
+
+                  final String title =
+                      data['title']?.toString() ??
+                          'Hospital Document';
+
+                  final String type =
+                      data['type']?.toString() ??
+                          'Medical Document';
+
+                  final String fileName =
+                      data['fileName']?.toString() ??
+                          'Document';
+
+                  final String? filePath =
+                      data['filePath']?.toString();
+
+                  final String extension =
+                      data['fileExtension']
+                              ?.toString()
+                              .toLowerCase() ??
+                          '';
+
+                  final bool isPdf =
+                      extension == 'pdf' ||
+                      fileName
+                          .toLowerCase()
+                          .endsWith('.pdf');
+
+                  return _ElderDocumentCard(
+                    title: title,
+                    type: type,
+                    fileName: fileName,
+                    isPdf: isPdf,
+                    onOpen: () {
+                      _openDocument(
+                        context,
+                        filePath,
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class _DocumentCard extends StatelessWidget {
+class _ElderDocumentCard extends StatelessWidget {
   final String title;
-  final String description;
-  final String documentType;
-  final String url;
+  final String type;
+  final String fileName;
+  final bool isPdf;
+  final VoidCallback onOpen;
 
-  const _DocumentCard({
+  const _ElderDocumentCard({
     required this.title,
-    required this.description,
-    required this.documentType,
-    required this.url,
+    required this.type,
+    required this.fileName,
+    required this.isPdf,
+    required this.onOpen,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 14),
-      elevation: 1,
+      elevation: 0,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: ElderColors.secondary
-                        .withValues(alpha: 0.12),
-                    borderRadius:
-                        BorderRadius.circular(14),
-                  ),
-                  child: const Icon(
-                    Icons.description_rounded,
-                    color: ElderColors.secondary,
-                    size: 30,
-                  ),
+      child: InkWell(
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                height: 58,
+                width: 58,
+                decoration: BoxDecoration(
+                  color: isPdf
+                      ? const Color(0xFFFFE1E1)
+                      : const Color(0xFFE1F4EA),
+                  borderRadius:
+                      BorderRadius.circular(16),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              documentType,
-              style: const TextStyle(
-                color: ElderColors.secondary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (description.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: ElderColors.mutedText,
+                child: Icon(
+                  isPdf
+                      ? Icons.picture_as_pdf_rounded
+                      : Icons.image_rounded,
+                  size: 30,
+                  color: isPdf
+                      ? Colors.red
+                      : const Color(0xFF21866A),
                 ),
               ),
-            ],
-            if (url.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Document link:\n$url',
-                        ),
+
+              const SizedBox(width: 14),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow:
+                          TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF173B36),
                       ),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.open_in_new,
-                  ),
-                  label: const Text(
-                    'VIEW DOCUMENT',
-                  ),
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    Text(
+                      type,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF21866A),
+                      ),
+                    ),
+
+                    const SizedBox(height: 3),
+
+                    Text(
+                      fileName,
+                      maxLines: 1,
+                      overflow:
+                          TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF60736E),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              Container(
+                height: 44,
+                width: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF21866A),
+                  borderRadius:
+                      BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.open_in_new_rounded,
+                  color: Colors.white,
+                  size: 22,
                 ),
               ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.folder_open_rounded,
-              size: 80,
-              color: ElderColors.secondary,
-            ),
-            SizedBox(height: 20),
-            Text(
-              'No hospital documents yet.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 21,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Your caregiver can add hospital documents for you.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: ElderColors.mutedText,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  final String message;
-  final String details;
-
-  const _ErrorState({
-    required this.message,
-    required this.details,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: ElderColors.critical,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              details,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: ElderColors.mutedText,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
