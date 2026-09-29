@@ -4,26 +4,36 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/supabase_service.dart';
 
-class ElderHospitalDocumentsScreen extends StatelessWidget {
+class HospitalDocumentsScreen extends StatefulWidget {
   final String elderId;
 
-  const ElderHospitalDocumentsScreen({
+  const HospitalDocumentsScreen({
     super.key,
     required this.elderId,
   });
 
-  Future<void> _openDocument(
-    BuildContext context,
-    String? filePath,
-  ) async {
+  @override
+  State<HospitalDocumentsScreen> createState() =>
+      _HospitalDocumentsScreenState();
+}
+
+class _HospitalDocumentsScreenState
+    extends State<HospitalDocumentsScreen> {
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance;
+
+  CollectionReference<Map<String, dynamic>> get _documentsCollection {
+    return _firestore
+        .collection('elders')
+        .doc(widget.elderId)
+        .collection('hospitalDocuments');
+  }
+
+  Future<void> _openDocument(String? filePath) async {
     if (filePath == null || filePath.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'This document does not have a valid file.',
-          ),
-          backgroundColor: Colors.red,
-        ),
+      _showMessage(
+        'Document file is unavailable.',
+        isError: true,
       );
       return;
     }
@@ -36,42 +46,48 @@ class ElderHospitalDocumentsScreen extends StatelessWidget {
 
       final Uri uri = Uri.parse(url);
 
-      final bool opened = await launchUrl(
+      final bool launched = await launchUrl(
         uri,
         mode: LaunchMode.externalApplication,
       );
 
-      if (!opened && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Could not open the document.',
-            ),
-            backgroundColor: Colors.red,
-          ),
+      if (!launched && mounted) {
+        _showMessage(
+          'Could not open the document.',
+          isError: true,
         );
       }
     } catch (e) {
-      if (!context.mounted) {
+      if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Could not open document:\n$e',
-          ),
-          backgroundColor: Colors.red,
-        ),
+      _showMessage(
+        'Could not open document:\n$e',
+        isError: true,
       );
     }
   }
 
+  void _showMessage(
+    String message, {
+    bool isError = false,
+  }) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor:
+            isError ? Colors.red : Colors.green,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final FirebaseFirestore firestore =
-        FirebaseFirestore.instance;
-
     return Scaffold(
       backgroundColor: const Color(0xFFFFF9F1),
 
@@ -79,20 +95,17 @@ class ElderHospitalDocumentsScreen extends StatelessWidget {
         title: const Text(
           'Hospital Documents',
           style: TextStyle(
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w800,
           ),
         ),
         backgroundColor: const Color(0xFFFFF9F1),
-        foregroundColor: Colors.black,
+        foregroundColor: const Color(0xFF173B36),
         elevation: 0,
       ),
 
       body: StreamBuilder<
           QuerySnapshot<Map<String, dynamic>>>(
-        stream: firestore
-            .collection('elders')
-            .doc(elderId)
-            .collection('hospitalDocuments')
+        stream: _documentsCollection
             .orderBy(
               'createdAt',
               descending: true,
@@ -118,13 +131,32 @@ class ElderHospitalDocumentsScreen extends StatelessWidget {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Text(
-                  'Unable to load hospital documents.\n\n'
-                  '${snapshot.error}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.red,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      size: 55,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Unable to load documents.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -134,89 +166,15 @@ class ElderHospitalDocumentsScreen extends StatelessWidget {
               snapshot.data?.docs ?? [];
 
           if (documents.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.folder_open_rounded,
-                      size: 70,
-                      color: Color(0xFF21866A),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'No hospital documents',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF173B36),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Documents uploaded by your caregiver '
-                      'will appear here.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFF60736E),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return _buildEmptyState();
           }
 
           return ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE5F4EC),
-                  borderRadius:
-                      BorderRadius.circular(22),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(
-                      Icons.folder_shared_rounded,
-                      size: 42,
-                      color: Color(0xFF21866A),
-                    ),
-                    SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Your Medical Documents',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF173B36),
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'Documents uploaded by your caregiver.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFF60736E),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildHeader(documents.length),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 20),
 
               ...documents.map(
                 (
@@ -226,42 +184,27 @@ class ElderHospitalDocumentsScreen extends StatelessWidget {
                 ) {
                   final data = document.data();
 
-                  final String title =
-                      data['title']?.toString() ??
-                          'Hospital Document';
+                  return _ElderDocumentTile(
+                    title:
+                        data['title']?.toString() ??
+                            'Hospital Document',
 
-                  final String type =
-                      data['type']?.toString() ??
-                          'Medical Document';
+                    type:
+                        data['type']?.toString() ??
+                            'Medical Document',
 
-                  final String fileName =
-                      data['fileName']?.toString() ??
-                          'Document';
+                    fileName:
+                        data['fileName']?.toString() ??
+                            'File',
 
-                  final String? filePath =
-                      data['filePath']?.toString();
+                    fileExtension:
+                        data['fileExtension']
+                                ?.toString() ??
+                            '',
 
-                  final String extension =
-                      data['fileExtension']
-                              ?.toString()
-                              .toLowerCase() ??
-                          '';
-
-                  final bool isPdf =
-                      extension == 'pdf' ||
-                      fileName
-                          .toLowerCase()
-                          .endsWith('.pdf');
-
-                  return _ElderDocumentCard(
-                    title: title,
-                    type: type,
-                    fileName: fileName,
-                    isPdf: isPdf,
                     onOpen: () {
                       _openDocument(
-                        context,
-                        filePath,
+                        data['filePath']?.toString(),
                       );
                     },
                   );
@@ -273,42 +216,156 @@ class ElderHospitalDocumentsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildHeader(int documentCount) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE5F4EC),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              color: const Color(0xFF21866A),
+              borderRadius:
+                  BorderRadius.circular(17),
+            ),
+            child: const Icon(
+              Icons.folder_shared_rounded,
+              color: Colors.white,
+              size: 30,
+            ),
+          ),
+
+          const SizedBox(width: 15),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Your Medical Documents',
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF173B36),
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  documentCount == 1
+                      ? '1 document available'
+                      : '$documentCount documents available',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF60736E),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(35),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5F4EC),
+                borderRadius:
+                    BorderRadius.circular(28),
+              ),
+              child: const Icon(
+                Icons.folder_open_rounded,
+                size: 48,
+                color: Color(0xFF21866A),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            const Text(
+              'No Documents Yet',
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF173B36),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            const Text(
+              'Your caregiver has not uploaded any hospital documents yet.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF60736E),
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _ElderDocumentCard extends StatelessWidget {
+class _ElderDocumentTile extends StatelessWidget {
   final String title;
   final String type;
   final String fileName;
-  final bool isPdf;
+  final String fileExtension;
   final VoidCallback onOpen;
 
-  const _ElderDocumentCard({
+  const _ElderDocumentTile({
     required this.title,
     required this.type,
     required this.fileName,
-    required this.isPdf,
+    required this.fileExtension,
     required this.onOpen,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool isPdf =
+        fileExtension.toLowerCase() == 'pdf' ||
+            fileName.toLowerCase().endsWith('.pdf');
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 13),
       elevation: 0,
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: InkWell(
+        borderRadius: BorderRadius.circular(18),
         onTap: onOpen,
-        borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(15),
           child: Row(
             children: [
               Container(
-                height: 58,
-                width: 58,
+                width: 55,
+                height: 55,
                 decoration: BoxDecoration(
                   color: isPdf
                       ? const Color(0xFFFFE1E1)
@@ -320,10 +377,10 @@ class _ElderDocumentCard extends StatelessWidget {
                   isPdf
                       ? Icons.picture_as_pdf_rounded
                       : Icons.image_rounded,
-                  size: 30,
                   color: isPdf
                       ? Colors.red
                       : const Color(0xFF21866A),
+                  size: 29,
                 ),
               ),
 
@@ -337,11 +394,10 @@ class _ElderDocumentCard extends StatelessWidget {
                     Text(
                       title,
                       maxLines: 2,
-                      overflow:
-                          TextOverflow.ellipsis,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w800,
                         color: Color(0xFF173B36),
                       ),
                     ),
@@ -352,8 +408,8 @@ class _ElderDocumentCard extends StatelessWidget {
                       type,
                       style: const TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF21866A),
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF60736E),
                       ),
                     ),
 
@@ -362,11 +418,10 @@ class _ElderDocumentCard extends StatelessWidget {
                     Text(
                       fileName,
                       maxLines: 1,
-                      overflow:
-                          TextOverflow.ellipsis,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF60736E),
+                        color: Color(0xFF8A9691),
                       ),
                     ),
                   ],
@@ -376,17 +431,17 @@ class _ElderDocumentCard extends StatelessWidget {
               const SizedBox(width: 8),
 
               Container(
-                height: 44,
-                width: 44,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: const Color(0xFF21866A),
                   borderRadius:
-                      BorderRadius.circular(14),
+                      BorderRadius.circular(13),
                 ),
                 child: const Icon(
                   Icons.open_in_new_rounded,
                   color: Colors.white,
-                  size: 22,
+                  size: 21,
                 ),
               ),
             ],
