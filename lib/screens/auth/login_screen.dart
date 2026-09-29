@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../services/auth_service.dart';
 import '../../widgets/app_logo.dart';
 import 'signup_screen.dart';
@@ -15,6 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   final _formKey = GlobalKey<FormState>();
 
   String _selectedRole = 'elder';
@@ -28,20 +30,35 @@ class _LoginScreenState extends State<LoginScreen> {
 =======
 >>>>>>> develop
   bool _isLoading = false;
+=======
+>>>>>>> origin/main
 
   final AuthService _authService = AuthService();
 
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
 
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+<<<<<<< HEAD
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _isLoading = true);
 
+=======
+>>>>>>> origin/main
     try {
       await _authService.signIn(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+<<<<<<< HEAD
     } catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
@@ -64,6 +81,124 @@ class _LoginScreenState extends State<LoginScreen> {
 >>>>>>> main
 =======
 >>>>>>> develop
+=======
+
+      // Firebase authStateChanges() in AuthWrapper
+      // automatically handles routing after successful login.
+    } catch (e) {
+      if (mounted) {
+        final message = e.toString().contains(']')
+            ? e.toString().split(']').last.trim()
+            : e.toString();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login failed: $message'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _showForgotPasswordDialog() async {
+    final resetEmailController = TextEditingController(
+      text: _emailController.text.trim(),
+    );
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Reset Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Enter your email address to receive a password reset link.',
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: resetEmailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final email = resetEmailController.text.trim();
+
+                if (email.isEmpty || !email.contains('@')) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid email address.'),
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  await _authService.sendPasswordResetEmail(email);
+
+                  if (!dialogContext.mounted) {
+                    return;
+                  }
+
+                  Navigator.pop(dialogContext);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Password reset email sent! Check your inbox.',
+                      ),
+                    ),
+                  );
+                } catch (e) {
+                  if (!dialogContext.mounted) {
+                    return;
+                  }
+
+                  final message = e.toString().contains(']')
+                      ? e.toString().split(']').last.trim()
+                      : e.toString();
+
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: $message'),
+                      backgroundColor:
+                          Theme.of(dialogContext).colorScheme.error,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Send Link'),
+            ),
+          ],
+        );
+      },
+    );
+
+    resetEmailController.dispose();
+  }
+>>>>>>> origin/main
 
   @override
   void dispose() {
@@ -72,6 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
   void _handleLogin() async {
@@ -241,6 +377,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context);
 
 >>>>>>> develop
+=======
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+>>>>>>> origin/main
     return Scaffold(
       backgroundColor: const Color(0xFFF4F8FA),
       body: SafeArea(
@@ -273,6 +415,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
             padding: const EdgeInsets.all(24.0),
 =======
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -280,12 +423,19 @@ class _LoginScreenState extends State<LoginScreen> {
 =======
             padding: const EdgeInsets.all(24.0),
 >>>>>>> develop
+=======
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
+>>>>>>> origin/main
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                   const Icon(Icons.favorite, size: 80, color: Colors.deepPurple),
@@ -398,12 +548,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text('Don\'t have an account? Sign Up'),
 =======
                   // Logo Header
+=======
+>>>>>>> origin/main
                   Icon(
                     Icons.favorite_rounded,
                     size: 72,
                     color: theme.colorScheme.primary,
                   ),
                   const SizedBox(height: 12),
+
                   Text(
                     'CareCircle',
                     textAlign: TextAlign.center,
@@ -412,6 +565,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: theme.colorScheme.primary,
                     ),
                   ),
+
                   Text(
                     'Connecting Caregivers & Elders',
                     textAlign: TextAlign.center,
@@ -419,9 +573,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
+
                   const SizedBox(height: 36),
 
-                  // Email Field
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -437,15 +591,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+
+                      if (!RegExp(
+                        r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$',
+                      ).hasMatch(value.trim())) {
                         return 'Enter a valid email address';
                       }
+
                       return null;
                     },
                   ),
+
                   const SizedBox(height: 16),
 
-                  // Password Field
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
@@ -456,10 +614,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                         ),
                         onPressed: () {
-                          setState(() => _obscurePassword = !_obscurePassword);
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
                         },
                       ),
                       border: OutlineInputBorder(
@@ -470,19 +632,35 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
                       }
+
                       if (value.length < 6) {
                         return 'Password must be at least 6 characters';
                       }
+
                       return null;
                     },
                   ),
-                  const SizedBox(height: 24),
 
-                  // Submit Button
+                  const SizedBox(height: 8),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _isLoading
+                          ? null
+                          : _showForgotPasswordDialog,
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
                   ElevatedButton(
                     onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -500,28 +678,43 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: Colors.white,
                             ),
                           )
+<<<<<<< HEAD
                         : const Text('Login'),
                   ),
 <<<<<<< HEAD
+=======
+                        : const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+
+>>>>>>> origin/main
                   const SizedBox(height: 16),
 
-                  // SignUp Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text("Don't have an account?"),
                       TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SignUpScreen(),
-                            ),
-                          );
-                        },
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const SignupScreen(),
+                                  ),
+                                );
+                              },
                         child: const Text('Sign Up'),
                       ),
                     ],
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 >>>>>>> main
 =======
@@ -541,6 +734,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: const Text("Don't have an account? Sign Up"),
 >>>>>>> develop
+=======
+>>>>>>> origin/main
                   ),
                 ],
               ),
@@ -702,6 +897,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+<<<<<<< HEAD
 
   Widget _buildRoleCard({
     required String roleKey,
@@ -739,3 +935,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+=======
+}
+>>>>>>> origin/main

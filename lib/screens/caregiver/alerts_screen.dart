@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../models/alert_model.dart';
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 import '../../services/alert_service.dart';
@@ -9,6 +11,9 @@ import '../../services/caregiver/alert_service.dart';
 =======
 import '../../services/caregiver/alert_service.dart';
 >>>>>>> develop
+=======
+import '../../services/caregiver/alert_service.dart';
+>>>>>>> origin/main
 
 class AlertsScreen extends StatelessWidget {
   final String elderId;
@@ -20,6 +25,7 @@ class AlertsScreen extends StatelessWidget {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
@@ -29,6 +35,8 @@ class AlertsScreen extends StatelessWidget {
   static const Color textColor = Color(0xFF26301F);
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
   // CareCircle palette
   static const Color darkSage = Color(0xFF46695A);
   static const Color cream = Color(0xFFFFFBF4);
@@ -36,15 +44,19 @@ class AlertsScreen extends StatelessWidget {
   static const Color terracotta = Color(0xFFC85C50);
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
 
   @override
   Widget build(BuildContext context) {
     final service = AlertService();
 
     return Scaffold(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -63,8 +75,9 @@ class AlertsScreen extends StatelessWidget {
       ),
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
       backgroundColor: background,
-
       appBar: AppBar(
         backgroundColor: background,
         foregroundColor: textDark,
@@ -79,16 +92,20 @@ class AlertsScreen extends StatelessWidget {
           ),
         ),
       ),
+<<<<<<< HEAD
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
       body: StreamBuilder<List<CareAlert>>(
         stream: service.getAlerts(elderId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                 color: primaryGreen,
@@ -98,11 +115,15 @@ class AlertsScreen extends StatelessWidget {
 =======
                 color: primaryGreen,
 >>>>>>> develop
+=======
+                color: darkSage,
+>>>>>>> origin/main
               ),
             );
           }
 
           if (snapshot.hasError) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -137,11 +158,15 @@ class AlertsScreen extends StatelessWidget {
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+            return const _ErrorState();
+>>>>>>> origin/main
           }
 
           final alerts = snapshot.data ?? [];
 
           if (alerts.isEmpty) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -236,6 +261,8 @@ class AlertsScreen extends StatelessWidget {
             },
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
             return const _EmptyAlertState();
           }
 
@@ -359,9 +386,12 @@ class AlertsScreen extends StatelessWidget {
                 (alert) => _AlertCard(alert: alert),
               ),
             ],
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
           );
         },
       ),
@@ -369,7 +399,10 @@ class AlertsScreen extends StatelessWidget {
   }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
 }
 
 // ------------------------------------------------------------
@@ -461,7 +494,6 @@ class _AlertCard extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     if (isSos)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -498,7 +530,6 @@ class _AlertCard extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // Date pill
                 Row(
                   children: [
                     Icon(
@@ -650,7 +681,10 @@ class _ErrorState extends StatelessWidget {
       ),
     );
   }
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/appointment_model.dart';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import '../../services/appointment_service.dart';
 =======
 import '../../services/caregiver/appointment_service.dart';
@@ -9,6 +10,9 @@ import '../../services/caregiver/appointment_service.dart';
 =======
 import '../../services/caregiver/appointment_service.dart';
 >>>>>>> develop
+=======
+import '../../services/caregiver/appointment_service.dart';
+>>>>>>> origin/main
 
 class AppointmentsScreen extends StatefulWidget {
   final String elderId;
@@ -25,6 +29,7 @@ class AppointmentsScreen extends StatefulWidget {
 class _AppointmentsScreenState extends State<AppointmentsScreen> {
   final AppointmentService _appointmentService = AppointmentService();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -60,6 +65,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               fontWeight: FontWeight.bold,
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
   static const Color cream = Color(0xFFF4EFE5);
   static const Color darkSage = Color(0xFF46695A);
   static const Color terracotta = Color(0xFFC85C50);
@@ -73,15 +80,19 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     final doctorController = TextEditingController(
       text: appointment?.doctorName ?? '',
     );
+
     final hospitalController = TextEditingController(
       text: appointment?.hospitalName ?? '',
     );
+
     final dateController = TextEditingController(
       text: appointment?.date ?? '',
     );
+
     final timeController = TextEditingController(
       text: appointment?.time ?? '',
     );
+
     final purposeController = TextEditingController(
       text: appointment?.purpose ?? '',
     );
@@ -101,15 +112,19 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             style: const TextStyle(
               color: textDark,
               fontWeight: FontWeight.w800,
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
             ),
           ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -219,6 +234,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   ),
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
                 _DialogField(
                   controller: doctorController,
                   label: 'Doctor name',
@@ -251,13 +268,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   icon: Icons.notes_rounded,
                   maxLines: 2,
                   hint: 'e.g. Routine check-up',
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
                 ),
               ],
             ),
           ),
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -274,6 +295,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ),
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
           actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           actions: [
             TextButton(
@@ -281,13 +304,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: mutedText),
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
               ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -299,6 +326,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 if (doctorController.text.trim().isEmpty) {
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
                 backgroundColor: darkSage,
                 foregroundColor: Colors.white,
                 elevation: 0,
@@ -321,14 +350,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       content: Text('Please fill in all fields.'),
                     ),
                   );
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
                   return;
                 }
 
                 final newAppointment = Appointment(
                   id: appointment?.id ??
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                       DateTime.now()
@@ -342,6 +375,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                           .millisecondsSinceEpoch
                           .toString(),
 >>>>>>> develop
+=======
+                      DateTime.now()
+                          .millisecondsSinceEpoch
+                          .toString(),
+>>>>>>> origin/main
                   doctorName: doctorController.text.trim(),
                   hospitalName: hospitalController.text.trim(),
                   date: dateController.text.trim(),
@@ -349,6 +387,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   purpose: purposeController.text.trim(),
                 );
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -373,6 +412,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 appointment == null ? 'Add' : 'Update',
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
                 try {
                   if (appointment == null) {
                     await _appointmentService.addAppointment(
@@ -387,9 +428,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   }
 
                   if (!dialogContext.mounted) return;
+
                   Navigator.pop(dialogContext);
 
                   if (!mounted) return;
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -411,15 +454,19 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               },
               child: Text(
                 appointment == null ? 'Add' : 'Save',
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
               ),
             ),
           ],
         );
       },
     );
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -433,6 +480,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     );
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
 
     doctorController.dispose();
     hospitalController.dispose();
@@ -495,14 +544,22 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                false,
+              ),
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: mutedText),
+                style: TextStyle(
+                  color: mutedText,
+                ),
               ),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                true,
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: terracotta,
                 foregroundColor: Colors.white,
@@ -518,14 +575,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     if (confirmed == true) {
       await _deleteAppointment(appointment);
     }
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -554,6 +615,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 color: primaryGreen,
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
       backgroundColor: cream,
       appBar: AppBar(
         backgroundColor: cream,
@@ -580,20 +643,27 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         ),
       ),
       body: StreamBuilder<List<Appointment>>(
-        stream: _appointmentService.getAppointments(widget.elderId),
+        stream: _appointmentService.getAppointments(
+          widget.elderId,
+        ),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
                 color: darkSage,
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
               ),
             );
           }
 
           if (snapshot.hasError) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -624,12 +694,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+            return const _ErrorState(
+              message: 'Could not load appointments.',
+>>>>>>> origin/main
             );
           }
 
           final appointments = snapshot.data ?? [];
 
           if (appointments.isEmpty) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -759,11 +834,18 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                           ],
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
             return const _EmptyState();
           }
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+            padding: const EdgeInsets.fromLTRB(
+              20,
+              12,
+              20,
+              110,
+            ),
             children: [
               Container(
                 padding: const EdgeInsets.all(24),
@@ -777,7 +859,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       width: 54,
                       height: 54,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
+                        color: Colors.white.withValues(
+                          alpha: 0.14,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -789,7 +873,8 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
                         children: [
                           const Text(
                             'Upcoming care',
@@ -801,9 +886,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${appointments.length} appointment${appointments.length == 1 ? '' : 's'} scheduled',
+                            '${appointments.length} appointment'
+                            '${appointments.length == 1 ? '' : 's'} scheduled',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.72),
+                              color: Colors.white.withValues(
+                                alpha: 0.72,
+                              ),
                             ),
                           ),
                         ],
@@ -812,7 +900,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 24),
+
               const Text(
                 'Your appointments',
                 style: TextStyle(
@@ -821,16 +911,22 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
+
               const SizedBox(height: 14),
+
               ...appointments.map(
                 (appointment) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.only(
+                    bottom: 14,
+                  ),
                   child: _AppointmentCard(
                     appointment: appointment,
                     onEdit: () => _showAppointmentDialog(
                       appointment: appointment,
                     ),
-                    onDelete: () => _confirmDelete(appointment),
+                    onDelete: () => _confirmDelete(
+                      appointment,
+                    ),
                   ),
                 ),
               ),
@@ -841,6 +937,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     );
   }
 }
+
+// ------------------------------------------------------------
+// Appointment Card
+// ------------------------------------------------------------
 
 class _AppointmentCard extends StatelessWidget {
   final Appointment appointment;
@@ -889,10 +989,13 @@ class _AppointmentCard extends StatelessWidget {
                     color: darkSage,
                   ),
                 ),
+
                 const SizedBox(width: 14),
+
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
                       Text(
                         appointment.purpose,
@@ -909,14 +1012,18 @@ class _AppointmentCard extends StatelessWidget {
                           color: mutedText,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
                         ),
                       ),
                     ],
                   ),
                 ),
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -936,6 +1043,9 @@ class _AppointmentCard extends StatelessWidget {
         child: const Icon(Icons.add),
 <<<<<<< HEAD
 =======
+=======
+
+>>>>>>> origin/main
                 PopupMenuButton<String>(
                   color: cardCream,
                   onSelected: (value) {
@@ -970,7 +1080,9 @@ class _AppointmentCard extends StatelessWidget {
                 ),
               ],
             ),
+
             const SizedBox(height: 18),
+
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -985,7 +1097,9 @@ class _AppointmentCard extends StatelessWidget {
                 ),
               ],
             ),
+
             const SizedBox(height: 14),
+
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
@@ -994,7 +1108,8 @@ class _AppointmentCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   const Icon(
                     Icons.local_hospital_outlined,
@@ -1020,6 +1135,10 @@ class _AppointmentCard extends StatelessWidget {
     );
   }
 }
+
+// ------------------------------------------------------------
+// Info Pill
+// ------------------------------------------------------------
 
 class _InfoPill extends StatelessWidget {
   final IconData icon;
@@ -1047,7 +1166,6 @@ class _InfoPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(width: 1),
           Icon(
             icon,
             size: 16,
@@ -1067,6 +1185,10 @@ class _InfoPill extends StatelessWidget {
     );
   }
 }
+
+// ------------------------------------------------------------
+// Dialog Field
+// ------------------------------------------------------------
 
 class _DialogField extends StatelessWidget {
   final TextEditingController controller;
@@ -1122,6 +1244,10 @@ class _DialogField extends StatelessWidget {
   }
 }
 
+// ------------------------------------------------------------
+// Empty State
+// ------------------------------------------------------------
+
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
@@ -1174,6 +1300,10 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+// ------------------------------------------------------------
+// Error State
+// ------------------------------------------------------------
+
 class _ErrorState extends StatelessWidget {
   final String message;
 
@@ -1208,9 +1338,12 @@ class _ErrorState extends StatelessWidget {
             ),
           ],
         ),
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
       ),
     );
   }

@@ -1,9 +1,14 @@
-<<<<<<< HEAD
 import 'dart:math';
+<<<<<<< HEAD
+=======
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+>>>>>>> origin/main
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+<<<<<<< HEAD
 import '../models/user_model.dart';
 
 class AuthService {
@@ -24,10 +29,30 @@ class AuthService {
   final MessagingService _messagingService = MessagingService();
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 >>>>>>> main
+=======
+
+import '../models/user_model.dart';
+import 'messaging_service.dart';
+
+class AuthService {
+  final FirebaseAuth _auth =
+      FirebaseAuth.instance;
+
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance;
+
+  final MessagingService _messagingService =
+      MessagingService();
+
+  // ============================================================
+  // CURRENT USER
+  // ============================================================
+>>>>>>> origin/main
 
   // Get Current User
   User? get currentUser => _auth.currentUser;
 
+<<<<<<< HEAD
   // Sign In
   Future<UserCredential> signIn({
     required String email,
@@ -45,20 +70,96 @@ class AuthService {
 <<<<<<< HEAD
   // Helper: Get and save the device FCM token for push notifications
   Future<void> _saveDeviceToken(String uid) async {
+=======
+  Stream<User?> get authStateChanges =>
+      _auth.authStateChanges();
+
+  // ============================================================
+  // INVITE CODE
+  // ============================================================
+
+  String _generateInviteCode() {
+    const String chars =
+        'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+    final Random random = Random();
+
+    return String.fromCharCodes(
+      Iterable.generate(
+        6,
+        (_) => chars.codeUnitAt(
+          random.nextInt(chars.length),
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // FCM TOKEN
+  // ============================================================
+
+  Future<void> _saveDeviceToken(
+    String uid,
+  ) async {
+>>>>>>> origin/main
     try {
-      // Request notification permission (Required for iOS, auto-granted on Android)
-      await FirebaseMessaging.instance.requestPermission();
+      // ----------------------------------------------------------
+      // FLUTTER WEB
+      // ----------------------------------------------------------
+      // FCM web requires firebase-messaging-sw.js.
+      // Web FCM is disabled for now so Chrome/Edge does not
+      // attempt to register the missing service worker.
+      // ----------------------------------------------------------
 
-      // Fetch the unique FCM token for this device
-      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (kIsWeb) {
+        debugPrint(
+          'FCM token saving skipped on web platform.',
+        );
+        return;
+      }
 
-      if (fcmToken != null) {
-        await _firestore.collection('users').doc(uid).update({
-          'fcmToken': fcmToken,
-          'lastActive': FieldValue.serverTimestamp(),
-        });
+      if (uid.trim().isEmpty) {
+        return;
+      }
+
+      final User? currentUser =
+          _auth.currentUser;
+
+      if (currentUser == null ||
+          currentUser.uid != uid) {
+        return;
+      }
+
+      await FirebaseMessaging.instance
+          .requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+
+      final String? token =
+          await FirebaseMessaging.instance
+              .getToken();
+
+      if (token != null &&
+          token.isNotEmpty) {
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .set(
+          {
+            'fcmToken': token,
+            'lastActive':
+                FieldValue.serverTimestamp(),
+          },
+          SetOptions(
+            merge: true,
+          ),
+        );
       }
     } catch (e) {
+<<<<<<< HEAD
       debugPrint("Failed to save FCM token: $e");
     }
   }
@@ -67,24 +168,30 @@ class AuthService {
 >>>>>>> main
   Future<UserCredential> signUp({
 =======
+=======
+      // FCM failure must never prevent login/signup.
+      debugPrint(
+        'FCM token could not be saved: $e',
+      );
+    }
+  }
+
+>>>>>>> origin/main
   // ============================================================
-  // REGISTER
+  // SIGN UP
   // ============================================================
 
-  Future<UserCredential> registerUser({
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+  Future<UserCredential> signUp({
     required String email,
     required String password,
     required String role,
     String? name,
     String? inviteCode,
   }) async {
-<<<<<<< HEAD
-    final credential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    final String cleanEmail =
+        email.trim();
 
+<<<<<<< HEAD
     // If Elder, auto-generate code; if Caregiver, use provided code
     final finalInviteCode = (role == 'elder') ? _generateInviteCode() : inviteCode;
 
@@ -131,36 +238,59 @@ class AuthService {
 =======
     final String cleanEmail = email.trim();
     final String cleanRole = role.trim().toLowerCase();
+=======
+    final String cleanRole =
+        role.trim().toLowerCase();
+
+    // ----------------------------------------------------------
+    // VALIDATION
+    // ----------------------------------------------------------
+>>>>>>> origin/main
 
     if (cleanEmail.isEmpty) {
-      throw Exception('Email is required.');
+      throw Exception(
+        'Email is required.',
+      );
     }
 
     if (password.isEmpty) {
-      throw Exception('Password is required.');
+      throw Exception(
+        'Password is required.',
+      );
     }
 
-    if (cleanRole != 'elder' && cleanRole != 'caregiver') {
-      throw Exception('Invalid account role.');
+    if (cleanRole != 'elder' &&
+        cleanRole != 'caregiver') {
+      throw Exception(
+        'Invalid account role.',
+      );
     }
+
+    // ----------------------------------------------------------
+    // CREATE FIREBASE AUTH ACCOUNT
+    // ----------------------------------------------------------
 
     UserCredential credential;
 
     try {
       credential =
-          await _auth.createUserWithEmailAndPassword(
+          await _auth
+              .createUserWithEmailAndPassword(
         email: cleanEmail,
         password: password,
       );
     } on FirebaseAuthException catch (e) {
-      throw Exception(_getAuthErrorMessage(e));
+      throw Exception(
+        _getAuthErrorMessage(e),
+      );
     } catch (e) {
       throw Exception(
         'Unable to create the account: $e',
       );
     }
 
-    final User? user = credential.user;
+    final User? user =
+        credential.user;
 
     if (user == null) {
       throw Exception(
@@ -168,30 +298,99 @@ class AuthService {
       );
     }
 
-    final Map<String, dynamic> userData = {
-      'uid': user.uid,
-      'email': cleanEmail,
-      'role': cleanRole,
-      'createdAt': FieldValue.serverTimestamp(),
-    };
+    // ----------------------------------------------------------
+    // ELDER INVITE CODE
+    // ----------------------------------------------------------
 
-    if (cleanRole == 'caregiver') {
-      userData['linkedElders'] = <String>[];
-    } else {
-      userData['caregivers'] = <String>[];
-      userData['inviteCode'] = '';
-    }
+    final String? inviteCode =
+        cleanRole == 'elder'
+            ? _generateInviteCode()
+            : null;
+
+    // ----------------------------------------------------------
+    // USER PROFILE
+    // ----------------------------------------------------------
+
+    final UserModel userModel =
+        UserModel(
+      uid: user.uid,
+      email: cleanEmail,
+      role: cleanRole,
+      name: name,
+      inviteCode: inviteCode,
+      createdAt: DateTime.now(),
+    );
+
+    // ----------------------------------------------------------
+    // CREATE FIRESTORE USER PROFILE
+    // ----------------------------------------------------------
 
     try {
-      await _db
+      await _firestore
           .collection('users')
           .doc(user.uid)
-          .set(userData);
+          .set(
+        userModel.toMap(),
+      );
 
-      await _messagingService.initialize(user.uid);
+      // --------------------------------------------------------
+      // CREATE ELDER INVITE CODE DOCUMENT
+      // --------------------------------------------------------
+      //
+      // This is done only for elders.
+      //
+      // The signup Firestore rules allow the authenticated elder
+      // to create their own inviteCodes document.
+      //
+      // Caregiver signup does not create an invite code.
+      // --------------------------------------------------------
+
+      if (cleanRole == 'elder' &&
+          inviteCode != null &&
+          inviteCode.isNotEmpty) {
+        await _firestore
+            .collection('inviteCodes')
+            .doc(inviteCode)
+            .set({
+          'code': inviteCode,
+          'elderId': user.uid,
+          'createdAt':
+              FieldValue.serverTimestamp(),
+        });
+      }
+
+      // --------------------------------------------------------
+      // INITIALIZE NOTIFICATION SERVICE
+      // --------------------------------------------------------
+
+      try {
+        await _messagingService
+            .initialize(
+          user.uid,
+        );
+      } catch (e) {
+        debugPrint(
+          'Messaging initialization failed: $e',
+        );
+      }
+
+      // --------------------------------------------------------
+      // SAVE FCM TOKEN
+      // --------------------------------------------------------
+      //
+      // On Chrome/Edge this method immediately returns.
+      // On Android/iOS it saves the FCM token normally.
+      // --------------------------------------------------------
+
+      await _saveDeviceToken(
+        user.uid,
+      );
 
       return credential;
     } on FirebaseException catch (e) {
+      // If Firestore setup fails, remove the Firebase Auth
+      // account so we don't leave an incomplete account behind.
+
       try {
         await user.delete();
       } catch (_) {}
@@ -214,21 +413,42 @@ class AuthService {
   // LOGIN
   // ============================================================
 
-  Future<UserCredential> loginUser({
+  Future<UserCredential> signIn({
     required String email,
     required String password,
   }) async {
     try {
       final UserCredential credential =
-          await _auth.signInWithEmailAndPassword(
+          await _auth
+              .signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
 
-      final User? user = credential.user;
+      final User? user =
+          credential.user;
 
       if (user != null) {
-        await _messagingService.initialize(
+        // --------------------------------------------------------
+        // INITIALIZE MESSAGING
+        // --------------------------------------------------------
+
+        try {
+          await _messagingService
+              .initialize(
+            user.uid,
+          );
+        } catch (e) {
+          debugPrint(
+            'Messaging initialization failed: $e',
+          );
+        }
+
+        // --------------------------------------------------------
+        // SAVE DEVICE TOKEN
+        // --------------------------------------------------------
+
+        await _saveDeviceToken(
           user.uid,
         );
       }
@@ -246,24 +466,58 @@ class AuthService {
   }
 
   // ============================================================
+  // PASSWORD RESET
+  // ============================================================
+
+  Future<void> sendPasswordResetEmail(
+    String email,
+  ) async {
+    try {
+      await _auth
+          .sendPasswordResetEmail(
+        email: email.trim(),
+      );
+    } on FirebaseAuthException catch (e) {
+      throw Exception(
+        _getAuthErrorMessage(e),
+      );
+    }
+  }
+
+  // ============================================================
   // SIGN OUT
   // ============================================================
 
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   Future<void> signOut() async {
-    final User? user = _auth.currentUser;
+    final User? user =
+        _auth.currentUser;
 
     if (user != null) {
-      await _messagingService.removeToken(
-        user.uid,
-      );
+      try {
+        await _messagingService
+            .removeToken(
+          user.uid,
+        );
+      } catch (e) {
+        debugPrint(
+          'Failed to remove messaging token: $e',
+        );
+      }
     }
 
-    await _messagingService.dispose();
+    try {
+      await _messagingService
+          .dispose();
+    } catch (e) {
+      debugPrint(
+        'Messaging dispose failed: $e',
+      );
+    }
 
     await _auth.signOut();
   }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   // Helper: Generate Random 6-Character Alphanumeric Code
   String _generateInviteCode() {
@@ -291,10 +545,41 @@ class AuthService {
     if (doc.exists && doc.data() != null) {
       return UserModel.fromMap(doc.data()!, uid);
 >>>>>>> main
+=======
+  // ============================================================
+  // GET USER PROFILE
+  // ============================================================
+
+  Future<UserModel?> getUserProfile(
+    String uid,
+  ) async {
+    try {
+      final DocumentSnapshot<
+          Map<String, dynamic>> doc =
+          await _firestore
+              .collection('users')
+              .doc(uid)
+              .get();
+
+      if (doc.exists &&
+          doc.data() != null) {
+        return UserModel.fromMap(
+          doc.data()!,
+          uid,
+        );
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint(
+        'Failed to get user profile: $e',
+      );
+
+      rethrow;
+>>>>>>> origin/main
     }
   }
-}
-=======
+
   // ============================================================
   // AUTH ERROR MESSAGES
   // ============================================================
@@ -362,10 +647,12 @@ class AuthService {
       case 'not-found':
         return 'The required Firestore resource was not found.';
 
+      case 'already-exists':
+        return 'The required Firestore resource already exists.';
+
       default:
         return 'Firestore error (${e.code}): '
             '${e.message ?? 'Unknown Firestore error'}';
     }
   }
 }
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317

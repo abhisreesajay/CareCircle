@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,46 +53,60 @@ class UserModel {
   }
 }
 =======
+=======
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+>>>>>>> origin/main
 class UserModel {
   final String uid;
   final String email;
   final String role;
+
+  final String? name;
+  final String? inviteCode;
+  final String? fcmToken;
+
   final List<String> linkedElders;
   final List<String> caregivers;
-  final String? inviteCode;
+
+  final DateTime createdAt;
 
   UserModel({
     required this.uid,
     required this.email,
     required this.role,
+    this.name,
+    this.inviteCode,
+    this.fcmToken,
     this.linkedElders = const [],
     this.caregivers = const [],
-    this.inviteCode,
+    required this.createdAt,
   });
 
   factory UserModel.fromMap(
+    Map<String, dynamic> map,
     String uid,
-    Map<String, dynamic> data,
   ) {
     return UserModel(
       uid: uid,
-      email: data['email']?.toString() ?? '',
-      role: data['role']?.toString() ?? 'elder',
+      email: map['email']?.toString() ?? '',
+      role: map['role']?.toString() ?? 'elder',
+      name: map['name']?.toString(),
+      inviteCode: map['inviteCode']?.toString(),
+      fcmToken: map['fcmToken']?.toString(),
 
-      linkedElders:
-          (data['linkedElders'] as List<dynamic>?)
-                  ?.map((e) => e.toString())
-                  .toList() ??
-              const [],
+      linkedElders: (map['linkedElders'] as List<dynamic>?)
+              ?.map((item) => item.toString())
+              .toList() ??
+          const [],
 
-      caregivers:
-          (data['caregivers'] as List<dynamic>?)
-                  ?.map((e) => e.toString())
-                  .toList() ??
-              const [],
+      caregivers: (map['caregivers'] as List<dynamic>?)
+              ?.map((item) => item.toString())
+              .toList() ??
+          const [],
 
-      inviteCode:
-          data['inviteCode']?.toString(),
+      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ??
+          DateTime.now(),
     );
   }
 
@@ -100,10 +115,12 @@ class UserModel {
       'uid': uid,
       'email': email,
       'role': role,
+      'name': name,
+      'inviteCode': inviteCode,
+      'fcmToken': fcmToken,
       'linkedElders': linkedElders,
       'caregivers': caregivers,
-      'inviteCode': inviteCode,
+      'createdAt': FieldValue.serverTimestamp(),
     };
   }
 }
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317

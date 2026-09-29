@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../models/activity_history_model.dart';
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 import '../../services/activity_history_service.dart';
@@ -9,6 +11,9 @@ import '../../services/caregiver/activity_history_service.dart';
 =======
 import '../../services/caregiver/activity_history_service.dart';
 >>>>>>> develop
+=======
+import '../../services/caregiver/activity_history_service.dart';
+>>>>>>> origin/main
 
 class ActivityHistoryScreen extends StatelessWidget {
   final String elderId;
@@ -20,6 +25,7 @@ class ActivityHistoryScreen extends StatelessWidget {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
@@ -29,6 +35,8 @@ class ActivityHistoryScreen extends StatelessWidget {
   static const Color textColor = Color(0xFF26301F);
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
   // CareCircle palette
   static const Color sage = Color(0xFF7FA68F);
   static const Color darkSage = Color(0xFF46695A);
@@ -37,15 +45,19 @@ class ActivityHistoryScreen extends StatelessWidget {
   static const Color terracotta = Color(0xFFC85C50);
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
 
   @override
   Widget build(BuildContext context) {
     final service = ActivityHistoryService();
 
     return Scaffold(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -64,8 +76,9 @@ class ActivityHistoryScreen extends StatelessWidget {
       ),
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
       backgroundColor: background,
-
       appBar: AppBar(
         backgroundColor: background,
         foregroundColor: textDark,
@@ -80,16 +93,20 @@ class ActivityHistoryScreen extends StatelessWidget {
           ),
         ),
       ),
+<<<<<<< HEAD
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
       body: StreamBuilder<List<ActivityHistory>>(
         stream: service.getActivityHistory(elderId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                 color: primaryGreen,
@@ -99,11 +116,15 @@ class ActivityHistoryScreen extends StatelessWidget {
 =======
                 color: primaryGreen,
 >>>>>>> develop
+=======
+                color: darkSage,
+>>>>>>> origin/main
               ),
             );
           }
 
           if (snapshot.hasError) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -139,11 +160,15 @@ class ActivityHistoryScreen extends StatelessWidget {
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+            return const _ErrorState();
+>>>>>>> origin/main
           }
 
           final activities = snapshot.data ?? [];
 
           if (activities.isEmpty) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -169,13 +194,15 @@ class ActivityHistoryScreen extends StatelessWidget {
                         color: textColor,
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
             return const _EmptyActivityState();
           }
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
             children: [
-              // Header / summary card
+              // Summary card
               Container(
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
@@ -220,14 +247,18 @@ class ActivityHistoryScreen extends StatelessWidget {
                             ),
                           ),
                         ],
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
                       ),
                     ),
                   ],
                 ),
               ),
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -327,6 +358,8 @@ class ActivityHistoryScreen extends StatelessWidget {
             },
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
 
               const SizedBox(height: 24),
 
@@ -347,9 +380,12 @@ class ActivityHistoryScreen extends StatelessWidget {
                 ),
               ),
             ],
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
           );
         },
       ),
@@ -357,7 +393,10 @@ class ActivityHistoryScreen extends StatelessWidget {
   }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
 }
 
 // ------------------------------------------------------------
@@ -441,9 +480,7 @@ class _ActivityCard extends StatelessWidget {
                         color: darkSage,
                       ),
                     ),
-
                     const SizedBox(width: 9),
-
                     Expanded(
                       child: Text(
                         activity.date,
@@ -475,9 +512,7 @@ class _ActivityCard extends StatelessWidget {
                         color: darkSage,
                       ),
                     ),
-
                     const SizedBox(width: 9),
-
                     Text(
                       activity.time,
                       style: const TextStyle(
@@ -620,7 +655,10 @@ class _ErrorState extends StatelessWidget {
       ),
     );
   }
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
 }

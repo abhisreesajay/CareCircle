@@ -24,11 +24,17 @@ service cloud.firestore {
 
     function isCaregiver() {
       return signedIn()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
         && userData(request.auth.uid).role == 'caregiver';
     }
 
     function isElder() {
       return signedIn()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
         && userData(request.auth.uid).role == 'elder';
     }
 
@@ -45,28 +51,32 @@ service cloud.firestore {
 
     match /users/{userId} {
 
-      // Users can read their own profile.
-      // Caregivers can read profiles when required
-      // for CareCircle functionality.
       allow read: if isOwner(userId)
         || isCaregiver();
 
-      // User creates their own profile.
       allow create: if isOwner(userId);
 
-      // User can update their own profile.
       allow update: if isOwner(userId);
 
-      // A caregiver may update an elder's caregivers list
-      // while linking themselves.
-      allow update: if isCaregiver()
-        && userData(userId).role == 'elder'
+      // Caregiver adding themselves to an elder.
+      allow update: if signedIn()
+        && resource.data.role == 'elder'
+        && request.resource.data.role == 'elder'
         && request.resource.data.diff(resource.data)
             .affectedKeys()
             .hasOnly(['caregivers'])
         && request.resource.data.caregivers is list
         && request.resource.data.caregivers
             .hasAny([request.auth.uid]);
+
+      // Caregiver linked elder list.
+      allow update: if isOwner(userId)
+        && resource.data.role == 'caregiver'
+        && request.resource.data.role == 'caregiver'
+        && request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly(['linkedElders'])
+        && request.resource.data.linkedElders is list;
 
       allow delete: if false;
     }
@@ -78,18 +88,14 @@ service cloud.firestore {
 
     match /inviteCodes/{code} {
 
-      // A caregiver needs to read the code to find
-      // the elder it belongs to.
-      allow read: if isCaregiver();
+      allow read: if signedIn();
 
-      // Elder creates their own invite code.
       allow create: if signedIn()
         && request.resource.data.elderId
             == request.auth.uid
         && request.resource.data.code
             == code;
 
-      // Elder can update their own invite code.
       allow update: if signedIn()
         && resource.data.elderId
             == request.auth.uid
@@ -121,9 +127,9 @@ service cloud.firestore {
       allow delete: if false;
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // MEDICINES
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /medicines/{medicineId} {
         allow read, write:
@@ -132,9 +138,9 @@ service cloud.firestore {
       }
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // APPOINTMENTS
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /appointments/{appointmentId} {
         allow read, write:
@@ -143,9 +149,9 @@ service cloud.firestore {
       }
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // EMERGENCY CONTACTS
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /emergencyContacts/{contactId} {
         allow read, write:
@@ -154,9 +160,9 @@ service cloud.firestore {
       }
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // NEARBY SERVICES
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /nearbyServices/{serviceId} {
         allow read, write:
@@ -165,9 +171,9 @@ service cloud.firestore {
       }
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // MEDICAL SUMMARY
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /medicalSummary/{summaryId} {
         allow read, write:
@@ -176,9 +182,9 @@ service cloud.firestore {
       }
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // CHECK-IN HISTORY
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /checkInHistory/{checkInId} {
         allow read, write:
@@ -187,9 +193,9 @@ service cloud.firestore {
       }
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // ACTIVITY HISTORY
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /activityHistory/{activityId} {
         allow read, write:
@@ -198,9 +204,9 @@ service cloud.firestore {
       }
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // STATUS
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /status/{statusId} {
         allow read, write:
@@ -209,14 +215,36 @@ service cloud.firestore {
       }
 
 
-      // ----------------------------------------------------------
+      // ==========================================================
       // ALERTS
-      // ----------------------------------------------------------
+      // ==========================================================
 
       match /alerts/{alertId} {
         allow read, write:
           if isOwner(elderId)
           || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ==========================================================
+      // HOSPITAL DOCUMENTS
+      // ==========================================================
+
+      match /hospitalDocuments/{documentId} {
+
+        // Elder can read their own hospital documents.
+        // Linked caregiver can also read them.
+        allow read: if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+
+        // Only linked caregiver can upload.
+        allow create: if caregiverLinkedToElder(elderId);
+
+        // Only linked caregiver can edit metadata.
+        allow update: if caregiverLinkedToElder(elderId);
+
+        // Only linked caregiver can delete.
+        allow delete: if caregiverLinkedToElder(elderId);
       }
     }
 
@@ -230,7 +258,8 @@ service cloud.firestore {
       allow read: if signedIn()
         && (
           resource.data.elderId == request.auth.uid
-          || (
+          ||
+          (
             isCaregiver()
             && caregiverLinkedToElder(
               resource.data.elderId
@@ -259,7 +288,7 @@ service cloud.firestore {
 
 
     // ============================================================
-    // SAFE-ZONE VIOLATIONS
+    // SAFE ZONE VIOLATIONS
     // ============================================================
 
     match /safeZoneViolations/{violationId} {
@@ -271,7 +300,8 @@ service cloud.firestore {
       allow read: if signedIn()
         && (
           resource.data.elderId == request.auth.uid
-          || caregiverLinkedToElder(
+          ||
+          caregiverLinkedToElder(
             resource.data.elderId
           )
         );
@@ -294,9 +324,9 @@ service cloud.firestore {
 
       allow read: if signedIn()
         && (
-          resource.data.userId
-              == request.auth.uid
-          || caregiverLinkedToElder(
+          resource.data.userId == request.auth.uid
+          ||
+          caregiverLinkedToElder(
             resource.data.userId
           )
         );
@@ -318,6 +348,7 @@ service cloud.firestore {
     // ============================================================
 
     match /careCircles/{circleId} {
+
       allow read, create, update, delete:
         if signedIn();
     }

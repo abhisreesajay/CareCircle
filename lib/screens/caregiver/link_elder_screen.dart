@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../services/caregiver/care_circle_service.dart';
+import '../../services/care_circle_service.dart';
 
 class LinkElderScreen extends StatefulWidget {
   const LinkElderScreen({

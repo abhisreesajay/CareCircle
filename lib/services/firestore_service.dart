@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
-  final FirebaseFirestore db =
-      FirebaseFirestore.instance;
+  final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  CollectionReference<
-      Map<String, dynamic>> elderCollection(
+  CollectionReference<Map<String, dynamic>> elderCollection(
     String elderId,
     String collection,
   ) {
@@ -15,8 +13,7 @@ class FirestoreService {
         .collection(collection);
   }
 
-  DocumentReference<
-      Map<String, dynamic>> elderDocument(
+  DocumentReference<Map<String, dynamic>> elderDocument(
     String elderId,
   ) {
     return db
@@ -35,12 +32,9 @@ class FirestoreService {
       'activityHistory',
     ).add({
       'type': type,
-      'description':
-          description,
-      if (method != null)
-        'method': method,
-      'timestamp':
-          FieldValue.serverTimestamp(),
+      'description': description,
+      'method': ?method,
+      'timestamp': FieldValue.serverTimestamp(),
     });
   }
 }

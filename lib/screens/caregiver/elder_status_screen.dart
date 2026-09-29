@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import '../../services/elder_status_service.dart';
 =======
 import '../../services/caregiver/elder_status_service.dart';
@@ -8,6 +9,9 @@ import '../../services/caregiver/elder_status_service.dart';
 =======
 import '../../services/caregiver/elder_status_service.dart';
 >>>>>>> develop
+=======
+import '../../services/caregiver/elder_status_service.dart';
+>>>>>>> origin/main
 
 class ElderStatusScreen extends StatelessWidget {
   final String elderId;
@@ -19,6 +23,7 @@ class ElderStatusScreen extends StatelessWidget {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> develop
   static const Color primaryGreen = Color(0xFF738F52);
@@ -28,6 +33,8 @@ class ElderStatusScreen extends StatelessWidget {
   static const Color textColor = Color(0xFF26301F);
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
   static const Color backgroundColor = Color(0xFFF4EFE5);
   static const Color sage = Color(0xFF7FA68F);
   static const Color darkSage = Color(0xFF46695A);
@@ -35,9 +42,12 @@ class ElderStatusScreen extends StatelessWidget {
   static const Color cream = Color(0xFFFFFBF4);
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +55,7 @@ class ElderStatusScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: backgroundColor,
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -63,6 +74,8 @@ class ElderStatusScreen extends StatelessWidget {
 <<<<<<< HEAD
 =======
 
+=======
+>>>>>>> origin/main
       appBar: AppBar(
         backgroundColor: backgroundColor,
         foregroundColor: textDark,
@@ -78,16 +91,20 @@ class ElderStatusScreen extends StatelessWidget {
           ),
         ),
       ),
+<<<<<<< HEAD
 
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
       body: StreamBuilder(
         stream: service.getStatus(elderId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                 color: primaryGreen,
@@ -97,11 +114,15 @@ class ElderStatusScreen extends StatelessWidget {
 =======
                 color: primaryGreen,
 >>>>>>> develop
+=======
+                color: darkSage,
+>>>>>>> origin/main
               ),
             );
           }
 
           if (snapshot.hasError) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -137,11 +158,15 @@ class ElderStatusScreen extends StatelessWidget {
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+            return const _ErrorState();
+>>>>>>> origin/main
           }
 
           final document = snapshot.data;
 
           if (document == null || !document.exists) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -177,6 +202,9 @@ class ElderStatusScreen extends StatelessWidget {
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+            return const _UnavailableState();
+>>>>>>> origin/main
           }
 
           final data = document.data() ?? {};
@@ -194,6 +222,7 @@ class ElderStatusScreen extends StatelessWidget {
               data['lastActivity'] ?? 'Not available';
 
           return SingleChildScrollView(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -225,6 +254,8 @@ class ElderStatusScreen extends StatelessWidget {
                   value: lastActivity.toString(),
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
             padding: const EdgeInsets.fromLTRB(
               20,
               8,
@@ -294,9 +325,12 @@ class ElderStatusScreen extends StatelessWidget {
                   title: 'Last activity',
                   value: lastActivity.toString(),
                   accentColor: darkSage,
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
                 ),
               ],
             ),
@@ -305,6 +339,7 @@ class ElderStatusScreen extends StatelessWidget {
       ),
     );
   }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -370,6 +405,8 @@ class ElderStatusScreen extends StatelessWidget {
           ],
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
 }
 
 class _OverviewCard extends StatelessWidget {
@@ -410,9 +447,7 @@ class _OverviewCard extends StatelessWidget {
                   size: 29,
                 ),
               ),
-
               const SizedBox(width: 15),
-
               const Expanded(
                 child: Text(
                   'How are things?',
@@ -734,9 +769,12 @@ class _ErrorState extends StatelessWidget {
               ),
             ],
           ),
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
         ),
       ),
     );

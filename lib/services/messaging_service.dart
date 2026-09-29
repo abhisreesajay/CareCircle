@@ -91,20 +91,48 @@ class MessagingService {
   StreamSubscription<RemoteMessage>?
       _foregroundMessageSubscription;
 
+  // ============================================================
+  // INITIALIZE
+  // ============================================================
+
   Future<void> initialize(String userId) async {
     try {
       if (userId.trim().isEmpty) {
         return;
       }
 
-      final currentUser = _auth.currentUser;
+      // ----------------------------------------------------------
+      // FLUTTER WEB
+      // ----------------------------------------------------------
+      // Firebase Cloud Messaging on web requires a properly
+      // configured firebase-messaging-sw.js service worker.
+      //
+      // For now, skip FCM completely on Chrome/Edge.
+      // This prevents:
+      // failed-service-worker-registration
+      //
+      // Android and iOS continue to use FCM normally.
+      // ----------------------------------------------------------
+
+      if (kIsWeb) {
+        debugPrint(
+          'FCM skipped on web platform.',
+        );
+        return;
+      }
+
+      final User? currentUser =
+          _auth.currentUser;
 
       if (currentUser == null ||
           currentUser.uid != userId) {
         return;
       }
 
-      // Request notification permission.
+      // ----------------------------------------------------------
+      // REQUEST NOTIFICATION PERMISSION
+      // ----------------------------------------------------------
+
       await _messaging.requestPermission(
         alert: true,
         badge: true,
@@ -112,7 +140,10 @@ class MessagingService {
         provisional: false,
       );
 
-      // iOS/macOS requires APNs token before FCM token.
+      // ----------------------------------------------------------
+      // IOS / MACOS APNS TOKEN
+      // ----------------------------------------------------------
+
       if (!kIsWeb &&
           (defaultTargetPlatform ==
                   TargetPlatform.iOS ||
@@ -130,33 +161,50 @@ class MessagingService {
           }
 
           await Future.delayed(
-            const Duration(milliseconds: 500),
+            const Duration(
+              milliseconds: 500,
+            ),
           );
         }
 
         if (apnsToken == null ||
             apnsToken.isEmpty) {
+          debugPrint(
+            'APNs token unavailable.',
+          );
+
           return;
         }
       }
 
-      final token =
+      // ----------------------------------------------------------
+      // GET FCM TOKEN
+      // ----------------------------------------------------------
+
+      final String? token =
           await _messaging.getToken();
 
-      if (token != null && token.isNotEmpty) {
+      if (token != null &&
+          token.isNotEmpty) {
         await _saveToken(
           userId,
           token,
         );
       }
 
-      await _tokenRefreshSubscription?.cancel();
+      // ----------------------------------------------------------
+      // TOKEN REFRESH
+      // ----------------------------------------------------------
+
+      await _tokenRefreshSubscription
+          ?.cancel();
 
       _tokenRefreshSubscription =
           _messaging.onTokenRefresh.listen(
-        (newToken) async {
+        (String newToken) async {
           try {
-            final user = _auth.currentUser;
+            final User? user =
+                _auth.currentUser;
 
             if (user == null ||
                 user.uid != userId) {
@@ -171,83 +219,57 @@ class MessagingService {
               userId,
               newToken,
             );
-          } catch (_) {}
+          } catch (e) {
+            debugPrint(
+              'FCM token refresh failed: $e',
+            );
+          }
         },
       );
+
+      // ----------------------------------------------------------
+      // FOREGROUND MESSAGES
+      // ----------------------------------------------------------
 
       await _foregroundMessageSubscription
           ?.cancel();
 
       _foregroundMessageSubscription =
           FirebaseMessaging.onMessage.listen(
-        (message) {
+        (RemoteMessage message) {
           _handleForegroundMessage(
             message,
           );
         },
       );
-    } catch (_) {
-      // FCM failure should not prevent app startup.
+    } catch (e) {
+      // FCM failure should never prevent
+      // the application from starting.
+      debugPrint(
+        'FCM initialization skipped/failed: $e',
+      );
     }
   }
+
+  // ============================================================
+  // SAVE TOKEN
+  // ============================================================
 
   Future<void> _saveToken(
     String userId,
     String token,
   ) async {
-    if (userId.isEmpty || token.isEmpty) {
-      return;
-    }
-
-    final user = _auth.currentUser;
-
-    if (user == null ||
-        user.uid != userId) {
-      return;
-    }
-
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .set(
-      {
-        'fcmTokens':
-            FieldValue.arrayUnion([token]),
-        'fcmTokenUpdatedAt':
-            FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
-  }
-
-  void _handleForegroundMessage(
-    RemoteMessage message,
-  ) {
-    // The notification is received here.
-    //
-    // If you want a custom popup later,
-    // implement it here.
-  }
-
-  Future<void> removeToken(
-    String userId,
-  ) async {
     try {
-      if (userId.isEmpty) {
+      if (userId.isEmpty ||
+          token.isEmpty) {
         return;
       }
 
-      final user = _auth.currentUser;
+      final User? user =
+          _auth.currentUser;
 
       if (user == null ||
           user.uid != userId) {
-        return;
-      }
-
-      final token =
-          await _messaging.getToken();
-
-      if (token == null || token.isEmpty) {
         return;
       }
 
@@ -257,15 +279,100 @@ class MessagingService {
           .set(
         {
           'fcmTokens':
-              FieldValue.arrayRemove([token]),
+              FieldValue.arrayUnion(
+            [token],
+          ),
+          'fcmTokenUpdatedAt':
+              FieldValue.serverTimestamp(),
         },
-        SetOptions(merge: true),
+        SetOptions(
+          merge: true,
+        ),
       );
-    } catch (_) {}
+    } catch (e) {
+      debugPrint(
+        'Failed to save FCM token: $e',
+      );
+    }
   }
 
+  // ============================================================
+  // FOREGROUND MESSAGE
+  // ============================================================
+
+  void _handleForegroundMessage(
+    RemoteMessage message,
+  ) {
+    debugPrint(
+      'FCM foreground message received: '
+      '${message.messageId}',
+    );
+
+    // Custom in-app notification UI
+    // can be added here later.
+  }
+
+  // ============================================================
+  // REMOVE TOKEN
+  // ============================================================
+
+  Future<void> removeToken(
+    String userId,
+  ) async {
+    try {
+      if (userId.isEmpty) {
+        return;
+      }
+
+      // FCM is intentionally disabled on web.
+      if (kIsWeb) {
+        return;
+      }
+
+      final User? user =
+          _auth.currentUser;
+
+      if (user == null ||
+          user.uid != userId) {
+        return;
+      }
+
+      final String? token =
+          await _messaging.getToken();
+
+      if (token == null ||
+          token.isEmpty) {
+        return;
+      }
+
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .set(
+        {
+          'fcmTokens':
+              FieldValue.arrayRemove(
+            [token],
+          ),
+        },
+        SetOptions(
+          merge: true,
+        ),
+      );
+    } catch (e) {
+      debugPrint(
+        'Failed to remove FCM token: $e',
+      );
+    }
+  }
+
+  // ============================================================
+  // DISPOSE
+  // ============================================================
+
   Future<void> dispose() async {
-    await _tokenRefreshSubscription?.cancel();
+    await _tokenRefreshSubscription
+        ?.cancel();
 
     _tokenRefreshSubscription = null;
 
@@ -276,6 +383,10 @@ class MessagingService {
   }
 }
 
+// ================================================================
+// BACKGROUND FCM HANDLER
+// ================================================================
+
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(
   RemoteMessage message,
@@ -283,10 +394,17 @@ Future<void> firebaseMessagingBackgroundHandler(
   try {
     await Firebase.initializeApp(
       options:
-          DefaultFirebaseOptions.currentPlatform,
+          DefaultFirebaseOptions
+              .currentPlatform,
     );
   } catch (_) {}
 
+<<<<<<< HEAD
   // Background notification handling.
 }
 >>>>>>> main
+=======
+  // Background notification handling
+  // can be implemented here later.
+}
+>>>>>>> origin/main

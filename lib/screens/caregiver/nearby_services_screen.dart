@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../models/nearby_service_model.dart';
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 import '../../services/nearby_service_service.dart';
@@ -9,6 +11,9 @@ import '../../services/caregiver/nearby_service_service.dart';
 =======
 import '../../services/caregiver/nearby_service_service.dart';
 >>>>>>> develop
+=======
+import '../../services/caregiver/nearby_service_service.dart';
+>>>>>>> origin/main
 
 class NearbyServicesScreen extends StatefulWidget {
   final String elderId;
@@ -25,6 +30,7 @@ class NearbyServicesScreen extends StatefulWidget {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> develop
 class _NearbyServicesScreenState
@@ -39,10 +45,15 @@ class _NearbyServicesScreenState
   static const Color textColor = Color(0xFF26301F);
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
 class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
   final NearbyServiceService _service = NearbyServiceService();
 
-  // CareCircle palette
+  // -----------------------------------------------------------------------
+  // CARECIRCLE PALETTE
+  // -----------------------------------------------------------------------
+
   static const Color sage = Color(0xFF7FA68F);
   static const Color darkSage = Color(0xFF46695A);
   static const Color cream = Color(0xFFFFFBF4);
@@ -50,9 +61,16 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
   static const Color terracotta = Color(0xFFC85C50);
   static const Color textDark = Color(0xFF26352F);
   static const Color mutedText = Color(0xFF7A827D);
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+
+  // -----------------------------------------------------------------------
+  // ADD / EDIT SERVICE
+  // -----------------------------------------------------------------------
+>>>>>>> origin/main
 
   void _showServiceForm({NearbyService? service}) {
     final nameController =
@@ -68,6 +86,7 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 
     showDialog(
       context: context,
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -134,6 +153,8 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                       ),
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
@@ -229,9 +250,12 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                         ),
                       ),
                       dropdownColor: cream,
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
                       items: const [
                         DropdownMenuItem(
                           value: 'Hospital',
@@ -251,6 +275,7 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                         ),
                       ],
                       onChanged: (value) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -305,6 +330,8 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                       ),
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
                         if (value == null) return;
 
                         setDialogState(() {
@@ -362,7 +389,9 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                             ),
                           ),
                         ),
+
                         const SizedBox(width: 12),
+
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () async {
@@ -411,7 +440,9 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                               ),
                             ),
                             child: Text(
-                              service == null ? 'Add service' : 'Save changes',
+                              service == null
+                                  ? 'Add service'
+                                  : 'Save changes',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -419,13 +450,17 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                           ),
                         ),
                       ],
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
                     ),
                   ],
                 ),
               ),
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -506,12 +541,18 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
             );
           },
         );
       },
     );
   }
+
+  // -----------------------------------------------------------------------
+  // SERVICE ICON
+  // -----------------------------------------------------------------------
 
   IconData _getServiceIcon(String type) {
     if (type == 'Hospital') {
@@ -531,7 +572,14 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+  // -----------------------------------------------------------------------
+  // SERVICE COLOR
+  // -----------------------------------------------------------------------
+
+>>>>>>> origin/main
   Color _getServiceColor(String type) {
     if (type == 'Hospital') {
       return terracotta;
@@ -548,6 +596,10 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
     return sage;
   }
 
+  // -----------------------------------------------------------------------
+  // SERVICE DESCRIPTION
+  // -----------------------------------------------------------------------
+
   String _getServiceDescription(String type) {
     if (type == 'Hospital') {
       return 'Medical care';
@@ -563,6 +615,10 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 
     return 'Food & dining';
   }
+
+  // -----------------------------------------------------------------------
+  // DELETE SERVICE
+  // -----------------------------------------------------------------------
 
   Future<void> _deleteService(NearbyService service) async {
     final shouldDelete = await showDialog<bool>(
@@ -627,13 +683,21 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
     );
   }
 
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+  // -----------------------------------------------------------------------
+  // BUILD
+  // -----------------------------------------------------------------------
+
+>>>>>>> origin/main
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -658,6 +722,8 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
       ),
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
 
       appBar: AppBar(
         backgroundColor: backgroundColor,
@@ -689,16 +755,19 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
         ),
       ),
 
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
       body: StreamBuilder<List<NearbyService>>(
         stream: _service.getServices(widget.elderId),
         builder: (context, snapshot) {
-          if (snapshot.connectionState ==
-              ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                 color: primaryGreen,
@@ -708,11 +777,15 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 =======
                 color: primaryGreen,
 >>>>>>> develop
+=======
+                color: darkSage,
+>>>>>>> origin/main
               ),
             );
           }
 
           if (snapshot.hasError) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -748,11 +821,15 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+            return const _ErrorState();
+>>>>>>> origin/main
           }
 
           final services = snapshot.data ?? [];
 
           if (services.isEmpty) {
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -1022,6 +1099,8 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
             },
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
             return const _EmptyServiceState();
           }
 
@@ -1091,9 +1170,12 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
                 ),
               ),
             ],
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
           );
         },
       ),
@@ -1101,8 +1183,15 @@ class _NearbyServicesScreenState extends State<NearbyServicesScreen> {
   }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/main
 }
+
+// =======================================================================
+// INTRO CARD
+// =======================================================================
 
 class _IntroCard extends StatelessWidget {
   final int serviceCount;
@@ -1139,7 +1228,9 @@ class _IntroCard extends StatelessWidget {
               size: 28,
             ),
           ),
+
           const SizedBox(width: 16),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1168,6 +1259,10 @@ class _IntroCard extends StatelessWidget {
     );
   }
 }
+
+// =======================================================================
+// SERVICE CARD
+// =======================================================================
 
 class _ServiceCard extends StatelessWidget {
   final NearbyService service;
@@ -1247,6 +1342,7 @@ class _ServiceCard extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
                           icon: const Icon(
@@ -1284,6 +1380,7 @@ class _ServiceCard extends StatelessWidget {
                                 ],
                               ),
                             ),
+
                             const PopupMenuItem(
                               value: 'delete',
                               child: Row(
@@ -1298,6 +1395,7 @@ class _ServiceCard extends StatelessWidget {
                                 ],
                               ),
                             ),
+
                             PopupMenuItem(
                               value: 'preferred',
                               child: Row(
@@ -1345,12 +1443,16 @@ class _ServiceCard extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         const SizedBox(width: 8),
-                        Text(
-                          description,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: mutedText,
+
+                        Expanded(
+                          child: Text(
+                            description,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: mutedText,
+                            ),
                           ),
                         ),
                       ],
@@ -1377,7 +1479,9 @@ class _ServiceCard extends StatelessWidget {
                       ? 'No phone number added'
                       : service.phone,
                 ),
+
                 const SizedBox(height: 10),
+
                 _ContactRow(
                   icon: Icons.location_on_outlined,
                   text: service.address.isEmpty
@@ -1390,6 +1494,7 @@ class _ServiceCard extends StatelessWidget {
 
           if (service.preferred) ...[
             const SizedBox(height: 13),
+
             Row(
               children: [
                 Container(
@@ -1430,6 +1535,10 @@ class _ServiceCard extends StatelessWidget {
   }
 }
 
+// =======================================================================
+// CONTACT ROW
+// =======================================================================
+
 class _ContactRow extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -1452,7 +1561,9 @@ class _ContactRow extends StatelessWidget {
           size: 18,
           color: darkSage,
         ),
+
         const SizedBox(width: 9),
+
         Expanded(
           child: Text(
             text,
@@ -1467,6 +1578,10 @@ class _ContactRow extends StatelessWidget {
     );
   }
 }
+
+// =======================================================================
+// INPUT FIELD
+// =======================================================================
 
 class _InputField extends StatelessWidget {
   final TextEditingController controller;
@@ -1531,6 +1646,10 @@ class _InputField extends StatelessWidget {
     );
   }
 }
+
+// =======================================================================
+// EMPTY STATE
+// =======================================================================
 
 class _EmptyServiceState extends StatelessWidget {
   const _EmptyServiceState();
@@ -1612,6 +1731,10 @@ class _EmptyServiceState extends StatelessWidget {
   }
 }
 
+// =======================================================================
+// ERROR STATE
+// =======================================================================
+
 class _ErrorState extends StatelessWidget {
   const _ErrorState();
 
@@ -1676,7 +1799,10 @@ class _ErrorState extends StatelessWidget {
       ),
     );
   }
+<<<<<<< HEAD
 >>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
 =======
 >>>>>>> develop
+=======
+>>>>>>> origin/main
 }

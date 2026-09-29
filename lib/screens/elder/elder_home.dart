@@ -1,33 +1,35 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import '../../services/auth_service.dart'; // Added this import
 
-class ElderHome extends StatelessWidget {
-  const ElderHome({super.key});
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F8FA),
-=======
-
+import '../../services/auth_service.dart';
 import 'elder_medication_screen.dart';
 import 'hospital_documents_screen.dart';
 import 'invite_code_screen.dart';
+import 'nearby_services_screen.dart';
 
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
 
+  static const Color primary = Color(0xFF415111);
+  static const Color orange = Color(0xFFFB8159);
+  static const Color lightGreen = Color(0xFFD2E186);
+  static const Color cream = Color(0xFFF2E8DF);
+  static const Color background = Color(0xFFFEFEFE);
+  static const Color textDark = Color(0xFF26352F);
+  static const Color mutedText = Color(0xFF6A6D5B);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFEFEFE),
+      backgroundColor: background,
 
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+      // ================================================================
+      // APP BAR
+      // ================================================================
+
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF415111),
+        backgroundColor: primary,
         foregroundColor: Colors.white,
         centerTitle: false,
         title: const Column(
@@ -65,52 +67,87 @@ class ElderHome extends StatelessWidget {
         ],
       ),
 
+      // ================================================================
+      // BODY
+      // ================================================================
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             14,
             16,
             14,
-            20,
+            24,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome section
+              // ==========================================================
+              // WELCOME
+              // ==========================================================
+
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(17),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEFEFE),
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFF3F7DE),
+                      Color(0xFFFFF8F2),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: const Color(0xFFF2E8DF),
+                    color: const Color(0xFFE8EBD8),
                   ),
                 ),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Text(
-                      'Welcome to Care Circle',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF415111),
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: primary,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(
+                        Icons.favorite_rounded,
+                        color: Colors.white,
+                        size: 30,
                       ),
                     ),
-                    SizedBox(height: 5),
-                    Text(
-                      'How can we help you today?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF6A6D5B),
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(width: 15),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome to Care Circle',
+                            style: TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.bold,
+                              color: primary,
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            'How can we help you today?',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: mutedText,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
               const SizedBox(height: 28),
@@ -239,185 +276,193 @@ class ElderHome extends StatelessWidget {
 
 >>>>>>> develop
               const SizedBox(height: 18),
+=======
+              const SizedBox(height: 24),
+
+              // ==========================================================
+              // QUICK ACTIONS HEADER
+              // ==========================================================
+>>>>>>> origin/main
 
               const Text(
                 'Quick Actions',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 21,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF415111),
+                  color: primary,
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
 
-              // Smaller vertical cards
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1.08,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+              const Text(
+                'Choose what you need',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: mutedText,
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // ==========================================================
+              // FEATURED CHECK-IN ROW
+              // ==========================================================
+
+              Row(
                 children: [
-                  // Daily Check-in
-                  _buildActionCard(
-                    context: context,
-                    title: 'Daily\nCheck-in',
-                    subtitle: 'Tell us how you feel',
-                    icon: Icons.check_circle_outline_rounded,
-                    iconColor: const Color(0xFF415111),
-                    backgroundColor: const Color(0xFFD2E186),
-                    route: '/checkin',
+                  Expanded(
+                    child: _buildLargeAction(
+                      context: context,
+                      title: 'Daily Check-in',
+                      subtitle: 'How are you today?',
+                      icon: Icons.check_circle_outline_rounded,
+                      backgroundColor: lightGreen,
+                      iconColor: primary,
+                      route: '/checkin',
+                    ),
                   ),
-
-                  // Voice Check-in
-                  _buildActionCard(
-                    context: context,
-                    title: 'Voice\nCheck-in',
-                    subtitle: 'Speak instead of typing',
-                    icon: Icons.mic_none_rounded,
-                    iconColor: const Color(0xFF9A674C),
-                    backgroundColor: const Color(0xFFFCBF93),
-                    route: '/voice-checkin',
-                  ),
-
-                  // My Medications
-                  _buildActionCard(
-                    context: context,
-                    title: 'My\nMedications',
-                    subtitle: 'Today\'s medicines',
-                    icon: Icons.medication_rounded,
-                    iconColor: const Color(0xFF415111),
-                    backgroundColor: const Color(0xFFF2E8DF),
-                    onTapOverride: () {
-                      final uid =
-                          FirebaseAuth.instance.currentUser?.uid ?? '';
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ElderMedicationScreen(
-                            elderId: uid,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-
-                  // Hospital Documents
-                  _buildActionCard(
-                    context: context,
-                    title: 'Hospital\nDocuments',
-                    subtitle: 'Access medical documents',
-                    icon: Icons.folder_shared_rounded,
-                    iconColor: const Color(0xFF415111),
-                    backgroundColor: const Color(0xFFFEFEFE),
-                    onTapOverride: () {
-                      final uid =
-                          FirebaseAuth.instance.currentUser?.uid ?? '';
-
-                      if (uid.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Unable to identify your account.',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HospitalDocumentsScreen(
-                            elderId: uid,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-
-                  // Emergency SOS
-                  _buildActionCard(
-                    context: context,
-                    title: 'Emergency\nSOS',
-                    subtitle: 'Get immediate help',
-                    icon: Icons.warning_amber_rounded,
-                    iconColor: Colors.white,
-                    backgroundColor: const Color(0xFFFB8159),
-                    route: '/sos',
-                    isEmergency: true,
-                  ),
-
-                  // Nearby Hospitals
-                  _buildActionCard(
-                    context: context,
-                    title: 'Nearby\nHospitals',
-                    subtitle: 'Find hospitals near you',
-                    icon: Icons.local_hospital_outlined,
-                    iconColor: Colors.white,
-                    backgroundColor: const Color(0xFF415111),
-                    route: '/hospitals',
-                  ),
-
-                  // Nearby Services
-                  _buildActionCard(
-                    context: context,
-                    title: 'Nearby\nServices',
-                    subtitle: 'Find shops nearby',
-                    icon: Icons.storefront_outlined,
-                    iconColor: const Color(0xFF415111),
-                    backgroundColor: const Color(0xFFD2E186),
-                    route: '/services',
-                  ),
-
-                  // Caregiver Connection
-                  _buildActionCard(
-                    context: context,
-                    title: 'Caregiver\nConnection',
-                    subtitle: 'Connect with caregiver',
-                    icon: Icons.link_rounded,
-                    iconColor: const Color(0xFF9A5A48),
-                    backgroundColor: const Color(0xFFF2E8DF),
-                    onTapOverride: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const InviteCodeScreen(),
-                        ),
-                      );
-                    },
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildLargeAction(
+                      context: context,
+                      title: 'Voice Check-in',
+                      subtitle: 'Speak with us',
+                      icon: Icons.mic_none_rounded,
+                      backgroundColor: const Color(0xFFFFD9BF),
+                      iconColor: const Color(0xFF9A674C),
+                      route: '/voice-checkin',
+                    ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
 
-              // Help information
+              // ==========================================================
+              // SOS
+              // ==========================================================
+
+              _buildEmergencyCard(context),
+
+              const SizedBox(height: 12),
+
+              // ==========================================================
+              // MEDICATION + DOCUMENTS
+              // ==========================================================
+
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildSmallAction(
+                      context: context,
+                      title: 'My Medications',
+                      subtitle: 'Today\'s medicines',
+                      icon: Icons.medication_rounded,
+                      backgroundColor: cream,
+                      iconColor: primary,
+                      onTap: () {
+                        final uid =
+                            FirebaseAuth.instance.currentUser?.uid ?? '';
+
+                        if (uid.isEmpty) {
+                          _showMessage(
+                            context,
+                            'Unable to identify your account.',
+                          );
+                          return;
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ElderMedicationScreen(
+                              elderId: uid,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildSmallAction(
+                      context: context,
+                      title: 'Hospital Documents',
+                      subtitle: 'Your medical documents',
+                      icon: Icons.folder_shared_rounded,
+                      backgroundColor: const Color(0xFFF1F4E5),
+                      iconColor: primary,
+                      onTap: () {
+                        final uid =
+                            FirebaseAuth.instance.currentUser?.uid ?? '';
+
+                        if (uid.isEmpty) {
+                          _showMessage(
+                            context,
+                            'Unable to identify your account.',
+                          );
+                          return;
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HospitalDocumentsScreen(
+                              elderId: uid,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // ==========================================================
+              // NEARBY SERVICES
+              // ==========================================================
+
+              _buildNearbyServicesCard(context),
+
+              const SizedBox(height: 12),
+
+              // ==========================================================
+              // CAREGIVER CONNECTION
+              // ==========================================================
+
+              _buildConnectionCard(context),
+
+              const SizedBox(height: 22),
+
+              // ==========================================================
+              // HELP INFORMATION
+              // ==========================================================
+
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(15),
+                padding: const EdgeInsets.all(17),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF415111),
-                  borderRadius: BorderRadius.circular(15),
+                  color: primary,
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Row(
                   children: [
                     Icon(
                       Icons.info_outline_rounded,
                       color: Colors.white,
-                      size: 26,
+                      size: 27,
                     ),
-                    SizedBox(width: 10),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Need help? Use Emergency SOS or contact your caregiver.',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
-                          height: 1.3,
+                          height: 1.35,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -426,14 +471,14 @@ class ElderHome extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 15),
 
-              Center(
+              const Center(
                 child: Text(
                   'Care • Connect • Safe',
                   style: TextStyle(
                     fontSize: 13,
-                    color: const Color(0xFF7A7D6D),
+                    color: Color(0xFF7A7D6D),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -445,129 +490,73 @@ class ElderHome extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard({
+  // ====================================================================
+  // DAILY / VOICE LARGE ACTION
+  // ====================================================================
+
+  Widget _buildLargeAction({
     required BuildContext context,
     required String title,
     required String subtitle,
     required IconData icon,
-    required Color iconColor,
     required Color backgroundColor,
+    required Color iconColor,
     String? route,
-    VoidCallback? onTapOverride,
-    bool isEmergency = false,
+    VoidCallback? onTap,
   }) {
     return Material(
       color: backgroundColor,
-      borderRadius: BorderRadius.circular(16),
-      elevation: 1,
+      borderRadius: BorderRadius.circular(22),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          if (onTapOverride != null) {
-            onTapOverride();
-          } else if (route != null) {
-            Navigator.pushNamed(
-              context,
-              route,
-            );
-          }
-        },
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap ??
+            () {
+              if (route != null) {
+                Navigator.pushNamed(context, route);
+              }
+            },
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(17),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Small icon
               Container(
-                width: 43,
-                height: 43,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-<<<<<<< HEAD
-                const SizedBox(width: 17),
-                // Text
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.bold,
-                          color: isEmergency
-                              ? const Color(0xFFC62828)
-                              : const Color(0xFF163B4D),
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Color(0xFF63747B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 20,
-                  color: Color(0xFF78909C),
-=======
                 child: Icon(
                   icon,
                   color: iconColor,
-                  size: 25,
+                  size: 28,
                 ),
               ),
-
-              const Spacer(),
-
-              // Title
+              const SizedBox(height: 25),
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 16,
+                style: const TextStyle(
+                  fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  height: 1.05,
-                  color: isEmergency
-                      ? Colors.white
-                      : const Color(0xFF415111),
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
+                  color: primary,
                 ),
               ),
-
-              const SizedBox(height: 5),
-
-              // Subtitle
+              const SizedBox(height: 4),
               Text(
                 subtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  height: 1.15,
-                  color: isEmergency
-                      ? Colors.white.withValues(alpha: 0.9)
-                      : const Color(0xFF66695A),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: mutedText,
                 ),
               ),
-
-              const SizedBox(height: 5),
-
-              // Arrow
+              const SizedBox(height: 9),
               Align(
                 alignment: Alignment.bottomRight,
                 child: Icon(
                   Icons.arrow_forward_rounded,
-                  size: 18,
-                  color: isEmergency
-                      ? Colors.white
-                      : const Color(0xFF59653A),
+                  color: iconColor,
+                  size: 19,
                 ),
               ),
             ],
@@ -577,55 +566,374 @@ class ElderHome extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(
+  // ====================================================================
+  // EMERGENCY SOS
+  // ====================================================================
+
+  Widget _buildEmergencyCard(BuildContext context) {
+    return Material(
+      color: orange,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            '/sos',
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 17,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 55,
+                height: 55,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(17),
+                ),
+                child: const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white,
+                  size: 31,
+                ),
+              ),
+              const SizedBox(width: 15),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Emergency SOS',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Get immediate help',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ====================================================================
+  // MEDICATION / DOCUMENTS
+  // ====================================================================
+
+  Widget _buildSmallAction({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color backgroundColor,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: backgroundColor,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: primary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: mutedText,
+                ),
+              ),
+              const SizedBox(height: 9),
+              const Align(
+                alignment: Alignment.bottomRight,
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: primary,
+                  size: 19,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ====================================================================
+  // NEARBY SERVICES
+  // IMPORTANT:
+  // Directly opens NearbyServicesScreen.
+  // No '/services' named route is used.
+  // ====================================================================
+
+  Widget _buildNearbyServicesCard(BuildContext context) {
+    return Material(
+      color: const Color(0xFFE8F0D4),
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ElderNearbyServicesScreen(),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(19),
+          child: Row(
+            children: [
+              Container(
+                width: 61,
+                height: 61,
+                decoration: BoxDecoration(
+                  color: primary,
+                  borderRadius: BorderRadius.circular(19),
+                ),
+                child: const Icon(
+                  Icons.explore_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Nearby Services',
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: primary,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Hospitals • Shops • Restaurants • Care',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: mutedText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 39,
+                height: 39,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: primary,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ====================================================================
+  // CAREGIVER CONNECTION
+  // ====================================================================
+
+  Widget _buildConnectionCard(BuildContext context) {
+    return Material(
+      color: const Color(0xFFFFF0E7),
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const InviteCodeScreen(),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(17),
+          child: Row(
+            children: [
+              Container(
+                width: 51,
+                height: 51,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF9A5A48),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.link_rounded,
+                  color: Colors.white,
+                  size: 27,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Caregiver Connection',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: primary,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Connect with your caregiver',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: mutedText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 17,
+                color: Color(0xFF9A5A48),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ====================================================================
+  // MESSAGE
+  // ====================================================================
+
+  static void _showMessage(
     BuildContext context,
+    String message,
   ) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  }
+
+  // ====================================================================
+  // LOGOUT
+  // ====================================================================
+
+  void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
-          backgroundColor: const Color(0xFFFEFEFE),
+          backgroundColor: background,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Text(
             'Logout',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF415111),
+              color: primary,
             ),
           ),
           content: const Text(
             'Are you sure you want to logout?',
             style: TextStyle(
               fontSize: 17,
-              color: Color(0xFF66695A),
+              color: mutedText,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
               child: const Text(
                 'CANCEL',
                 style: TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF415111),
+                  color: primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
             ElevatedButton(
               onPressed: () async {
-                Navigator.pop(context); // Close the dialog first
-                await AuthService().signOut(); // Actually log the user out
+                Navigator.pop(dialogContext);
+                await AuthService().signOut();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFB8159),
+                backgroundColor: orange,
                 foregroundColor: Colors.white,
               ),
               child: const Text(
                 'LOGOUT',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
