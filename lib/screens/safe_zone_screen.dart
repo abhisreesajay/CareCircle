@@ -6,7 +6,6 @@ import 'package:geolocator/geolocator.dart';
 import '../models/safe_zone.dart';
 import '../services/location_service.dart';
 import '../services/safe_zone_service.dart';
-import 'elder/emergency_screen.dart';
 
 class SafeZoneScreen extends StatefulWidget {
   final String? elderId;
@@ -602,20 +601,6 @@ class _SafeZoneScreenState
   }
 
   // ============================================================
-  // EMERGENCY
-  // ============================================================
-
-  void _openEmergencyScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            const EmergencyScreen(),
-      ),
-    );
-  }
-
-  // ============================================================
   // TIMESTAMP
   // ============================================================
 
@@ -643,7 +628,9 @@ class _SafeZoneScreenState
           size: 80,
           color: Colors.green,
         ),
+
         const SizedBox(height: 16),
+
         const Text(
           'Create Safe Zone',
           textAlign: TextAlign.center,
@@ -652,12 +639,15 @@ class _SafeZoneScreenState
             fontWeight: FontWeight.bold,
           ),
         ),
+
         const SizedBox(height: 8),
+
         const Text(
           'Set the safe-zone name, latitude, '
           'longitude and radius for the elder.',
           textAlign: TextAlign.center,
         ),
+
         const SizedBox(height: 24),
 
         TextField(
@@ -785,7 +775,9 @@ class _SafeZoneScreenState
                   Icons.location_pin,
                   color: Colors.green,
                 ),
+
                 const SizedBox(width: 8),
+
                 Expanded(
                   child: Text(
                     safeZone.name,
@@ -797,6 +789,7 @@ class _SafeZoneScreenState
                     ),
                   ),
                 ),
+
                 if (_isCaregiverMode)
                   IconButton(
                     onPressed: () =>
@@ -829,6 +822,7 @@ class _SafeZoneScreenState
 
             if (!_isCaregiverMode) ...[
               const SizedBox(height: 10),
+
               SizedBox(
                 width: double.infinity,
                 child:
@@ -895,13 +889,20 @@ class _SafeZoneScreenState
               : 'Safe Zone',
         ),
       ),
+
       body: SingleChildScrollView(
         padding:
             const EdgeInsets.all(20),
+
         child: Column(
           crossAxisAlignment:
               CrossAxisAlignment.stretch,
+
           children: [
+            // ==================================================
+            // CAREGIVER MODE
+            // ==================================================
+
             if (_isCaregiverMode) ...[
               _buildCaregiverCreateSection(),
 
@@ -921,7 +922,13 @@ class _SafeZoneScreenState
               ),
 
               const SizedBox(height: 12),
-            ] else ...[
+            ]
+
+            // ==================================================
+            // ELDER MODE
+            // ==================================================
+
+            else ...[
               const Icon(
                 Icons.shield_rounded,
                 size: 80,
@@ -953,11 +960,16 @@ class _SafeZoneScreenState
               const SizedBox(height: 24),
             ],
 
+            // ==================================================
+            // SAFE ZONES
+            // ==================================================
+
             StreamBuilder<List<SafeZone>>(
               stream:
                   _safeZonesStream(
                 elderId,
               ),
+
               builder:
                   (context, snapshot) {
                 if (snapshot
@@ -996,6 +1008,10 @@ class _SafeZoneScreenState
               },
             ),
 
+            // ==================================================
+            // ELDER ONLY: I'M OUT
+            // ==================================================
+
             if (!_isCaregiverMode) ...[
               const SizedBox(height: 30),
 
@@ -1030,11 +1046,13 @@ class _SafeZoneScreenState
               SizedBox(
                 height: 60,
                 width: double.infinity,
+
                 child:
                     ElevatedButton.icon(
                   onPressed: _isChecking
                       ? null
                       : _handleImOut,
+
                   icon: _isChecking
                       ? const SizedBox(
                           height: 20,
@@ -1050,6 +1068,7 @@ class _SafeZoneScreenState
                           Icons
                               .directions_walk,
                         ),
+
                   label: Text(
                     _isChecking
                         ? 'CHECKING LOCATION...'
@@ -1061,6 +1080,7 @@ class _SafeZoneScreenState
                           FontWeight.bold,
                     ),
                   ),
+
                   style:
                       ElevatedButton
                           .styleFrom(
@@ -1098,6 +1118,7 @@ class _SafeZoneScreenState
                     _violationsStream(
                   user.uid,
                 ),
+
                 builder:
                     (context, snapshot) {
                   if (snapshot
@@ -1158,6 +1179,7 @@ class _SafeZoneScreenState
                           color: Colors
                               .orange
                               .shade50,
+
                           child:
                               ListTile(
                             leading:
@@ -1166,11 +1188,13 @@ class _SafeZoneScreenState
                               color: Colors
                                   .orange,
                             ),
+
                             title:
                                 Text(
                               'Outside '
                               '$zoneName',
                             ),
+
                             subtitle:
                                 Text(
                               'Distance: '
@@ -1187,62 +1211,14 @@ class _SafeZoneScreenState
               ),
             ],
 
+            // ==================================================
+            // NO CAREGIVER SOS SECTION
+            //
+            // SOS IS INTENTIONALLY NOT PRESENT HERE.
+            // Only the elder's EmergencyScreen handles SOS.
+            // ==================================================
+
             const SizedBox(height: 30),
-
-            const Divider(),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              'Emergency Assistance',
-              textAlign:
-                  TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight:
-                    FontWeight.bold,
-                color: Colors.red,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            const Text(
-              'Use this button during an emergency '
-              'to send an SOS alert.',
-              textAlign:
-                  TextAlign.center,
-            ),
-
-            const SizedBox(height: 16),
-
-            SizedBox(
-              height: 60,
-              width: double.infinity,
-              child:
-                  ElevatedButton.icon(
-                onPressed:
-                    _openEmergencyScreen,
-                icon: const Icon(
-                  Icons.sos,
-                ),
-                label: const Text(
-                  'EMERGENCY / SOS',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
-                ),
-                style:
-                    ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.red,
-                  foregroundColor:
-                      Colors.white,
-                ),
-              ),
-            ),
           ],
         ),
       ),

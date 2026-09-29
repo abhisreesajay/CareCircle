@@ -16,9 +16,9 @@ class SosService {
   final MedicalService _medicalService =
       MedicalService();
 
-  // ------------------------------------------------------------
+  // ============================================================
   // GET CURRENT LOCATION
-  // ------------------------------------------------------------
+  // ============================================================
 
   // Gets the user's current GPS location only once.
   //
@@ -37,9 +37,9 @@ class SosService {
     return position;
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // CREATE SOS
-  // ------------------------------------------------------------
+  // ============================================================
 
   Future<SosRecord> createSos({
     required String userId,
@@ -66,28 +66,39 @@ class SosService {
       );
     }
 
-    // Get the current location before creating
-    // the SOS record.
+    // ----------------------------------------------------------
+    // GET CURRENT LOCATION
+    // ----------------------------------------------------------
+
     final Position position =
         await getCurrentLocation();
 
-    // Retrieve medical information.
+    // ----------------------------------------------------------
+    // GET MEDICAL INFORMATION
+    // ----------------------------------------------------------
+
     final Map<String, dynamic>? medicalInformation =
         await _medicalService
             .getMedicalInformation(userId);
 
-    // Create a new document inside sosAlerts.
-    final DocumentReference<Map<String, dynamic>> doc =
+    // ----------------------------------------------------------
+    // CREATE SOS DOCUMENT
+    // ----------------------------------------------------------
+
+    final DocumentReference<Map<String, dynamic>> sosDocument =
         _firestore
             .collection('sosAlerts')
             .doc();
 
+    final DateTime now =
+        DateTime.now();
+
     final SosRecord sos = SosRecord(
-      id: doc.id,
+      id: sosDocument.id,
       userId: currentUser.uid,
       latitude: position.latitude,
       longitude: position.longitude,
-      timestamp: DateTime.now(),
+      timestamp: now,
       status: 'ACTIVE',
     );
 
@@ -101,14 +112,68 @@ class SosService {
         medicalInformation ?? {};
 
     // Save the SOS record.
-    await doc.set(sosData);
+    await sosDocument.set(sosData);
+
+    // ----------------------------------------------------------
+    // CREATE CAREGIVER ALERT
+    // ----------------------------------------------------------
+
+    await _createCaregiverAlert(
+      elderId: currentUser.uid,
+      sosId: sosDocument.id,
+      latitude: position.latitude,
+      longitude: position.longitude,
+    );
 
     return sos;
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
+  // CREATE CAREGIVER SOS ALERT
+  // ============================================================
+
+  Future<void> _createCaregiverAlert({
+    required String elderId,
+    required String sosId,
+    required double latitude,
+    required double longitude,
+  }) async {
+    final DocumentReference<Map<String, dynamic>> alertDocument =
+        _firestore
+            .collection('elders')
+            .doc(elderId)
+            .collection('alerts')
+            .doc();
+
+    await alertDocument.set({
+      'title': 'Emergency SOS',
+
+      'message':
+          'The elder has triggered an emergency SOS. '
+          'Immediate attention may be required.',
+
+      'date': _formatCurrentDateTime(),
+
+      'type': 'sos',
+
+      'elderId': elderId,
+
+      'sosId': sosId,
+
+      'latitude': latitude,
+
+      'longitude': longitude,
+
+      'status': 'ACTIVE',
+
+      'createdAt':
+          FieldValue.serverTimestamp(),
+    });
+  }
+
+  // ============================================================
   // GET ACTIVE SOS
-  // ------------------------------------------------------------
+  // ============================================================
 
   Future<SosRecord?> getActiveSos({
     required String userId,
@@ -201,9 +266,9 @@ class SosService {
     );
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // GET SOS MEDICAL INFORMATION
-  // ------------------------------------------------------------
+  // ============================================================
 
   Future<Map<String, dynamic>> getSosMedicalInformation(
     String sosId,
@@ -246,9 +311,9 @@ class SosService {
     return {};
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
   // CANCEL SOS
-  // ------------------------------------------------------------
+  // ============================================================
 
   Future<void> cancelSos(String sosId) async {
     if (sosId.trim().isEmpty) {
@@ -309,16 +374,71 @@ class SosService {
       );
     }
 
+    // ----------------------------------------------------------
+    // CANCEL SOS RECORD
+    // ----------------------------------------------------------
+
     await sosDocument.update({
       'status': 'CANCELLED',
       'cancelledAt':
           FieldValue.serverTimestamp(),
     });
+
+    // ----------------------------------------------------------
+    // UPDATE CORRESPONDING CAREGIVER ALERTS
+    // ----------------------------------------------------------
+
+    final QuerySnapshot<Map<String, dynamic>>
+        alertSnapshot =
+        await _firestore
+            .collection('elders')
+            .doc(currentUser.uid)
+            .collection('alerts')
+            .where(
+              'sosId',
+              isEqualTo: sosId,
+            )
+            .where(
+              'type',
+              isEqualTo: 'sos',
+            )
+            .get();
+
+    for (final QueryDocumentSnapshot<Map<String, dynamic>>
+        alertDocument in alertSnapshot.docs) {
+      await alertDocument.reference.update({
+        'status': 'CANCELLED',
+        'message':
+            'The emergency SOS was cancelled by the elder.',
+        'cancelledAt':
+            FieldValue.serverTimestamp(),
+      });
+    }
   }
 
-  // ------------------------------------------------------------
+  // ============================================================
+  // FORMAT ALERT DATE
+  // ============================================================
+
+  String _formatCurrentDateTime() {
+    final DateTime now =
+        DateTime.now();
+
+    final String date =
+        '${now.day.toString().padLeft(2, '0')}/'
+        '${now.month.toString().padLeft(2, '0')}/'
+        '${now.year}';
+
+    final String time =
+        '${now.hour.toString().padLeft(2, '0')}:'
+        '${now.minute.toString().padLeft(2, '0')}';
+
+    return '$date at $time';
+  }
+
+  // ============================================================
   // TIMESTAMP CONVERSION HELPER
-  // ------------------------------------------------------------
+  // ============================================================
 
   DateTime? _convertTimestampToDateTime(
     dynamic timestamp,

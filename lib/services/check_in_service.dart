@@ -1,8 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'caregiver/alert_service.dart';
+
 class CheckInService {
   final FirebaseFirestore _firestore =
       FirebaseFirestore.instance;
+
+  final AlertService _alertService =
+      AlertService();
 
   // ============================================================
   // RECORD CHECK-IN
@@ -14,7 +19,10 @@ class CheckInService {
     required String response,
     required String status,
   }) async {
-    if (elderId.trim().isEmpty) {
+    final String normalizedElderId =
+        elderId.trim();
+
+    if (normalizedElderId.isEmpty) {
       throw Exception(
         'Elder ID is required.',
       );
@@ -32,13 +40,19 @@ class CheckInService {
         '${now.hour.toString().padLeft(2, '0')}:'
         '${now.minute.toString().padLeft(2, '0')}';
 
-    final doc = _firestore
-        .collection('elders')
-        .doc(elderId)
-        .collection('checkInHistory')
-        .doc();
+    // ==========================================================
+    // CREATE CHECK-IN RECORD
+    // ==========================================================
 
-    await doc.set({
+    final DocumentReference<
+        Map<String, dynamic>> checkInDocument =
+        _firestore
+            .collection('elders')
+            .doc(normalizedElderId)
+            .collection('checkInHistory')
+            .doc();
+
+    await checkInDocument.set({
       'date': date,
       'scheduledTime': time,
       'completedAt':
@@ -51,21 +65,34 @@ class CheckInService {
           FieldValue.serverTimestamp(),
     });
 
-    await _firestore
-        .collection('elders')
-        .doc(elderId)
-        .collection('status')
-        .doc('current')
-        .set({
-      'checkInStatus': status,
-      'lastCheckInAt':
-          FieldValue.serverTimestamp(),
-      'lastCheckInMethod': method,
-    }, SetOptions(merge: true));
+    // ==========================================================
+    // UPDATE CURRENT ELDER STATUS
+    // ==========================================================
 
     await _firestore
         .collection('elders')
-        .doc(elderId)
+        .doc(normalizedElderId)
+        .collection('status')
+        .doc('current')
+        .set(
+      {
+        'checkInStatus': status,
+        'lastCheckInAt':
+            FieldValue.serverTimestamp(),
+        'lastCheckInMethod': method,
+      },
+      SetOptions(
+        merge: true,
+      ),
+    );
+
+    // ==========================================================
+    // ADD ACTIVITY HISTORY
+    // ==========================================================
+
+    await _firestore
+        .collection('elders')
+        .doc(normalizedElderId)
         .collection('activityHistory')
         .doc()
         .set({
@@ -76,6 +103,21 @@ class CheckInService {
       'timestamp':
           FieldValue.serverTimestamp(),
     });
+
+    // ==========================================================
+    // CREATE MISSED CHECK-IN ALERT
+    // ==========================================================
+
+    if (status.trim().toUpperCase() ==
+        'MISSED') {
+      await _alertService.createAlert(
+        elderId: normalizedElderId,
+        title: 'Missed Check-in',
+        message:
+            'The elder missed the scheduled check-in.',
+        type: 'checkin',
+      );
+    }
   }
 
   // ============================================================
@@ -86,37 +128,73 @@ class CheckInService {
     required String elderId,
     required String checkInId,
   }) async {
-    if (elderId.trim().isEmpty ||
-        checkInId.trim().isEmpty) {
+    final String normalizedElderId =
+        elderId.trim();
+
+    final String normalizedCheckInId =
+        checkInId.trim();
+
+    if (normalizedElderId.isEmpty ||
+        normalizedCheckInId.isEmpty) {
       throw Exception(
         'Elder ID and check-in ID are required.',
       );
     }
 
+    // ==========================================================
+    // UPDATE CHECK-IN
+    // ==========================================================
+
     await _firestore
         .collection('elders')
-        .doc(elderId)
+        .doc(normalizedElderId)
         .collection('checkInHistory')
-        .doc(checkInId)
+        .doc(normalizedCheckInId)
         .update({
       'status': 'COMPLETED',
-      'completedBy':
-          'caregiver',
+      'completedBy': 'caregiver',
       'completedAt':
           FieldValue.serverTimestamp(),
     });
 
+    // ==========================================================
+    // UPDATE CURRENT ELDER STATUS
+    // ==========================================================
+
     await _firestore
         .collection('elders')
-        .doc(elderId)
+        .doc(normalizedElderId)
         .collection('status')
         .doc('current')
+        .set(
+      {
+        'checkInStatus': 'COMPLETED',
+        'lastCheckInAt':
+            FieldValue.serverTimestamp(),
+        'lastCheckInMethod':
+            'caregiver',
+      },
+      SetOptions(
+        merge: true,
+      ),
+    );
+
+    // ==========================================================
+    // ADD ACTIVITY HISTORY
+    // ==========================================================
+
+    await _firestore
+        .collection('elders')
+        .doc(normalizedElderId)
+        .collection('activityHistory')
+        .doc()
         .set({
-      'checkInStatus': 'COMPLETED',
-      'lastCheckInAt':
+      'type': 'checkin',
+      'description':
+          'Caregiver manually completed the check-in.',
+      'method': 'caregiver',
+      'timestamp':
           FieldValue.serverTimestamp(),
-      'lastCheckInMethod':
-          'caregiver',
-    }, SetOptions(merge: true));
+    });
   }
 }

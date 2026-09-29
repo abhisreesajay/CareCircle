@@ -16,7 +16,8 @@ class SafeZoneService {
   Future<void> createSafeZone(
     SafeZone safeZone,
   ) async {
-    final collection = _firestore.collection('safeZones');
+    final CollectionReference<Map<String, dynamic>> collection =
+        _firestore.collection('safeZones');
 
     final DocumentReference<Map<String, dynamic>> document =
         safeZone.id.trim().isEmpty
@@ -35,7 +36,8 @@ class SafeZoneService {
   Future<List<SafeZone>> getSafeZones(
     String elderId,
   ) async {
-    final String normalizedElderId = elderId.trim();
+    final String normalizedElderId =
+        elderId.trim();
 
     if (normalizedElderId.isEmpty) {
       throw Exception(
@@ -138,10 +140,12 @@ class SafeZoneService {
       }
     }
 
+    // Elder is inside at least one safe zone.
     if (isInsideAnyZone) {
       return;
     }
 
+    // Elder is outside every safe zone.
     for (final SafeZone safeZone in safeZones) {
       final double distanceInMeters =
           _calculateDistanceInMeters(
@@ -162,7 +166,7 @@ class SafeZoneService {
   }
 
   // ============================================================
-  // CREATE SAFE-ZONE VIOLATION
+  // PUBLIC SAFE-ZONE VIOLATION CREATION
   // ============================================================
 
   Future<void> createSafeZoneViolation({
@@ -191,7 +195,7 @@ class SafeZoneService {
   }
 
   // ============================================================
-  // INTERNAL SAFE-ZONE VIOLATION CREATION
+  // CREATE SAFE-ZONE VIOLATION + ALERT
   // ============================================================
 
   Future<void> _createSafeZoneViolation({
@@ -201,17 +205,20 @@ class SafeZoneService {
     required double longitude,
     required double distanceInMeters,
   }) async {
-    final CollectionReference<Map<String, dynamic>> collection =
+    // ----------------------------------------------------------
+    // 1. CREATE SAFE-ZONE VIOLATION RECORD
+    // ----------------------------------------------------------
+
+    final CollectionReference<Map<String, dynamic>>
+        violationCollection =
         _firestore.collection('safeZoneViolations');
 
-    // Generate the Firestore document reference first.
-    final DocumentReference<Map<String, dynamic>> document =
-        collection.doc();
+    final DocumentReference<Map<String, dynamic>>
+        violationDocument =
+        violationCollection.doc();
 
-    // Store the generated document ID inside the document
-    // as violationId so the ID is available to the application.
-    await document.set({
-      'violationId': document.id,
+    await violationDocument.set({
+      'violationId': violationDocument.id,
 
       'elderId': elderId,
 
@@ -226,12 +233,78 @@ class SafeZoneService {
 
       'distanceInMeters': distanceInMeters,
 
-      'timestamp': FieldValue.serverTimestamp(),
+      'timestamp':
+          FieldValue.serverTimestamp(),
 
       'status': 'OUTSIDE',
 
-      'createdAt': FieldValue.serverTimestamp(),
+      'createdAt':
+          FieldValue.serverTimestamp(),
     });
+
+    // ----------------------------------------------------------
+    // 2. CREATE CAREGIVER ALERT
+    // ----------------------------------------------------------
+
+    final CollectionReference<Map<String, dynamic>>
+        alertCollection =
+        _firestore
+            .collection('elders')
+            .doc(elderId)
+            .collection('alerts');
+
+    final DocumentReference<Map<String, dynamic>>
+        alertDocument =
+        alertCollection.doc();
+
+    await alertDocument.set({
+      'title': 'Safe Zone Alert',
+
+      'message':
+          'Elder is outside the safe zone "${safeZone.name}". '
+          'Current distance: ${distanceInMeters.toStringAsFixed(0)} meters.',
+
+      'date': _formatCurrentDateTime(),
+
+      'type': 'safe_zone',
+
+      'elderId': elderId,
+
+      'safeZoneId': safeZone.id,
+
+      'safeZoneName': safeZone.name,
+
+      'latitude': latitude,
+
+      'longitude': longitude,
+
+      'distanceInMeters': distanceInMeters,
+
+      'status': 'ACTIVE',
+
+      'createdAt':
+          FieldValue.serverTimestamp(),
+    });
+  }
+
+  // ============================================================
+  // FORMAT ALERT DATE
+  // ============================================================
+
+  String _formatCurrentDateTime() {
+    final DateTime now =
+        DateTime.now();
+
+    final String date =
+        '${now.day.toString().padLeft(2, '0')}/'
+        '${now.month.toString().padLeft(2, '0')}/'
+        '${now.year}';
+
+    final String time =
+        '${now.hour.toString().padLeft(2, '0')}:'
+        '${now.minute.toString().padLeft(2, '0')}';
+
+    return '$date at $time';
   }
 
   // ============================================================
