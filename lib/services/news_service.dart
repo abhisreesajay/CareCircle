@@ -32,8 +32,7 @@ class NewsArticle {
 }
 
 class NewsService {
-  static const String _apiKey =
-      String.fromEnvironment('GNEWS_API_KEY');
+  static const String _apiKey = '31cdb1bcec591ee934c823a4a4220bea';
 
   static Future<List<NewsArticle>> fetchNews() async {
     if (_apiKey.isEmpty) {
