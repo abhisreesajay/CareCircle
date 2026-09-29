@@ -6,7 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import '../models/safe_zone.dart';
 import '../services/location_service.dart';
 import '../services/safe_zone_service.dart';
-import 'emergency_screen.dart';
+import 'elder/emergency_screen.dart';
 
 class SafeZoneScreen extends StatefulWidget {
   final String? elderId;

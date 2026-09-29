@@ -35,7 +35,7 @@ import 'screens/elder/invite_code_screen.dart';
 // OTHER SCREENS
 // ============================================================
 
-import 'screens/emergency_screen.dart';
+import 'screens/elder/emergency_screen.dart';
 import 'screens/safe_zone_screen.dart';
 
 Future<void> main() async {

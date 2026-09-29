@@ -6,6 +6,7 @@ import 'elder_medication_screen.dart';
 import 'hospital_documents_screen.dart';
 import 'invite_code_screen.dart';
 import 'nearby_services_screen.dart';
+import 'medical_information_screen.dart';
 
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
@@ -287,6 +288,15 @@ class ElderHome extends StatelessWidget {
                   ),
                 ],
               ),
+
+              const SizedBox(height: 12),
+
+              // ==========================================================
+              // MEDICAL INFORMATION
+              // ELDER CAN VIEW ONLY
+              // ==========================================================
+
+              _buildMedicalInformationCard(context),
 
               const SizedBox(height: 12),
 
@@ -573,6 +583,78 @@ class ElderHome extends StatelessWidget {
                   color: primary,
                   size: 19,
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ====================================================================
+  // MEDICAL INFORMATION
+  // ELDER VIEW ONLY
+  // ====================================================================
+
+  Widget _buildMedicalInformationCard(BuildContext context) {
+    return Material(
+      color: const Color(0xFFFFF5EA),
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const MedicalInformationScreen(),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: orange,
+                  borderRadius: BorderRadius.circular(17),
+                ),
+                child: const Icon(
+                  Icons.medical_information_rounded,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 15),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Medical Information',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: primary,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'View your health information',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: mutedText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 18,
+                color: orange,
               ),
             ],
           ),

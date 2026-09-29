@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../services/sos_service.dart';
+import '../../services/sos_service.dart';
 import 'medical_information_screen.dart';
 
 class EmergencyScreen extends StatefulWidget {

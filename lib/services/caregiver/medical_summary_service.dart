@@ -6,18 +6,28 @@ class MedicalSummaryService {
   final FirebaseFirestore _firestore =
       FirebaseFirestore.instance;
 
-  // ------------------------------------------------------------
-  // REAL-TIME MEDICAL SUMMARY
-  // ------------------------------------------------------------
+  // ============================================================
+  // MEDICAL SUMMARY REFERENCE
+  // ============================================================
 
-  Stream<MedicalSummary?> getMedicalSummaryStream(
+  DocumentReference<Map<String, dynamic>> _summaryReference(
     String elderId,
   ) {
     return _firestore
         .collection('elders')
         .doc(elderId)
         .collection('medicalSummary')
-        .doc('summary')
+        .doc('summary');
+  }
+
+  // ============================================================
+  // REAL-TIME MEDICAL SUMMARY
+  // ============================================================
+
+  Stream<MedicalSummary?> getMedicalSummaryStream(
+    String elderId,
+  ) {
+    return _summaryReference(elderId)
         .snapshots()
         .map((doc) {
       if (!doc.exists || doc.data() == null) {
@@ -30,35 +40,79 @@ class MedicalSummaryService {
     });
   }
 
-  // ------------------------------------------------------------
-  // SAVE MEDICAL SUMMARY
-  // ------------------------------------------------------------
+  // ============================================================
+  // GET MEDICAL SUMMARY ONCE
+  // ============================================================
 
-  Future<void> saveMedicalSummary(
+  Future<MedicalSummary?> getMedicalSummary(
     String elderId,
-    MedicalSummary summary,
   ) async {
-    await _firestore
-        .collection('elders')
-        .doc(elderId)
-        .collection('medicalSummary')
-        .doc('summary')
-        .set(summary.toMap());
+    final doc = await _summaryReference(elderId).get();
+
+    if (!doc.exists || doc.data() == null) {
+      return null;
+    }
+
+    return MedicalSummary.fromMap(
+      doc.data()!,
+    );
   }
 
-  // ------------------------------------------------------------
-  // UPDATE MEDICAL SUMMARY
-  // ------------------------------------------------------------
+  // ============================================================
+  // SAVE / UPDATE MEDICAL SUMMARY
+  // ============================================================
+  //
+  // This method is intended to be called by the CAREGIVER.
+  //
+  // Firestore rules will enforce that the elder cannot write.
+  //
+  Future<void> saveMedicalSummary({
+    required String elderId,
+    required String bloodGroup,
+    required String allergies,
+    required String conditions,
+    required String notes,
+  }) async {
+    if (elderId.trim().isEmpty) {
+      throw Exception('Elder ID is required.');
+    }
 
-  Future<void> updateMedicalSummary(
-    String elderId,
-    MedicalSummary summary,
-  ) async {
-    await _firestore
-        .collection('elders')
-        .doc(elderId)
-        .collection('medicalSummary')
-        .doc('summary')
-        .update(summary.toMap());
+    await _summaryReference(elderId).set(
+      {
+        'bloodGroup': bloodGroup.trim(),
+        'allergies': allergies.trim(),
+        'conditions': conditions.trim(),
+        'notes': notes.trim(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
+  }
+
+  // ============================================================
+  // UPDATE MEDICAL SUMMARY
+  // ============================================================
+
+  Future<void> updateMedicalSummary({
+    required String elderId,
+    required String bloodGroup,
+    required String allergies,
+    required String conditions,
+    required String notes,
+  }) async {
+    if (elderId.trim().isEmpty) {
+      throw Exception('Elder ID is required.');
+    }
+
+    await _summaryReference(elderId).set(
+      {
+        'bloodGroup': bloodGroup.trim(),
+        'allergies': allergies.trim(),
+        'conditions': conditions.trim(),
+        'notes': notes.trim(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
   }
 }

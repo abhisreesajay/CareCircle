@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/medical_summary_model.dart';
 import '../../services/caregiver/medical_summary_service.dart';
+import 'medical_summary_edit_screen.dart';
 
 class MedicalSummaryScreen extends StatelessWidget {
   final String elderId;
@@ -47,6 +48,26 @@ class MedicalSummaryScreen extends StatelessWidget {
             color: textDark,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Edit medical information',
+            icon: const Icon(
+              Icons.edit_rounded,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      MedicalSummaryEditScreen(
+                    elderId: elderId,
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
 
       // ----------------------------------------------------------

@@ -24,10 +24,14 @@ class MedicalSummary {
     Map<String, dynamic> map,
   ) {
     return MedicalSummary(
-      bloodGroup: map['bloodGroup'] ?? '',
-      allergies: map['allergies'] ?? '',
-      conditions: map['conditions'] ?? '',
-      notes: map['notes'] ?? '',
+      bloodGroup:
+          map['bloodGroup']?.toString() ?? '',
+      allergies:
+          map['allergies']?.toString() ?? '',
+      conditions:
+          map['conditions']?.toString() ?? '',
+      notes:
+          map['notes']?.toString() ?? '',
     );
   }
 }

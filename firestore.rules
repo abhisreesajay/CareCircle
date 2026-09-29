@@ -176,11 +176,21 @@ service cloud.firestore {
       // ==========================================================
 
       match /medicalSummary/{summaryId} {
-        allow read, write:
+
+        // Elder can ONLY view their medical information.
+        // Linked caregiver can also view it.
+        allow read:
           if isOwner(elderId)
           || caregiverLinkedToElder(elderId);
-      }
 
+        // ONLY the linked caregiver can create/update
+        // the medical summary.
+        allow create, update:
+          if caregiverLinkedToElder(elderId);
+
+        // Medical summary cannot be deleted.
+        allow delete: if false;
+      }
 
       // ==========================================================
       // CHECK-IN HISTORY
@@ -316,29 +326,47 @@ service cloud.firestore {
 
     match /sosAlerts/{sosId} {
 
+      // ----------------------------------------------------------
+      // CREATE SOS
+      // ----------------------------------------------------------
+      // A logged-in user can create an SOS only for themselves.
       allow create: if signedIn()
-        && request.resource.data.userId
-            == request.auth.uid
-        && request.resource.data.status
-            == 'ACTIVE';
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'ACTIVE';
 
+
+      // ----------------------------------------------------------
+      // READ SOS
+      // ----------------------------------------------------------
+      // User can read their own SOS.
+      // Linked caregiver can read the elder's SOS.
       allow read: if signedIn()
         && (
           resource.data.userId == request.auth.uid
           ||
-          caregiverLinkedToElder(
-            resource.data.userId
+          (
+            isCaregiver()
+            && userData(request.auth.uid).linkedElders is list
+            && resource.data.userId
+                in userData(request.auth.uid).linkedElders
           )
         );
 
-      allow update: if signedIn()
-        && resource.data.userId
-            == request.auth.uid
-        && request.resource.data.userId
-            == resource.data.userId
-        && request.resource.data.status
-            == 'CANCELLED';
 
+      // ----------------------------------------------------------
+      // CANCEL SOS
+      // ----------------------------------------------------------
+      // Only the person who created the SOS can cancel it.
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && resource.data.status == 'ACTIVE'
+        && request.resource.data.status == 'CANCELLED';
+
+
+      // ----------------------------------------------------------
+      // DELETE
+      // ----------------------------------------------------------
       allow delete: if false;
     }
 

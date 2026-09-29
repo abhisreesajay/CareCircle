@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../models/sos_record.dart';
-import '../services/sos_service.dart';
+import '../../models/sos_record.dart';
+import '../../services/sos_service.dart';
 
 class SosScreen extends StatefulWidget {
   const SosScreen({super.key});
