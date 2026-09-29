@@ -20,6 +20,7 @@ import 'screens/auth/login_screen.dart';
 
 import 'screens/caregiver/caregiver_dashboard.dart';
 import 'screens/caregiver/connect_elder_screen.dart';
+import 'screens/admin/admin_dashboard_screen.dart';
 
 // ============================================================
 // ELDER SCREENS
@@ -383,6 +384,14 @@ class _RoleRouterState extends State<RoleRouter> {
           return CaregiverDashboard(
             elderId: elderId,
           );
+        }
+
+        // ======================================================
+        // ADMIN
+        // ======================================================
+
+        if (role == 'admin') {
+          return const AdminDashboardScreen();
         }
 
         // ======================================================

@@ -38,6 +38,14 @@ service cloud.firestore {
         && userData(request.auth.uid).role == 'elder';
     }
 
+    function isAdmin() {
+      return signedIn()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
+        && userData(request.auth.uid).role == 'admin';
+    }
+
     function caregiverLinkedToElder(elderId) {
       return isCaregiver()
         && userData(request.auth.uid).linkedElders is list
@@ -51,12 +59,29 @@ service cloud.firestore {
 
     match /users/{userId} {
 
+      // Owner can read their own profile.
+      // Caregivers can read users for existing app functionality.
+      // Admins can read all users.
       allow read: if isOwner(userId)
-        || isCaregiver();
+        || isCaregiver()
+        || isAdmin();
 
-      allow create: if isOwner(userId);
 
-      allow update: if isOwner(userId);
+      // Public signup may create only Elder or Caregiver accounts.
+      // Admin accounts must NOT be created through normal signup.
+      allow create: if isOwner(userId)
+        && request.resource.data.role in ['elder', 'caregiver'];
+
+
+      // Normal users can update their own profile,
+      // but they cannot change their role.
+      allow update: if isOwner(userId)
+        && request.resource.data.role == resource.data.role;
+
+
+      // Admin can manage user profiles and roles.
+      allow update: if isAdmin();
+
 
       // Caregiver adding themselves to an elder.
       allow update: if signedIn()
@@ -68,6 +93,7 @@ service cloud.firestore {
         && request.resource.data.caregivers is list
         && request.resource.data.caregivers
             .hasAny([request.auth.uid]);
+
 
       // Caregiver linked elder list.
       allow update: if isOwner(userId)
@@ -177,20 +203,16 @@ service cloud.firestore {
 
       match /medicalSummary/{summaryId} {
 
-        // Elder can ONLY view their medical information.
-        // Linked caregiver can also view it.
         allow read:
           if isOwner(elderId)
           || caregiverLinkedToElder(elderId);
 
-        // ONLY the linked caregiver can create/update
-        // the medical summary.
         allow create, update:
           if caregiverLinkedToElder(elderId);
 
-        // Medical summary cannot be deleted.
         allow delete: if false;
       }
+
 
       // ==========================================================
       // CHECK-IN HISTORY
@@ -226,7 +248,7 @@ service cloud.firestore {
 
 
       // ==========================================================
-      // ALERTS
+      // ELDER ALERTS
       // ==========================================================
 
       match /alerts/{alertId} {
@@ -242,18 +264,13 @@ service cloud.firestore {
 
       match /hospitalDocuments/{documentId} {
 
-        // Elder can read their own hospital documents.
-        // Linked caregiver can also read them.
         allow read: if isOwner(elderId)
           || caregiverLinkedToElder(elderId);
 
-        // Only linked caregiver can upload.
         allow create: if caregiverLinkedToElder(elderId);
 
-        // Only linked caregiver can edit metadata.
         allow update: if caregiverLinkedToElder(elderId);
 
-        // Only linked caregiver can delete.
         allow delete: if caregiverLinkedToElder(elderId);
       }
     }
@@ -275,6 +292,8 @@ service cloud.firestore {
               resource.data.elderId
             )
           )
+          ||
+          isAdmin()
         );
 
       allow create: if isCaregiver()
@@ -304,8 +323,7 @@ service cloud.firestore {
     match /safeZoneViolations/{violationId} {
 
       allow create: if signedIn()
-        && request.resource.data.elderId
-            == request.auth.uid;
+        && request.resource.data.elderId == request.auth.uid;
 
       allow read: if signedIn()
         && (
@@ -314,6 +332,8 @@ service cloud.firestore {
           caregiverLinkedToElder(
             resource.data.elderId
           )
+          ||
+          isAdmin()
         );
 
       allow update, delete: if false;
@@ -326,20 +346,10 @@ service cloud.firestore {
 
     match /sosAlerts/{sosId} {
 
-      // ----------------------------------------------------------
-      // CREATE SOS
-      // ----------------------------------------------------------
-      // A logged-in user can create an SOS only for themselves.
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'ACTIVE';
 
-
-      // ----------------------------------------------------------
-      // READ SOS
-      // ----------------------------------------------------------
-      // User can read their own SOS.
-      // Linked caregiver can read the elder's SOS.
       allow read: if signedIn()
         && (
           resource.data.userId == request.auth.uid
@@ -350,23 +360,16 @@ service cloud.firestore {
             && resource.data.userId
                 in userData(request.auth.uid).linkedElders
           )
+          ||
+          isAdmin()
         );
 
-
-      // ----------------------------------------------------------
-      // CANCEL SOS
-      // ----------------------------------------------------------
-      // Only the person who created the SOS can cancel it.
       allow update: if signedIn()
         && resource.data.userId == request.auth.uid
         && request.resource.data.userId == resource.data.userId
         && resource.data.status == 'ACTIVE'
         && request.resource.data.status == 'CANCELLED';
 
-
-      // ----------------------------------------------------------
-      // DELETE
-      // ----------------------------------------------------------
       allow delete: if false;
     }
 
@@ -379,6 +382,39 @@ service cloud.firestore {
 
       allow read, create, update, delete:
         if signedIn();
+    }
+
+
+    // ============================================================
+    // ADMIN CARE CIRCLE COLLECTION
+    // ============================================================
+
+    match /care_circles/{circleId} {
+
+      allow read: if isAdmin();
+
+      allow create, update, delete:
+        if isAdmin();
+    }
+
+
+    // ============================================================
+    // PLATFORM-WIDE ALERTS
+    // ============================================================
+
+    match /alerts/{alertId} {
+
+      // Admin dashboard can view platform-wide alerts.
+      allow read: if isAdmin();
+
+      // Existing application users may create alerts
+      // only when the application writes them.
+      allow create: if signedIn();
+
+      // Only admins can directly modify platform-wide alerts.
+      allow update: if isAdmin();
+
+      allow delete: if false;
     }
 
 

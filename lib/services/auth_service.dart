@@ -150,8 +150,14 @@ class AuthService {
       );
     }
 
+    // Admin is a supported account role, but the current public
+    // signup screen only exposes Elder and Caregiver.
+    //
+    // Admin accounts should be provisioned/promoted through the
+    // administration system rather than being publicly selectable.
     if (cleanRole != 'elder' &&
-        cleanRole != 'caregiver') {
+        cleanRole != 'caregiver' &&
+        cleanRole != 'admin') {
       throw Exception(
         'Invalid account role.',
       );
@@ -233,7 +239,7 @@ class AuthService {
       // The signup Firestore rules allow the authenticated elder
       // to create their own inviteCodes document.
       //
-      // Caregiver signup does not create an invite code.
+      // Caregiver and Admin signup do not create an invite code.
       // --------------------------------------------------------
 
       if (cleanRole == 'elder' &&
