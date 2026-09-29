@@ -1,282 +1,153 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
-import 'services/messaging_service.dart';
-import 'services/supabase_service.dart';
 
 // ============================================================
-// AUTH SCREENS
+// AUTHENTICATION
 // ============================================================
 
 import 'screens/auth/login_screen.dart';
 
 // ============================================================
-// CAREGIVER SCREENS
+// ADMIN
 // ============================================================
 
-import 'screens/caregiver/caregiver_dashboard.dart';
-import 'screens/caregiver/connect_elder_screen.dart';
 
 // ============================================================
-// ELDER SCREENS
+// CAREGIVER
+// ============================================================
+
+import 'screens/caregiver_dashboard.dart';
+
+// ============================================================
+// ELDER
 // ============================================================
 
 import 'screens/elder/check_in_screen.dart';
 import 'screens/elder/elder_home.dart';
+import 'screens/elder/hospitals_screen.dart';
+import 'screens/elder/services_screen.dart';
+import 'screens/elder/sos_screen.dart';
 import 'screens/elder/voice_check_in_screen.dart';
-import 'screens/elder/nearby_services_screen.dart';
-import 'screens/elder/invite_code_screen.dart';
 
 // ============================================================
-// OTHER SCREENS
+// MAIN
 // ============================================================
-
-import 'screens/emergency_screen.dart';
-import 'screens/safe_zone_screen.dart';
 
 Future<void> main() async {
-  // ----------------------------------------------------------
-  // Flutter initialization
-  // ----------------------------------------------------------
-
   WidgetsFlutterBinding.ensureInitialized();
-
-  // ----------------------------------------------------------
-  // Firebase initialization
-  // ----------------------------------------------------------
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ----------------------------------------------------------
-  // Firebase Cloud Messaging background handler
-  // ----------------------------------------------------------
-
-  FirebaseMessaging.onBackgroundMessage(
-    firebaseMessagingBackgroundHandler,
+  runApp(
+    const CareCircleApp(),
   );
-
-  // ----------------------------------------------------------
-  // Supabase initialization
-  // ----------------------------------------------------------
-  //
-  // Firebase remains the main backend for:
-  // - Authentication
-  // - Firestore
-  // - FCM
-  //
-  // Supabase is being used specifically for:
-  // - Hospital document file storage
-  //
-  // The two services work independently.
-  // ----------------------------------------------------------
-
-  await SupabaseService.initialize();
-
-  // ----------------------------------------------------------
-  // Start application
-  // ----------------------------------------------------------
-
-  runApp(const CareCircleApp());
 }
 
-// ======================================================================
+// ============================================================
 // CARECIRCLE APP
-// ======================================================================
+// ============================================================
 
 class CareCircleApp extends StatelessWidget {
-  const CareCircleApp({super.key});
+  const CareCircleApp({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CareCircle',
-
       debugShowCheckedModeBanner: false,
 
-      // ----------------------------------------------------------
-      // GLOBAL THEME
-      // ----------------------------------------------------------
+      title: 'CareCircle',
 
       theme: ThemeData(
         useMaterial3: true,
 
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF7FA68F),
+          seedColor: const Color(0xFF4F7966),
         ),
+
+        scaffoldBackgroundColor:
+            const Color(0xFFF6F8F5),
       ),
 
-      // ----------------------------------------------------------
-      // APPLICATION ROUTES
-      // ----------------------------------------------------------
+      initialRoute: '/',
 
       routes: {
-        // Elder
-        '/checkin': (context) => const CheckInScreen(),
+        // ------------------------------------------------------
+        // AUTH
+        // ------------------------------------------------------
 
-        '/voice-checkin': (context) =>
-            const VoiceCheckInScreen(),
+        '/': (context) {
+          return const AuthWrapper();
+        },
 
-        '/nearby-services': (context) =>
-            const ElderNearbyServicesScreen(),
+        '/login': (context) {
+          return const LoginScreen();
+        },
 
-        '/invite-code': (context) =>
-            const InviteCodeScreen(),
+        // ------------------------------------------------------
+        // ELDER
+        // ------------------------------------------------------
 
-        // Emergency
-        '/sos': (context) =>
-            const EmergencyScreen(),
+        '/checkin': (context) {
+          return const CheckInScreen();
+        },
 
-        // Safe zone
-        '/safe-zone': (context) =>
-            const SafeZoneScreen(),
+        '/voice-checkin': (context) {
+          return const VoiceCheckInScreen();
+        },
+
+        '/sos': (context) {
+          return const SOSScreen();
+        },
+
+        '/hospitals': (context) {
+          return const HospitalsScreen();
+        },
+
+        '/services': (context) {
+          return const ServicesScreen();
+        },
+
+        // ------------------------------------------------------
+        // ADMIN
+        // ------------------------------------------------------
+
       },
-
-      // ----------------------------------------------------------
-      // INITIAL SCREEN
-      // ----------------------------------------------------------
-
-      home: const AuthWrapper(),
     );
   }
 }
 
-// ======================================================================
+class AdminDashboard {
+  const new();
+}
+
+// ============================================================
 // AUTH WRAPPER
-// ======================================================================
-//
-// Checks whether a Firebase user is logged in.
-//
-// Firebase Authentication remains unchanged.
-// ======================================================================
+// ============================================================
 
 class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
+  const AuthWrapper({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
 
-      builder: (context, snapshot) {
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<User?> snapshot,
+      ) {
         // ------------------------------------------------------
-        // Waiting for Firebase Auth
-        // ------------------------------------------------------
-
-        if (snapshot.connectionState ==
-            ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        // ------------------------------------------------------
-        // No logged-in user
-        // ------------------------------------------------------
-
-        final user = snapshot.data;
-
-        if (user == null) {
-          return const LoginScreen();
-        }
-
-        // ------------------------------------------------------
-        // Logged-in user
-        // ------------------------------------------------------
-
-        return RoleRouter(
-          uid: user.uid,
-        );
-      },
-    );
-  }
-}
-
-// ======================================================================
-// ROLE ROUTER
-// ======================================================================
-//
-// Loads the user's Firestore profile and sends them to the
-// correct interface.
-//
-// Existing CareCircle role logic is preserved.
-// ======================================================================
-
-class RoleRouter extends StatefulWidget {
-  final String uid;
-
-  const RoleRouter({
-    super.key,
-    required this.uid,
-  });
-
-  @override
-  State<RoleRouter> createState() =>
-      _RoleRouterState();
-}
-
-class _RoleRouterState extends State<RoleRouter> {
-  final MessagingService _messagingService =
-      MessagingService();
-
-  @override
-  void initState() {
-    super.initState();
-
-    _initializeMessaging();
-  }
-
-  @override
-  void didUpdateWidget(
-    covariant RoleRouter oldWidget,
-  ) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.uid != widget.uid) {
-      _initializeMessaging();
-    }
-  }
-
-  // ====================================================================
-  // FIREBASE MESSAGING INITIALIZATION
-  // ====================================================================
-
-  Future<void> _initializeMessaging() async {
-    await _messagingService.initialize(
-      widget.uid,
-    );
-  }
-
-  @override
-  void dispose() {
-    _messagingService.dispose();
-
-    super.dispose();
-  }
-
-  // ====================================================================
-  // ROLE ROUTING
-  // ====================================================================
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<
-        DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.uid)
-          .snapshots(),
-
-      builder: (context, snapshot) {
-        // ------------------------------------------------------
-        // Loading profile
+        // LOADING
         // ------------------------------------------------------
 
         if (snapshot.connectionState ==
@@ -289,7 +160,7 @@ class _RoleRouterState extends State<RoleRouter> {
         }
 
         // ------------------------------------------------------
-        // Firestore error
+        // AUTH ERROR
         // ------------------------------------------------------
 
         if (snapshot.hasError) {
@@ -297,12 +168,13 @@ class _RoleRouterState extends State<RoleRouter> {
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-
                 child: Text(
-                  'Error loading user profile:\n'
+                  'Authentication error.\n\n'
                   '${snapshot.error}',
-
                   textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                  ),
                 ),
               ),
             ),
@@ -310,20 +182,234 @@ class _RoleRouterState extends State<RoleRouter> {
         }
 
         // ------------------------------------------------------
-        // Profile doesn't exist
+        // NO USER
+        // ------------------------------------------------------
+
+        final User? user = snapshot.data;
+
+        if (user == null) {
+          return const LoginScreen();
+        }
+
+        // ------------------------------------------------------
+        // LOGGED IN
+        // ------------------------------------------------------
+
+        return const RoleRouter();
+      },
+    );
+  }
+}
+
+// ============================================================
+// ROLE ROUTER
+// ============================================================
+//
+// Firestore:
+//
+// users/{uid}
+//
+// Supported roles:
+//
+// elder
+// caregiver
+// admin
+//
+// ============================================================
+
+class RoleRouter extends StatelessWidget {
+  const RoleRouter({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final User? user =
+        FirebaseAuth.instance.currentUser;
+
+    // ----------------------------------------------------------
+    // NO USER
+    // ----------------------------------------------------------
+
+    if (user == null) {
+      return const LoginScreen();
+    }
+
+    // ----------------------------------------------------------
+    // READ USER ROLE
+    // ----------------------------------------------------------
+
+    return StreamBuilder<
+        DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<
+                DocumentSnapshot<
+                    Map<String, dynamic>>>
+            snapshot,
+      ) {
+        // ------------------------------------------------------
+        // LOADING
+        // ------------------------------------------------------
+
+        if (snapshot.connectionState ==
+            ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // ------------------------------------------------------
+        // FIRESTORE ERROR
+        // ------------------------------------------------------
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Padding(
+                padding:
+                    const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize:
+                      MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 55,
+                      color: Colors.red,
+                    ),
+
+                    const SizedBox(
+                      height: 15,
+                    ),
+
+                    const Text(
+                      'Unable to load user profile.',
+                      textAlign:
+                          TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 10,
+                    ),
+
+                    Text(
+                      '${snapshot.error}',
+                      textAlign:
+                          TextAlign.center,
+                      style:
+                          const TextStyle(
+                        color:
+                            Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await FirebaseAuth
+                            .instance
+                            .signOut();
+                      },
+                      icon: const Icon(
+                        Icons.logout,
+                      ),
+                      label: const Text(
+                        'Back to Login',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        // ------------------------------------------------------
+        // PROFILE DOES NOT EXIST
         // ------------------------------------------------------
 
         if (!snapshot.hasData ||
             !snapshot.data!.exists) {
-          return const Scaffold(
+          return Scaffold(
             body: Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding:
+                    const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize:
+                      MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.person_off_outlined,
+                      size: 55,
+                      color: Colors.orange,
+                    ),
 
-                child: Text(
-                  'User profile not found.',
+                    const SizedBox(
+                      height: 15,
+                    ),
 
-                  textAlign: TextAlign.center,
+                    const Text(
+                      'User profile not found.',
+                      textAlign:
+                          TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 10,
+                    ),
+
+                    const Text(
+                      'Please create the user profile '
+                      'in the Firestore users collection.',
+                      textAlign:
+                          TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color:
+                            Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await FirebaseAuth
+                            .instance
+                            .signOut();
+                      },
+                      icon: const Icon(
+                        Icons.logout,
+                      ),
+                      label: const Text(
+                        'Back to Login',
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -331,59 +417,43 @@ class _RoleRouterState extends State<RoleRouter> {
         }
 
         // ------------------------------------------------------
-        // Read Firestore profile
+        // USER DATA
         // ------------------------------------------------------
 
-        final data =
+        final Map<String, dynamic> data =
             snapshot.data!.data() ??
                 <String, dynamic>{};
 
-        final role =
+        final String role =
             data['role']
-                ?.toString()
-                .toLowerCase();
+                    ?.toString()
+                    .toLowerCase()
+                    .trim() ??
+                '';
 
-        // ======================================================
-        // CAREGIVER
-        // ======================================================
+        // ------------------------------------------------------
+        // DEBUG
+        // ------------------------------------------------------
 
-        if (role == 'caregiver') {
-          final linkedElders =
-              data['linkedElders'] is List
-                  ? List<dynamic>.from(
-                      data['linkedElders'] as List,
-                    )
-                  : <dynamic>[];
+        debugPrint(
+          '=========================================',
+        );
 
-          // ----------------------------------------------------
-          // No elder connected
-          // ----------------------------------------------------
+        debugPrint(
+          'CareCircle logged-in UID: ${user.uid}',
+        );
 
-          if (linkedElders.isEmpty) {
-            return const CaregiverConnectElderScreen();
-          }
+        debugPrint(
+          'CareCircle Firestore user data: $data',
+        );
 
-          // ----------------------------------------------------
-          // Get first linked elder
-          // ----------------------------------------------------
+        debugPrint(
+          'CareCircle detected role: [$role]',
+        );
 
-          final elderId =
-              linkedElders.first
-                  .toString()
-                  .trim();
-
-          if (elderId.isEmpty) {
-            return const CaregiverConnectElderScreen();
-          }
-
-          // ----------------------------------------------------
-          // Caregiver dashboard
-          // ----------------------------------------------------
-
-          return CaregiverDashboard(
-            elderId: elderId,
-          );
-        }
+        debugPrint(
+          '=========================================',
+        );
 
         // ======================================================
         // ELDER
@@ -394,6 +464,98 @@ class _RoleRouterState extends State<RoleRouter> {
         }
 
         // ======================================================
+        // CAREGIVER
+        // ======================================================
+
+        if (role == 'caregiver') {
+          final dynamic linkedElders =
+              data['linkedElders'];
+
+          if (linkedElders is List &&
+              linkedElders.isNotEmpty) {
+            return CaregiverDashboard(
+              elderId:
+                  linkedElders.first.toString(),
+            );
+          }
+
+          return Scaffold(
+            body: Center(
+              child: Padding(
+                padding:
+                    const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize:
+                      MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.people_outline,
+                      size: 55,
+                      color: Colors.orange,
+                    ),
+
+                    const SizedBox(
+                      height: 15,
+                    ),
+
+                    const Text(
+                      'No elder linked',
+                      textAlign:
+                          TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 10,
+                    ),
+
+                    const Text(
+                      'No elder is linked to this '
+                      'caregiver account yet.',
+                      textAlign:
+                          TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color:
+                            Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(
+                      height: 20,
+                    ),
+
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await FirebaseAuth
+                            .instance
+                            .signOut();
+                      },
+                      icon: const Icon(
+                        Icons.logout,
+                      ),
+                      label: const Text(
+                        'Back to Login',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        // ======================================================
+        // ADMIN
+        // ======================================================
+
+  
+
+        // ======================================================
         // UNKNOWN ROLE
         // ======================================================
 
@@ -402,13 +564,80 @@ class _RoleRouterState extends State<RoleRouter> {
             child: Padding(
               padding:
                   const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize:
+                    MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 60,
+                    color: Colors.orange,
+                  ),
 
-              child: Text(
-                'Unknown account role: '
-                '${role ?? 'missing'}',
+                  const SizedBox(
+                    height: 18,
+                  ),
 
-                textAlign:
-                    TextAlign.center,
+                  const Text(
+                    'User role is not configured.',
+                    textAlign:
+                        TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 10,
+                  ),
+
+                  Text(
+                    'Current role: '
+                    '${role.isEmpty ? 'Not specified' : role}',
+                    textAlign:
+                        TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color:
+                          Colors.black54,
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 10,
+                  ),
+
+                  Text(
+                    'User UID:\n${user.uid}',
+                    textAlign:
+                        TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color:
+                          Colors.black45,
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 22,
+                  ),
+
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await FirebaseAuth
+                          .instance
+                          .signOut();
+                    },
+                    icon: const Icon(
+                      Icons.logout,
+                    ),
+                    label: const Text(
+                      'Back to Login',
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
