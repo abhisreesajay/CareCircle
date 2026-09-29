@@ -2,9 +2,345 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // ============================================================
+    // COMMON HELPERS
+    // ============================================================
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn()
+        && request.auth.uid == uid;
+    }
+
+    function userData(uid) {
+      return get(
+        /databases/$(database)/documents/users/$(uid)
+      ).data;
+    }
+
+    function isCaregiver() {
+      return signedIn()
+        && userData(request.auth.uid).role == 'caregiver';
+    }
+
+    function isElder() {
+      return signedIn()
+        && userData(request.auth.uid).role == 'elder';
+    }
+
+    function caregiverLinkedToElder(elderId) {
+      return isCaregiver()
+        && userData(request.auth.uid).linkedElders is list
+        && elderId in userData(request.auth.uid).linkedElders;
+    }
+
+
+    // ============================================================
+    // USERS
+    // ============================================================
+
+    match /users/{userId} {
+
+      // Users can read their own profile.
+      // Caregivers can read profiles when required
+      // for CareCircle functionality.
+      allow read: if isOwner(userId)
+        || isCaregiver();
+
+      // User creates their own profile.
+      allow create: if isOwner(userId);
+
+      // User can update their own profile.
+      allow update: if isOwner(userId);
+
+      // A caregiver may update an elder's caregivers list
+      // while linking themselves.
+      allow update: if isCaregiver()
+        && userData(userId).role == 'elder'
+        && request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly(['caregivers'])
+        && request.resource.data.caregivers is list
+        && request.resource.data.caregivers
+            .hasAny([request.auth.uid]);
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // INVITE CODES
+    // ============================================================
+
+    match /inviteCodes/{code} {
+
+      // A caregiver needs to read the code to find
+      // the elder it belongs to.
+      allow read: if isCaregiver();
+
+      // Elder creates their own invite code.
+      allow create: if signedIn()
+        && request.resource.data.elderId
+            == request.auth.uid
+        && request.resource.data.code
+            == code;
+
+      // Elder can update their own invite code.
+      allow update: if signedIn()
+        && resource.data.elderId
+            == request.auth.uid
+        && request.resource.data.elderId
+            == request.auth.uid
+        && request.resource.data.code
+            == code;
+
+      allow delete: if signedIn()
+        && resource.data.elderId
+            == request.auth.uid;
+    }
+
+
+    // ============================================================
+    // ELDER DATA
+    // ============================================================
+
+    match /elders/{elderId} {
+
+      allow read: if isOwner(elderId)
+        || caregiverLinkedToElder(elderId);
+
+      allow create: if isOwner(elderId);
+
+      allow update: if isOwner(elderId)
+        || caregiverLinkedToElder(elderId);
+
+      allow delete: if false;
+
+
+      // ----------------------------------------------------------
+      // MEDICINES
+      // ----------------------------------------------------------
+
+      match /medicines/{medicineId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ----------------------------------------------------------
+      // APPOINTMENTS
+      // ----------------------------------------------------------
+
+      match /appointments/{appointmentId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ----------------------------------------------------------
+      // EMERGENCY CONTACTS
+      // ----------------------------------------------------------
+
+      match /emergencyContacts/{contactId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ----------------------------------------------------------
+      // NEARBY SERVICES
+      // ----------------------------------------------------------
+
+      match /nearbyServices/{serviceId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ----------------------------------------------------------
+      // MEDICAL SUMMARY
+      // ----------------------------------------------------------
+
+      match /medicalSummary/{summaryId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ----------------------------------------------------------
+      // CHECK-IN HISTORY
+      // ----------------------------------------------------------
+
+      match /checkInHistory/{checkInId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ----------------------------------------------------------
+      // ACTIVITY HISTORY
+      // ----------------------------------------------------------
+
+      match /activityHistory/{activityId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ----------------------------------------------------------
+      // STATUS
+      // ----------------------------------------------------------
+
+      match /status/{statusId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+
+
+      // ----------------------------------------------------------
+      // ALERTS
+      // ----------------------------------------------------------
+
+      match /alerts/{alertId} {
+        allow read, write:
+          if isOwner(elderId)
+          || caregiverLinkedToElder(elderId);
+      }
+    }
+
+
+    // ============================================================
+    // SAFE ZONES
+    // ============================================================
+
+    match /safeZones/{safeZoneId} {
+
+      allow read: if signedIn()
+        && (
+          resource.data.elderId == request.auth.uid
+          || (
+            isCaregiver()
+            && caregiverLinkedToElder(
+              resource.data.elderId
+            )
+          )
+        );
+
+      allow create: if isCaregiver()
+        && caregiverLinkedToElder(
+          request.resource.data.elderId
+        )
+        && request.resource.data.createdBy
+            == request.auth.uid;
+
+      allow update: if isCaregiver()
+        && resource.data.createdBy
+            == request.auth.uid
+        && caregiverLinkedToElder(
+          resource.data.elderId
+        );
+
+      allow delete: if isCaregiver()
+        && resource.data.createdBy
+            == request.auth.uid;
+    }
+
+
+    // ============================================================
+    // SAFE-ZONE VIOLATIONS
+    // ============================================================
+
+    match /safeZoneViolations/{violationId} {
+
+      allow create: if signedIn()
+        && request.resource.data.elderId
+            == request.auth.uid;
+
+      allow read: if signedIn()
+        && (
+          resource.data.elderId == request.auth.uid
+          || caregiverLinkedToElder(
+            resource.data.elderId
+          )
+        );
+
+      allow update, delete: if false;
+    }
+
+
+    // ============================================================
+    // SOS ALERTS
+    // ============================================================
+
+    match /sosAlerts/{sosId} {
+
+      allow create: if signedIn()
+        && request.resource.data.userId
+            == request.auth.uid
+        && request.resource.data.status
+            == 'ACTIVE';
+
+      allow read: if signedIn()
+        && (
+          resource.data.userId
+              == request.auth.uid
+          || caregiverLinkedToElder(
+            resource.data.userId
+          )
+        );
+
+      allow update: if signedIn()
+        && resource.data.userId
+            == request.auth.uid
+        && request.resource.data.userId
+            == resource.data.userId
+        && request.resource.data.status
+            == 'CANCELLED';
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // CARE CIRCLES
+    // ============================================================
+
+    match /careCircles/{circleId} {
+      allow read, create, update, delete:
+        if signedIn();
+    }
+
+
+    // ============================================================
+    // MEDICAL INFORMATION
+    // ============================================================
+
+    match /medicalInformation/{elderId} {
+
+      allow read, write:
+        if isOwner(elderId)
+        || caregiverLinkedToElder(elderId);
+    }
+
+
+    // ============================================================
+    // DEFAULT DENY
+    // ============================================================
+
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

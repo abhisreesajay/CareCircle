@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>CareCircle uses your location for SOS alerts, nearby services, and safe-zone checks.</string>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>CareCircle uses the microphone for voice check-ins.</string>
+
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>CareCircle uses speech recognition for voice check-ins.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

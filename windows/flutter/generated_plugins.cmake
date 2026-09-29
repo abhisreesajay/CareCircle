@@ -6,6 +6,10 @@ list(APPEND FLUTTER_PLUGIN_LIST
   cloud_firestore
   firebase_auth
   firebase_core
+<<<<<<< HEAD
+=======
+  geolocator_windows
+>>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   speech_to_text_windows
 )
 

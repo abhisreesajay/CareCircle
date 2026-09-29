@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/emergency_contact_model.dart';
+import '../../models/emergency_contact_model.dart';
 
 class EmergencyContactService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
