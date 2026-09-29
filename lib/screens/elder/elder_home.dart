@@ -6,6 +6,7 @@ import 'elder_medication_screen.dart';
 import 'hospital_documents_screen.dart';
 import 'invite_code_screen.dart';
 import 'nearby_services_screen.dart';
+import 'news_screen.dart';
 
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
@@ -26,7 +27,6 @@ class ElderHome extends StatelessWidget {
       // ================================================================
       // APP BAR
       // ================================================================
-
       appBar: AppBar(
         elevation: 0,
         backgroundColor: primary,
@@ -45,10 +45,7 @@ class ElderHome extends StatelessWidget {
             ),
             Text(
               'Elder Care Assistant',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
             ),
           ],
         ),
@@ -58,10 +55,7 @@ class ElderHome extends StatelessWidget {
             onPressed: () {
               _showLogoutDialog(context);
             },
-            icon: const Icon(
-              Icons.logout_rounded,
-              size: 25,
-            ),
+            icon: const Icon(Icons.logout_rounded, size: 25),
           ),
           const SizedBox(width: 4),
         ],
@@ -70,15 +64,9 @@ class ElderHome extends StatelessWidget {
       // ================================================================
       // BODY
       // ================================================================
-
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            14,
-            16,
-            14,
-            24,
-          ),
+          padding: const EdgeInsets.fromLTRB(14, 16, 14, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -91,17 +79,12 @@ class ElderHome extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFF3F7DE),
-                      Color(0xFFFFF8F2),
-                    ],
+                    colors: [Color(0xFFF3F7DE), Color(0xFFFFF8F2)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: const Color(0xFFE8EBD8),
-                  ),
+                  border: Border.all(color: const Color(0xFFE8EBD8)),
                 ),
                 child: Row(
                   children: [
@@ -152,7 +135,6 @@ class ElderHome extends StatelessWidget {
               // ==========================================================
               // QUICK ACTIONS HEADER
               // ==========================================================
-
               const Text(
                 'Quick Actions',
                 style: TextStyle(
@@ -166,10 +148,7 @@ class ElderHome extends StatelessWidget {
 
               const Text(
                 'Choose what you need',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: mutedText,
-                ),
+                style: TextStyle(fontSize: 14, color: mutedText),
               ),
 
               const SizedBox(height: 14),
@@ -177,7 +156,6 @@ class ElderHome extends StatelessWidget {
               // ==========================================================
               // FEATURED CHECK-IN ROW
               // ==========================================================
-
               Row(
                 children: [
                   Expanded(
@@ -211,7 +189,6 @@ class ElderHome extends StatelessWidget {
               // ==========================================================
               // SOS
               // ==========================================================
-
               _buildEmergencyCard(context),
 
               const SizedBox(height: 12),
@@ -219,7 +196,6 @@ class ElderHome extends StatelessWidget {
               // ==========================================================
               // MEDICATION + DOCUMENTS
               // ==========================================================
-
               Row(
                 children: [
                   Expanded(
@@ -245,9 +221,7 @@ class ElderHome extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => ElderMedicationScreen(
-                              elderId: uid,
-                            ),
+                            builder: (_) => ElderMedicationScreen(elderId: uid),
                           ),
                         );
                       },
@@ -277,9 +251,8 @@ class ElderHome extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => HospitalDocumentsScreen(
-                              elderId: uid,
-                            ),
+                            builder: (_) =>
+                                HospitalDocumentsScreen(elderId: uid),
                           ),
                         );
                       },
@@ -289,11 +262,28 @@ class ElderHome extends StatelessWidget {
               ),
 
               const SizedBox(height: 12),
+              // ==========================================================
+              // NEWS
+              // ==========================================================
+              _buildSmallAction(
+                context: context,
+                title: 'Today\'s News',
+                subtitle: 'Important headlines',
+                icon: Icons.newspaper_rounded,
+                backgroundColor: const Color(0xFFE8F0E4),
+                iconColor: primary,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const NewsScreen()),
+                  );
+                },
+              ),
 
+              const SizedBox(height: 12),
               // ==========================================================
               // NEARBY SERVICES
               // ==========================================================
-
               _buildNearbyServicesCard(context),
 
               const SizedBox(height: 12),
@@ -301,7 +291,6 @@ class ElderHome extends StatelessWidget {
               // ==========================================================
               // CAREGIVER CONNECTION
               // ==========================================================
-
               _buildConnectionCard(context),
 
               const SizedBox(height: 22),
@@ -309,7 +298,6 @@ class ElderHome extends StatelessWidget {
               // ==========================================================
               // HELP INFORMATION
               // ==========================================================
-
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(17),
@@ -378,7 +366,8 @@ class ElderHome extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
-        onTap: onTap ??
+        onTap:
+            onTap ??
             () {
               if (route != null) {
                 Navigator.pushNamed(context, route);
@@ -396,11 +385,7 @@ class ElderHome extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.65),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 28,
-                ),
+                child: Icon(icon, color: iconColor, size: 28),
               ),
               const SizedBox(height: 25),
               Text(
@@ -414,10 +399,7 @@ class ElderHome extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: mutedText,
-                ),
+                style: const TextStyle(fontSize: 12, color: mutedText),
               ),
               const SizedBox(height: 9),
               Align(
@@ -446,16 +428,10 @@ class ElderHome extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
         onTap: () {
-          Navigator.pushNamed(
-            context,
-            '/sos',
-          );
+          Navigator.pushNamed(context, '/sos');
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 17,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
           child: Row(
             children: [
               Container(
@@ -487,10 +463,7 @@ class ElderHome extends StatelessWidget {
                     SizedBox(height: 4),
                     Text(
                       'Get immediate help',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 13),
                     ),
                   ],
                 ),
@@ -538,11 +511,7 @@ class ElderHome extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.65),
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 26,
-                ),
+                child: Icon(icon, color: iconColor, size: 26),
               ),
               const SizedBox(height: 20),
               Text(
@@ -560,10 +529,7 @@ class ElderHome extends StatelessWidget {
                 subtitle,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: mutedText,
-                ),
+                style: const TextStyle(fontSize: 12, color: mutedText),
               ),
               const SizedBox(height: 9),
               const Align(
@@ -635,10 +601,7 @@ class ElderHome extends StatelessWidget {
                     SizedBox(height: 4),
                     Text(
                       'Hospitals • Shops • Restaurants • Care',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: mutedText,
-                      ),
+                      style: TextStyle(fontSize: 12, color: mutedText),
                     ),
                   ],
                 ),
@@ -676,9 +639,7 @@ class ElderHome extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const InviteCodeScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const InviteCodeScreen()),
           );
         },
         child: Padding(
@@ -714,10 +675,7 @@ class ElderHome extends StatelessWidget {
                     SizedBox(height: 4),
                     Text(
                       'Connect with your caregiver',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: mutedText,
-                      ),
+                      style: TextStyle(fontSize: 12, color: mutedText),
                     ),
                   ],
                 ),
@@ -738,15 +696,9 @@ class ElderHome extends StatelessWidget {
   // MESSAGE
   // ====================================================================
 
-  static void _showMessage(
-    BuildContext context,
-    String message,
-  ) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
+  static void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   // ====================================================================
@@ -772,10 +724,7 @@ class ElderHome extends StatelessWidget {
           ),
           content: const Text(
             'Are you sure you want to logout?',
-            style: TextStyle(
-              fontSize: 17,
-              color: mutedText,
-            ),
+            style: TextStyle(fontSize: 17, color: mutedText),
           ),
           actions: [
             TextButton(
@@ -784,10 +733,7 @@ class ElderHome extends StatelessWidget {
               },
               child: const Text(
                 'CANCEL',
-                style: TextStyle(
-                  color: primary,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: primary, fontWeight: FontWeight.w600),
               ),
             ),
             ElevatedButton(
@@ -801,9 +747,7 @@ class ElderHome extends StatelessWidget {
               ),
               child: const Text(
                 'LOGOUT',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
