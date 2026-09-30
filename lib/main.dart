@@ -39,6 +39,12 @@ import 'screens/elder/invite_code_screen.dart';
 import 'screens/elder/emergency_screen.dart';
 import 'screens/safe_zone_screen.dart';
 
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+import 'services/notifications/medication_notification_service.dart';
+
 Future<void> main() async {
   // ----------------------------------------------------------
   // Flutter initialization
@@ -258,10 +264,10 @@ class _RoleRouterState extends State<RoleRouter> {
   @override
   void dispose() {
     _messagingService.dispose();
+    MedicationNotificationService.instance.stop();
 
     super.dispose();
   }
-
   // ====================================================================
   // ROLE ROUTING
   // ====================================================================
@@ -399,9 +405,9 @@ class _RoleRouterState extends State<RoleRouter> {
         // ======================================================
 
         if (role == 'elder') {
+          MedicationNotificationService.instance.startForElder(widget.uid);
           return const ElderHome();
         }
-
         // ======================================================
         // UNKNOWN ROLE
         // ======================================================
