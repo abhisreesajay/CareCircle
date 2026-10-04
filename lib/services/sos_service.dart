@@ -4,12 +4,10 @@ import 'package:geolocator/geolocator.dart';
 
 import '../models/sos_record.dart';
 import 'location_service.dart';
-import 'medical_service.dart';
 
 class SosService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final MedicalService _medicalService = MedicalService();
 
   // ============================================================
   // GET CURRENT LOCATION
@@ -55,10 +53,6 @@ class SosService {
     // Get the current location.
     final Position position = await getCurrentLocation();
 
-    // Retrieve medical information before writing either document.
-    final Map<String, dynamic>? medicalInformation =
-        await _medicalService.getMedicalInformation(userId);
-
     // Prepare the SOS document.
     final DocumentReference<Map<String, dynamic>> sosDocument =
         _firestore.collection('sosAlerts').doc();
@@ -85,7 +79,6 @@ class SosService {
     final Map<String, dynamic> sosData = sos.toMap();
 
     sosData['createdAt'] = FieldValue.serverTimestamp();
-    sosData['medicalInformation'] = medicalInformation ?? {};
 
     final Map<String, dynamic> alertData = {
       'title': 'Emergency SOS',
@@ -171,52 +164,7 @@ class SosService {
       documents.first.data(),
     );
   }
-
-  // ============================================================
-  // GET SOS MEDICAL INFORMATION
-  // ============================================================
-
-  Future<Map<String, dynamic>> getSosMedicalInformation(
-    String sosId,
-  ) async {
-    if (sosId.trim().isEmpty) {
-      throw Exception('SOS ID is required.');
-    }
-
-    final User? currentUser = _auth.currentUser;
-
-    if (currentUser == null) {
-      throw Exception('You must be logged in to view SOS information.');
-    }
-
-    final DocumentSnapshot<Map<String, dynamic>> snapshot =
-        await _firestore.collection('sosAlerts').doc(sosId).get();
-
-    if (!snapshot.exists) {
-      throw Exception('SOS record was not found.');
-    }
-
-    final Map<String, dynamic>? data = snapshot.data();
-
-    if (data == null) {
-      throw Exception('SOS record data is unavailable.');
-    }
-
-    // Firestore security rules remain responsible for deciding
-    // whether this user can read this SOS document.
-    final dynamic medicalData = data['medicalInformation'];
-
-    if (medicalData is Map<String, dynamic>) {
-      return medicalData;
-    }
-
-    if (medicalData is Map) {
-      return Map<String, dynamic>.from(medicalData);
-    }
-
-    return {};
-  }
-
+  
   // ============================================================
   // CANCEL SOS
   // ============================================================
