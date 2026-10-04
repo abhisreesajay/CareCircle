@@ -1,26 +1,8 @@
-import os
-import json
+import firebase_admin
+from firebase_admin import firestore, messaging
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-import firebase_admin
-from firebase_admin import credentials, firestore, messaging
-
-
-service_account_json = os.environ.get(
-    "FIREBASE_SERVICE_ACCOUNT_JSON"
-)
-
-if not service_account_json:
-    raise RuntimeError(
-        "FIREBASE_SERVICE_ACCOUNT_JSON secret is missing."
-    )
-
-service_account_info = json.loads(service_account_json)
-
-cred = credentials.Certificate(service_account_info)
-
-firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 

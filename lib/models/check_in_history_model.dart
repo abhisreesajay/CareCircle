@@ -4,22 +4,19 @@ class CheckInHistory {
   final String scheduledTime;
   final String status;
 
-  CheckInHistory({
+  const CheckInHistory({
     required this.id,
     required this.date,
     required this.scheduledTime,
     required this.status,
   });
 
-  factory CheckInHistory.fromMap(
-    String id,
-    Map<String, dynamic> map,
-  ) {
+  factory CheckInHistory.fromMap(String id, Map<String, dynamic> map) {
     return CheckInHistory(
       id: id,
-      date: map['date'] ?? '',
-      scheduledTime: map['scheduledTime'] ?? '',
-      status: map['status'] ?? 'PENDING',
+      date: map['date']?.toString() ?? '',
+      scheduledTime: map['scheduledTime']?.toString() ?? '',
+      status: map['status']?.toString() ?? 'PENDING',
     );
   }
 }

@@ -133,21 +133,38 @@ class CareCircleService {
       }
     }
 
-    // Save on elder profile.
-    await elderRef.update({
-      'inviteCode': code,
-    });
+    // ----------------------------------------------------------
+    // SAVE ELDER CODE + LOOKUP DOCUMENT
+    // ----------------------------------------------------------
 
-    // Create lookup document.
-    await _db
-        .collection('inviteCodes')
-        .doc(code)
-        .set({
-      'code': code,
-      'elderId': uid,
-      'createdAt':
-          FieldValue.serverTimestamp(),
-    });
+    final DocumentReference<
+            Map<String, dynamic>>
+        inviteRef =
+        _db
+            .collection('inviteCodes')
+            .doc(code);
+
+    final WriteBatch batch =
+        _db.batch();
+
+    batch.update(
+      elderRef,
+      {
+        'inviteCode': code,
+      },
+    );
+
+    batch.set(
+      inviteRef,
+      {
+        'code': code,
+        'elderId': uid,
+        'createdAt':
+            FieldValue.serverTimestamp(),
+      },
+    );
+
+    await batch.commit();
 
     return code;
   }
@@ -295,32 +312,49 @@ class CareCircleService {
     }
 
     // ----------------------------------------------------------
-    // CONNECT CAREGIVER -> ELDER
+    // CONNECT CAREGIVER <-> ELDER ATOMICALLY
     // ----------------------------------------------------------
 
-    await _db
-        .collection('users')
-        .doc(caregiverId)
-        .update({
-      'linkedElders':
-          FieldValue.arrayUnion([
-        elderId,
-      ]),
-    });
+    final WriteBatch batch =
+        _db.batch();
 
-    // ----------------------------------------------------------
-    // CONNECT ELDER -> CAREGIVER
-    // ----------------------------------------------------------
+    final DocumentReference<
+            Map<String, dynamic>>
+        caregiverRef =
+        _db
+            .collection('users')
+            .doc(caregiverId);
 
-    await _db
-        .collection('users')
-        .doc(elderId)
-        .update({
-      'caregivers':
-          FieldValue.arrayUnion([
-        caregiverId,
-      ]),
-    });
+    final DocumentReference<
+            Map<String, dynamic>>
+        elderRef =
+        _db
+            .collection('users')
+            .doc(elderId);
+
+    // Caregiver -> Elder
+    batch.update(
+      caregiverRef,
+      {
+        'linkedElders':
+            FieldValue.arrayUnion([
+          elderId,
+        ]),
+      },
+    );
+
+    // Elder -> Caregiver
+    batch.update(
+      elderRef,
+      {
+        'caregivers':
+            FieldValue.arrayUnion([
+          caregiverId,
+        ]),
+      },
+    );
+
+    await batch.commit();
   }
 
   // ============================================================

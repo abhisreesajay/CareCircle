@@ -1,4 +1,6 @@
-from firebase_functions import firestore_fn
+from firebase_functions import firestore_fn, scheduler_fn
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from firebase_functions.options import set_global_options
 from firebase_admin import initialize_app, firestore, messaging
 
@@ -467,3 +469,19 @@ def on_safe_zone_violation_created(
         title=notification_title,
         body=notification_body,
     )
+
+
+# ============================================================
+# CHECK-IN REMINDER SCHEDULER
+# ============================================================
+
+@scheduler_fn.on_schedule(
+    schedule="*/5 * * * *",
+    timezone="Asia/Kolkata",
+)
+def process_checkin_reminders(
+    event: scheduler_fn.ScheduledEvent,
+) -> None:
+    from checkin_scheduler import process_checkins
+
+    process_checkins()

@@ -1,24 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../models/check_in_history_model.dart';
 
 class CheckInHistoryService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  CheckInHistoryService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
 
   Stream<List<CheckInHistory>> getCheckInHistory(String elderId) {
+    final normalizedElderId = elderId.trim();
+    if (normalizedElderId.isEmpty) {
+      return Stream.value(const <CheckInHistory>[]);
+    }
+
     return _firestore
         .collection('elders')
-        .doc(elderId)
+        .doc(normalizedElderId)
         .collection('checkInHistory')
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map(
-                (doc) => CheckInHistory.fromMap(
-                  doc.id,
-                  doc.data(),
-                ),
-              )
-              .toList(),
-        );
+        .map((snapshot) => snapshot.docs
+            .map((doc) => CheckInHistory.fromMap(doc.id, doc.data()))
+            .toList());
   }
 }

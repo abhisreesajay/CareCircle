@@ -8,7 +8,7 @@ class CheckIn {
   final String response;
   final int reminderStage;
 
-  CheckIn({
+  const CheckIn({
     required this.id,
     required this.elderId,
     required this.date,
@@ -19,43 +19,27 @@ class CheckIn {
     required this.reminderStage,
   });
 
-  factory CheckIn.fromMap(
-    String id,
-    Map<String, dynamic> map,
-  ) {
+  factory CheckIn.fromMap(String id, Map<String, dynamic> map) {
+    final rawReminderStage = map['reminderStage'];
     return CheckIn(
       id: id,
-      elderId:
-          map['elderId']?.toString() ?? '',
-      date:
-          map['date']?.toString() ?? '',
-      scheduledTime:
-          map['scheduledTime']?.toString() ?? '',
-      status:
-          map['status']?.toString() ??
-              'PENDING',
-      method:
-          map['method']?.toString() ?? '',
-      response:
-          map['response']?.toString() ?? '',
-      reminderStage:
-          map['reminderStage'] is int
-              ? map['reminderStage']
-                  as int
-              : 0,
+      elderId: map['elderId']?.toString() ?? '',
+      date: map['date']?.toString() ?? '',
+      scheduledTime: map['scheduledTime']?.toString() ?? '',
+      status: map['status']?.toString() ?? 'PENDING',
+      method: map['method']?.toString() ?? '',
+      response: map['response']?.toString() ?? '',
+      reminderStage: rawReminderStage is num ? rawReminderStage.toInt() : 0,
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'elderId': elderId,
-      'date': date,
-      'scheduledTime': scheduledTime,
-      'status': status,
-      'method': method,
-      'response': response,
-      'reminderStage':
-          reminderStage,
-    };
-  }
+  Map<String, dynamic> toMap() => <String, dynamic>{
+        'elderId': elderId,
+        'date': date,
+        'scheduledTime': scheduledTime,
+        'status': status,
+        'method': method,
+        'response': response,
+        'reminderStage': reminderStage,
+      };
 }

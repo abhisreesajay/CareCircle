@@ -1,18 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MedicalService {
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance;
+  MedicalService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  // ------------------------------------------------------------
-  // SAVE MEDICAL INFORMATION
-  // ------------------------------------------------------------
-  //
-  // Saves or updates medical information for one user.
-  //
-  // Document path:
-  // medicalInformation/{elderId}
-  //
+  final FirebaseFirestore _firestore;
+
+  CollectionReference<Map<String, dynamic>>
+      get _medicalInformation =>
+          _firestore.collection('medicalInformation');
+
+  String _validateElderId(String elderId) {
+    final normalizedId = elderId.trim();
+
+    if (normalizedId.isEmpty) {
+      throw ArgumentError('Elder ID is required.');
+    }
+
+    return normalizedId;
+  }
+
+  /// Saves or updates an elder's medical information.
   Future<void> saveMedicalInformation({
     required String elderId,
     required String bloodGroup,
@@ -23,57 +31,33 @@ class MedicalService {
     String? doctorName,
     String? doctorPhone,
   }) async {
-    if (elderId.trim().isEmpty) {
-      throw Exception(
-        'Elder ID is required.',
-      );
-    }
+    final normalizedElderId = _validateElderId(elderId);
 
-    await _firestore
-        .collection('medicalInformation')
-        .doc(elderId)
-        .set(
+    await _medicalInformation.doc(normalizedElderId).set(
       {
-        'elderId': elderId,
+        'elderId': normalizedElderId,
         'bloodGroup': bloodGroup.trim(),
         'allergies': allergies.trim(),
-        'medicalConditions':
-            medicalConditions.trim(),
+        'medicalConditions': medicalConditions.trim(),
         'medications': medications.trim(),
-        'emergencyNotes':
-            emergencyNotes.trim(),
-        'doctorName':
-            doctorName?.trim() ?? '',
-        'doctorPhone':
-            doctorPhone?.trim() ?? '',
-        'updatedAt':
-            FieldValue.serverTimestamp(),
+        'emergencyNotes': emergencyNotes.trim(),
+        'doctorName': doctorName?.trim() ?? '',
+        'doctorPhone': doctorPhone?.trim() ?? '',
+        'updatedAt': FieldValue.serverTimestamp(),
       },
       SetOptions(merge: true),
     );
   }
 
-  // ------------------------------------------------------------
-  // GET MEDICAL INFORMATION
-  // ------------------------------------------------------------
-  //
-  // Retrieves medical information for one user.
-  //
+  /// Retrieves an elder's medical information.
+  /// Returns null if no document exists.
   Future<Map<String, dynamic>?> getMedicalInformation(
     String elderId,
   ) async {
-    if (elderId.trim().isEmpty) {
-      throw Exception(
-        'Elder ID is required.',
-      );
-    }
+    final normalizedElderId = _validateElderId(elderId);
 
-    final DocumentSnapshot<
-        Map<String, dynamic>> document =
-        await _firestore
-            .collection('medicalInformation')
-            .doc(elderId)
-            .get();
+    final document =
+        await _medicalInformation.doc(normalizedElderId).get();
 
     if (!document.exists) {
       return null;
@@ -82,24 +66,10 @@ class MedicalService {
     return document.data();
   }
 
-  // ------------------------------------------------------------
-  // DELETE MEDICAL INFORMATION
-  // ------------------------------------------------------------
-  //
-  // Deletes medical information for one user.
-  //
-  Future<void> deleteMedicalInformation(
-    String elderId,
-  ) async {
-    if (elderId.trim().isEmpty) {
-      throw Exception(
-        'Elder ID is required.',
-      );
-    }
+  /// Deletes an elder's medical information.
+  Future<void> deleteMedicalInformation(String elderId) async {
+    final normalizedElderId = _validateElderId(elderId);
 
-    await _firestore
-        .collection('medicalInformation')
-        .doc(elderId)
-        .delete();
+    await _medicalInformation.doc(normalizedElderId).delete();
   }
 }

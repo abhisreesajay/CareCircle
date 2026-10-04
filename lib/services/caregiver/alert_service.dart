@@ -10,16 +10,11 @@ class AlertService {
   // GET ALERTS
   // ============================================================
 
-  Stream<List<CareAlert>> getAlerts(
-    String elderId,
-  ) {
-    final String normalizedElderId =
-        elderId.trim();
+  Stream<List<CareAlert>> getAlerts(String elderId) {
+    final String normalizedElderId = elderId.trim();
 
     if (normalizedElderId.isEmpty) {
-      return Stream.value(
-        <CareAlert>[],
-      );
+      return Stream.value(<CareAlert>[]);
     }
 
     return _firestore
@@ -27,56 +22,41 @@ class AlertService {
         .doc(normalizedElderId)
         .collection('alerts')
         .snapshots()
-        .map(
-      (snapshot) {
-        final List<
-            QueryDocumentSnapshot<
-                Map<String, dynamic>>> documents =
-            List<
-                QueryDocumentSnapshot<
-                    Map<String, dynamic>>>.from(
-          snapshot.docs,
-        );
+        .map((snapshot) {
+      final documents = snapshot.docs.toList();
 
-        documents.sort(
-          (a, b) {
-            final DateTime? aDate =
-                _timestampToDateTime(
-              a.data()['createdAt'],
-            );
+      // Sort newest alerts first.
+      documents.sort((a, b) {
+        final DateTime? aDate =
+            _timestampToDateTime(a.data()['createdAt']);
 
-            final DateTime? bDate =
-                _timestampToDateTime(
-              b.data()['createdAt'],
-            );
+        final DateTime? bDate =
+            _timestampToDateTime(b.data()['createdAt']);
 
-            if (aDate == null &&
-                bDate == null) {
-              return 0;
-            }
+        if (aDate == null && bDate == null) {
+          return 0;
+        }
 
-            if (aDate == null) {
-              return 1;
-            }
+        if (aDate == null) {
+          return 1;
+        }
 
-            if (bDate == null) {
-              return -1;
-            }
+        if (bDate == null) {
+          return -1;
+        }
 
-            return bDate.compareTo(aDate);
-          },
-        );
+        return bDate.compareTo(aDate);
+      });
 
-        return documents
-            .map(
-              (doc) => CareAlert.fromMap(
-                doc.id,
-                doc.data(),
-              ),
-            )
-            .toList();
-      },
-    );
+      return documents
+          .map(
+            (doc) => CareAlert.fromMap(
+              doc.id,
+              doc.data(),
+            ),
+          )
+          .toList();
+    });
   }
 
   // ============================================================
@@ -89,17 +69,10 @@ class AlertService {
     required String message,
     required String type,
   }) async {
-    final String normalizedElderId =
-        elderId.trim();
-
-    final String normalizedTitle =
-        title.trim();
-
-    final String normalizedMessage =
-        message.trim();
-
-    final String normalizedType =
-        type.trim();
+    final String normalizedElderId = elderId.trim();
+    final String normalizedTitle = title.trim();
+    final String normalizedMessage = message.trim();
+    final String normalizedType = type.trim();
 
     if (normalizedElderId.isEmpty) {
       throw Exception(
@@ -125,8 +98,7 @@ class AlertService {
       );
     }
 
-    final DateTime now =
-        DateTime.now();
+    final DateTime now = DateTime.now();
 
     final String formattedDate =
         '${now.day.toString().padLeft(2, '0')} '
@@ -135,9 +107,8 @@ class AlertService {
         '${now.hour.toString().padLeft(2, '0')}:'
         '${now.minute.toString().padLeft(2, '0')}';
 
-    final DocumentReference<
-        Map<String, dynamic>> alertDocument =
-        _firestore
+    final DocumentReference<Map<String, dynamic>>
+        alertDocument = _firestore
             .collection('elders')
             .doc(normalizedElderId)
             .collection('alerts')
@@ -149,8 +120,12 @@ class AlertService {
       'date': formattedDate,
       'type': normalizedType,
       'elderId': normalizedElderId,
-      'createdAt':
-          FieldValue.serverTimestamp(),
+
+      // Must match the Admin query:
+      // where('status', isEqualTo: 'active')
+      'status': 'active',
+
+      'createdAt': FieldValue.serverTimestamp(),
     });
   }
 
@@ -162,11 +137,8 @@ class AlertService {
     required String elderId,
     required String alertId,
   }) async {
-    final String normalizedElderId =
-        elderId.trim();
-
-    final String normalizedAlertId =
-        alertId.trim();
+    final String normalizedElderId = elderId.trim();
+    final String normalizedAlertId = alertId.trim();
 
     if (normalizedElderId.isEmpty) {
       throw Exception(
@@ -192,9 +164,7 @@ class AlertService {
   // TIMESTAMP CONVERSION
   // ============================================================
 
-  DateTime? _timestampToDateTime(
-    dynamic value,
-  ) {
+  DateTime? _timestampToDateTime(dynamic value) {
     if (value is Timestamp) {
       return value.toDate();
     }
@@ -210,9 +180,7 @@ class AlertService {
   // MONTH NAME
   // ============================================================
 
-  String _monthName(
-    int month,
-  ) {
+  String _monthName(int month) {
     const List<String> months = [
       'Jan',
       'Feb',
