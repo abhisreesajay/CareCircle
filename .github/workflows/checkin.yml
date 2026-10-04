@@ -1,28 +1,6 @@
 name: CareCircle Check-in Notifications
 
 on:
-  schedule:
-    # 10:00 AM IST
-    - cron: "30 4 * * *"
-    # 10:15 AM IST
-    - cron: "45 4 * * *"
-    # 10:30 AM IST
-    - cron: "0 5 * * *"
-
-    # 2:00 PM IST
-    - cron: "30 8 * * *"
-    # 2:15 PM IST
-    - cron: "45 8 * * *"
-    # 2:30 PM IST
-    - cron: "0 9 * * *"
-
-    # 9:00 PM IST
-    - cron: "30 15 * * *"
-    # 9:15 PM IST
-    - cron: "45 15 * * *"
-    # 9:30 PM IST
-    - cron: "0 16 * * *"
-
   workflow_dispatch:
 
 jobs:
