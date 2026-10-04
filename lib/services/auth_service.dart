@@ -153,9 +153,10 @@ class AuthService {
     }
 
     if (cleanRole != 'elder' &&
-        cleanRole != 'caregiver' &&
-        cleanRole != 'admin') {
-      throw Exception('Invalid account role.');
+        cleanRole != 'caregiver') {
+      throw Exception(
+        'Only Elder and Caregiver accounts can sign up.',
+      );
     }
 
     UserCredential credential;

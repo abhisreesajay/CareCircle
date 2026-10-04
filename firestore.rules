@@ -60,9 +60,15 @@ service cloud.firestore {
 
     match /users/{userId} {
 
-      allow read: if isOwner(userId)
-        || isCaregiver()
-        || isAdmin();
+      // A user can read their own profile.
+      // Admins can read profiles for administration.
+      // Caregivers can read profiles of elders linked to them.
+      allow get: if isOwner(userId)
+        || isAdmin()
+        || caregiverLinkedToElder(userId);
+
+      // Only admins may list/query the entire users collection.
+      allow list: if isAdmin();
 
       // Normal signup can create Elder or Caregiver accounts only.
       allow create: if isOwner(userId)
@@ -116,18 +122,40 @@ service cloud.firestore {
 
     match /inviteCodes/{code} {
 
-      allow read: if signedIn();
+      // Caregivers can look up existing invite codes.
+      // Elders can read only their own invite-code document.
+      allow get: if isCaregiver()
+        || (
+          isOwner(resource.data.elderId)
+          && isElder()
+        );
 
-      allow create: if signedIn()
+      // Never allow listing all invite codes.
+      allow list: if false;
+
+      // Only an elder can create an invite code for themselves.
+      allow create: if isElder()
         && request.resource.data.elderId == request.auth.uid
-        && request.resource.data.code == code;
+        && request.resource.data.code == code
+        && request.resource.data.keys().hasOnly([
+          'code',
+          'elderId',
+          'createdAt'
+        ]);
 
-      allow update: if signedIn()
+      // Only the owning elder can update their own invite code.
+      allow update: if isElder()
         && resource.data.elderId == request.auth.uid
         && request.resource.data.elderId == request.auth.uid
-        && request.resource.data.code == code;
+        && request.resource.data.code == code
+        && request.resource.data.keys().hasOnly([
+          'code',
+          'elderId',
+          'createdAt'
+        ]);
 
-      allow delete: if signedIn()
+      // Only the owning elder can delete their invite code.
+      allow delete: if isElder()
         && resource.data.elderId == request.auth.uid;
     }
 
@@ -143,8 +171,9 @@ service cloud.firestore {
 
       allow create: if isOwner(elderId);
 
-      allow update: if isOwner(elderId)
-        || caregiverLinkedToElder(elderId);
+      // Only the elder account owner can update
+      // the main elder document.
+      allow update: if isOwner(elderId);
 
       allow delete: if false;
 
