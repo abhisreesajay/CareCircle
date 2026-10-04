@@ -70,16 +70,17 @@ service cloud.firestore {
 
       // Normal profile updates.
       allow update: if isOwner(userId)
-        && request.resource.data.role == resource.data.role
         && request.resource.data.diff(resource.data)
             .affectedKeys()
             .hasOnly([
               'name',
               'fcmToken',
               'fcmTokens',
+              'fcmTokenUpdatedAt',
               'lastActive',
               'inviteCode'
             ]);
+
 
       // Admin user management.
       allow update: if isAdmin();
