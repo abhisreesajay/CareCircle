@@ -15,7 +15,8 @@ import 'alerts_screen.dart';
 import 'hospital_documents_screen.dart';
 import '../safe_zone_screen.dart';
 import '../../services/auth_service.dart';
-import '../auth/login_screen.dart';
+import '../common/profile_screen.dart';
+import '../common/settings_screen.dart';
 
 class CaregiverDashboard extends StatefulWidget {
   final String elderId;
@@ -288,14 +289,6 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
 
     await AuthService().signOut();
 
-    if (!mounted) return;
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (_) => const LoginScreen(),
-      ),
-      (route) => false,
-    );
   }
 
   // =====================================================================
@@ -422,6 +415,30 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                         size: 23,
                       ),
                     ),
+                  ),
+                  IconButton(
+                    tooltip: 'Profile',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileScreen(role: 'caregiver'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.person_outline_rounded),
+                  ),
+                  IconButton(
+                    tooltip: 'Settings',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsScreen(role: 'caregiver'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.settings_outlined),
                   ),
                 ],
               ),

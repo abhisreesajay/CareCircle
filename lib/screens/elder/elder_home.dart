@@ -11,6 +11,8 @@ import 'medical_information_screen.dart';
 import 'news_screen.dart';
 import 'elder_emergency_contacts_screen.dart';
 import '../../services/safe_zone_service.dart';
+import '../common/profile_screen.dart';
+import '../common/settings_screen.dart';
 
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
@@ -115,6 +117,30 @@ class ElderHome extends StatelessWidget {
                   size: 23,
                 ),
               ),
+            ),
+            IconButton(
+              tooltip: 'Profile',
+              icon: const Icon(Icons.person_outline_rounded),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ProfileScreen(role: 'elder'),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              tooltip: 'Settings',
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SettingsScreen(role: 'elder'),
+                  ),
+                );
+              },
             ),
           ],
         ),

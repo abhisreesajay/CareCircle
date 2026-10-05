@@ -1,3 +1,4 @@
+
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -295,12 +296,52 @@ class AuthService {
   // ============================================================
 
   Future<void> sendPasswordResetEmail(String email) async {
+    final String cleanEmail = email.trim();
+
+    if (cleanEmail.isEmpty ||
+        !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+            .hasMatch(cleanEmail)) {
+      throw Exception('Please enter a valid email address.');
+    }
+
     try {
       await _auth.sendPasswordResetEmail(
-        email: email.trim(),
+        email: cleanEmail,
       );
     } on FirebaseAuthException catch (e) {
-      throw Exception(_getAuthErrorMessage(e));
+      debugPrint(
+        'Password reset failed: ${e.code} - ${e.message}',
+      );
+
+      switch (e.code) {
+        case 'invalid-email':
+          throw Exception('Please enter a valid email address.');
+
+        case 'user-not-found':
+          throw Exception(
+            'No account was found for that email address.',
+          );
+
+        case 'too-many-requests':
+          throw Exception(
+            'Too many reset attempts. Please wait and try again.',
+          );
+
+        case 'network-request-failed':
+          throw Exception(
+            'Network error. Check your internet connection.',
+          );
+
+        case 'operation-not-allowed':
+          throw Exception(
+            'Password reset is unavailable. Check Firebase settings.',
+          );
+
+        default:
+          throw Exception(
+            'Could not send the reset email. Error: ${e.code}',
+          );
+      }
     }
   }
 

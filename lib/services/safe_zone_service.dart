@@ -200,7 +200,9 @@ class SafeZoneService {
     _validateCoordinates(latitude, longitude);
 
     if (!distanceInMeters.isFinite || distanceInMeters < 0) {
-      throw ArgumentError('Distance must be a valid non-negative number.');
+      throw ArgumentError(
+        'Distance must be a valid non-negative number.',
+      );
     }
 
     if (safeZone.elderId.trim() != id) {
@@ -215,24 +217,43 @@ class SafeZoneService {
 
     final outside = distanceInMeters > safeZone.radiusInMeters;
     final violationId = _stableViolationId(id, zoneId);
-    final violationRef = _violations.doc(violationId);
+    final stableViolationRef = _violations.doc(violationId);
 
-    debugPrint('SAFE ZONE: Violation path = ${violationRef.path}');
-    debugPrint('SAFE ZONE: Checking existing violation $violationId');
+    debugPrint(
+      'SAFE ZONE: Looking up violations for elder $id',
+    );
 
     try {
-      // Use one deterministic document per elder and safe zone.
-      // This prevents repeated location checks from creating
-      // duplicate violation documents.
-      final existingSnapshot = await violationRef.get();
+      // Query by elder ID instead of directly reading a possibly
+      // nonexistent document. Firestore rules must allow this
+      // query for the signed-in user.
+      final matchingViolations = await _violations
+          .where('elderId', isEqualTo: id)
+          .get();
 
-      final existing = existingSnapshot.exists
-          ? existingSnapshot.data()
-          : null;
+      QueryDocumentSnapshot<Map<String, dynamic>>? existingDoc;
 
+      for (final doc in matchingViolations.docs) {
+        if (doc.data()['safeZoneId'] == zoneId) {
+          existingDoc = doc;
+          break;
+        }
+      }
+
+      final existing = existingDoc?.data();
       final existingStatus = existing?['status'] as String?;
 
-      debugPrint('SAFE ZONE: Existing violation = ${existing != null}');
+      // Reuse the actual existing document if found. Otherwise,
+      // use the stable document ID for a new violation.
+      final violationRef =
+          existingDoc?.reference ?? stableViolationRef;
+
+      debugPrint(
+        'SAFE ZONE: Violation path = ${violationRef.path}',
+      );
+      debugPrint(
+        'SAFE ZONE: Existing violation = ${existingDoc != null}',
+      );
       debugPrint('SAFE ZONE: Existing status = $existingStatus');
       debugPrint('SAFE ZONE: Current outside status = $outside');
 
@@ -268,7 +289,9 @@ class SafeZoneService {
           'lastCheckedAt': FieldValue.serverTimestamp(),
         });
 
-        debugPrint('SAFE ZONE: Existing violation location updated');
+        debugPrint(
+          'SAFE ZONE: Existing violation location updated',
+        );
         return;
       }
 
@@ -295,9 +318,6 @@ class SafeZoneService {
         'lastCheckedAt': FieldValue.serverTimestamp(),
       };
 
-      // If this document already exists with status SAFE, set()
-      // acts as an update. Firestore rules must allow the SAFE
-      // -> OUTSIDE transition and every field changed by this map.
       batch.set(violationRef, violationData);
 
       batch.set(alertRef, {
@@ -325,12 +345,18 @@ class SafeZoneService {
 
       await batch.commit();
 
-      debugPrint('SAFE ZONE: Violation and alert saved successfully');
+      debugPrint(
+        'SAFE ZONE: Violation and alert saved successfully',
+      );
     } on FirebaseException catch (error, stackTrace) {
       debugPrint(
-        'SAFE ZONE FIREBASE ERROR: ${error.code} - ${error.message}',
+        'SAFE ZONE FIREBASE ERROR: '
+        '${error.code} - ${error.message}',
       );
-      debugPrint('SAFE ZONE: Violation path = ${violationRef.path}');
+      debugPrint(
+        'SAFE ZONE: Stable violation path = '
+        '${stableViolationRef.path}',
+      );
       debugPrint('SAFE ZONE STACK TRACE: $stackTrace');
 
       rethrow;
@@ -370,8 +396,11 @@ class SafeZoneService {
       throw ArgumentError('Invalid safe zone coordinates.');
     }
 
-    if (!zone.radiusInMeters.isFinite || zone.radiusInMeters <= 0) {
-      throw ArgumentError('Safe zone radius must be positive.');
+    if (!zone.radiusInMeters.isFinite ||
+        zone.radiusInMeters <= 0) {
+      throw ArgumentError(
+        'Safe zone radius must be positive.',
+      );
     }
   }
 

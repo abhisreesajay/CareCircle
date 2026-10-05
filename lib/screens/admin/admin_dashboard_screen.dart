@@ -6,6 +6,8 @@ import 'tabs/admin_overview_tab.dart';
 import 'tabs/admin_users_tab.dart';
 import 'tabs/admin_circles_tab.dart';
 import 'tabs/admin_alerts_tab.dart';
+import '../common/profile_screen.dart';
+import '../common/settings_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -386,6 +388,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               size: 19,
               color: Color(0xFFB6BFCE),
             ),
+          ),
+
+          IconButton(
+            tooltip: 'Profile',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ProfileScreen(role: 'admin'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.person_outline_rounded),
+          ),
+          IconButton(
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SettingsScreen(role: 'admin'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.settings_outlined),
           ),
         ],
       ),

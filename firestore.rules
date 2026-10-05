@@ -394,6 +394,7 @@ service cloud.firestore {
     // SAFE ZONE VIOLATIONS
     // ============================================================
 
+        
     match /safeZoneViolations/{violationId} {
 
       function canAccessElder(elderId) {
@@ -407,17 +408,16 @@ service cloud.firestore {
 
       allow get, list: if canAccessElder(resource.data.elderId);
 
-      allow create: if signedIn()
-        && request.resource.data.elderId is string
+      allow create: if request.resource.data.elderId is string
         && canAccessElder(request.resource.data.elderId)
         && request.resource.data.safeZoneId is string
         && request.resource.data.status == 'OUTSIDE';
 
-      allow update: if signedIn()
-        && canAccessElder(resource.data.elderId)
+      allow update: if canAccessElder(resource.data.elderId)
         && request.resource.data.elderId == resource.data.elderId
         && request.resource.data.safeZoneId == resource.data.safeZoneId
         && (
+          // Update an active outside violation.
           (
             resource.data.status == 'OUTSIDE'
             && request.resource.data.status == 'OUTSIDE'
@@ -431,6 +431,7 @@ service cloud.firestore {
               ])
           )
           ||
+          // Resolve an outside violation.
           (
             resource.data.status == 'OUTSIDE'
             && request.resource.data.status == 'SAFE'
@@ -443,6 +444,7 @@ service cloud.firestore {
               ])
           )
           ||
+          // Reopen a resolved violation.
           (
             resource.data.status == 'SAFE'
             && request.resource.data.status == 'OUTSIDE'
