@@ -3,17 +3,18 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links
   cloud_firestore
   firebase_auth
   firebase_core
-<<<<<<< HEAD
-=======
+  flutter_tts
   geolocator_windows
->>>>>>> a3aebc2c1aa208a23c4a02ef94e26ea39211c317
   speech_to_text_windows
+  url_launcher_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  flutter_local_notifications_windows
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)
