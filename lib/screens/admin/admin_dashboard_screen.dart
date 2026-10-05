@@ -420,27 +420,93 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildCompactAdminCard() {
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(13),
-          onTap: _signOut,
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(13),
-            ),
-            child: const Icon(
-              Icons.logout_rounded,
-              color: Color(0xFFB6BFCE),
-              size: 21,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Profile
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(13),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ProfileScreen(role: 'admin'),
+                ),
+              );
+            },
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Icon(
+                Icons.person_outline_rounded,
+                color: Color(0xFFB6BFCE),
+                size: 21,
+              ),
             ),
           ),
         ),
-      ),
+
+        const SizedBox(height: 8),
+
+        // Settings
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(13),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SettingsScreen(role: 'admin'),
+                ),
+              );
+            },
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Icon(
+                Icons.settings_outlined,
+                color: Color(0xFFB6BFCE),
+                size: 21,
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        // Logout
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(13),
+            onTap: _signOut,
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: Color(0xFFB6BFCE),
+                size: 21,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

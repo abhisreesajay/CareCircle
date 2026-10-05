@@ -17,6 +17,8 @@ import '../safe_zone_screen.dart';
 import '../../services/auth_service.dart';
 import '../auth/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../common/profile_screen.dart';
+import '../common/settings_screen.dart';
 
 class CaregiverDashboard extends StatefulWidget {
   final String elderId;
@@ -398,36 +400,99 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                     ),
                   ),
 
-                  // Logout button
-                  GestureDetector(
-                    onTap: _logout,
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            coral,
-                            Color(0xFFFF7770),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(17),
-                        boxShadow: [
-                          BoxShadow(
-                            color: coral.withValues(alpha: .22),
-                            blurRadius: 14,
-                            offset: const Offset(0, 6),
+                  
+                  // Account actions
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Profile
+                      GestureDetector(
+                        onTap: () {
+                          _openPage(
+                            context,
+                            const ProfileScreen(role: 'caregiver'),
+                          );
+                        },
+                        child: Container(
+                          height: 46,
+                          width: 46,
+                          decoration: BoxDecoration(
+                            color: cream,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: const Color(0xFFEEDCC8),
+                            ),
                           ),
-                        ],
+                          child: const Icon(
+                            Icons.person_outline_rounded,
+                            color: greenDark,
+                            size: 22,
+                          ),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.logout_rounded,
-                        color: Colors.white,
-                        size: 23,
+
+                      const SizedBox(width: 8),
+
+                      // Settings
+                      GestureDetector(
+                        onTap: () {
+                          _openPage(
+                            context,
+                            const SettingsScreen(role: 'caregiver'),
+                          );
+                        },
+                        child: Container(
+                          height: 46,
+                          width: 46,
+                          decoration: BoxDecoration(
+                            color: cream,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: const Color(0xFFEEDCC8),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.settings_outlined,
+                            color: greenDark,
+                            size: 22,
+                          ),
+                        ),
                       ),
-                    ),
+
+                      const SizedBox(width: 8),
+
+                      // Logout
+                      GestureDetector(
+                        onTap: _logout,
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                coral,
+                                Color(0xFFFF7770),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(17),
+                            boxShadow: [
+                              BoxShadow(
+                                color: coral.withValues(alpha: .22),
+                                blurRadius: 14,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.logout_rounded,
+                            color: Colors.white,
+                            size: 23,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
