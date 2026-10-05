@@ -17,6 +17,7 @@ class SosRecord {
     required this.status,
   });
 
+  // Convert the record into Firestore-compatible data.
   Map<String, dynamic> toMap() {
     return {
       'userId': userId,
@@ -27,29 +28,38 @@ class SosRecord {
     };
   }
 
+  // Create a record from Firestore data.
   factory SosRecord.fromMap(
     String id,
     Map<String, dynamic> map,
   ) {
-    final timestampValue = map['timestamp'];
-
-    DateTime timestamp;
-
-    if (timestampValue is Timestamp) {
-      timestamp = timestampValue.toDate();
-    } else if (timestampValue is DateTime) {
-      timestamp = timestampValue;
-    } else {
-      timestamp = DateTime.now();
-    }
-
     return SosRecord(
       id: id,
       userId: map['userId']?.toString() ?? '',
-      latitude: (map['latitude'] as num?)?.toDouble() ?? 0.0,
-      longitude: (map['longitude'] as num?)?.toDouble() ?? 0.0,
-      timestamp: timestamp,
+      latitude: _toDouble(map['latitude']),
+      longitude: _toDouble(map['longitude']),
+      timestamp: _toDateTime(map['timestamp']) ?? DateTime.now(),
       status: map['status']?.toString() ?? 'UNKNOWN',
     );
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return 0.0;
+  }
+
+  static DateTime? _toDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    }
+
+    if (value is DateTime) {
+      return value;
+    }
+
+    return null;
   }
 }

@@ -21,7 +21,6 @@ class _InviteCodeScreenState
   String? _code;
 
   bool _loading = true;
-  bool _generating = false;
 
   @override
   void initState() {
@@ -43,10 +42,15 @@ class _InviteCodeScreenState
       return;
     }
 
+    if (mounted) {
+      setState(() {
+        _loading = true;
+      });
+    }
+
     try {
       final String code =
-          await _careCircleService
-              .createElderInviteCode(
+          await _careCircleService.createElderInviteCode(
         user.uid,
       );
 
@@ -69,68 +73,13 @@ class _InviteCodeScreenState
           '',
         ),
       );
-    }
-  }
-
-  Future<void> _generateNewCode() async {
-    final User? user =
-        FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      _showMessage(
-        'Please log in again.',
-      );
-      return;
-    }
-
-    setState(() {
-      _generating = true;
-    });
-
-    try {
-      // Generate a new code directly.
-      final String code =
-          _careCircleService.generateInviteCode();
-
-      // Save it on the elder profile.
-      // The invite lookup document is also created.
-      await _careCircleService
-          .createElderInviteCode(
-        user.uid,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        _code = code;
-      });
-
-      _showMessage(
-        'Your connection code is ready.',
-      );
-    } catch (e) {
-      if (!mounted) return;
-
-      _showMessage(
-        e.toString().replaceFirst(
-          'Exception: ',
-          '',
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _generating = false;
-        });
-      }
     }
   }
 
   void _showMessage(String message) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
       ),
@@ -147,8 +96,7 @@ class _InviteCodeScreenState
       ),
       body: Center(
         child: Padding(
-          padding:
-              const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: _loading
               ? const CircularProgressIndicator()
               : SingleChildScrollView(
@@ -165,12 +113,10 @@ class _InviteCodeScreenState
 
                       const Text(
                         'Your Connection Code',
-                        textAlign:
-                            TextAlign.center,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 24,
-                          fontWeight:
-                              FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
 
@@ -180,37 +126,29 @@ class _InviteCodeScreenState
                         'Give this code to your caregiver '
                         'so they can connect to your '
                         'CareCircle account.',
-                        textAlign:
-                            TextAlign.center,
+                        textAlign: TextAlign.center,
                       ),
 
                       const SizedBox(height: 28),
 
                       Container(
                         padding:
-                            const EdgeInsets
-                                .symmetric(
+                            const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 24,
                         ),
-                        decoration:
-                            BoxDecoration(
+                        decoration: BoxDecoration(
                           borderRadius:
-                              BorderRadius.circular(
-                            16,
-                          ),
-                          border:
-                              Border.all(
+                              BorderRadius.circular(16),
+                          border: Border.all(
                             width: 2,
                           ),
                         ),
                         child: Text(
                           _code ?? '------',
-                          style:
-                              const TextStyle(
+                          style: const TextStyle(
                             fontSize: 36,
-                            fontWeight:
-                                FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                             letterSpacing: 6,
                           ),
                         ),
@@ -222,24 +160,13 @@ class _InviteCodeScreenState
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed:
-                              _generating
-                                  ? null
-                                  : _loadCode,
+                              _loading ? null : _loadCode,
                           icon: const Icon(
                             Icons.refresh,
                           ),
-                          label: _generating
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child:
-                                      CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Refresh Code',
-                                ),
+                          label: const Text(
+                            'Refresh Code',
+                          ),
                         ),
                       ),
                     ],

@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/sos_service.dart';
-import 'medical_information_screen.dart';
 
 class EmergencyScreen extends StatefulWidget {
   const EmergencyScreen({super.key});
@@ -246,19 +245,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   }
 
   // ------------------------------------------------------------
-  // OPEN MEDICAL INFORMATION
-  // ------------------------------------------------------------
-
-  void openMedicalInformation() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const MedicalInformationScreen(),
-      ),
-    );
-  }
-
-  // ------------------------------------------------------------
   // ERROR MESSAGE HELPER
   // ------------------------------------------------------------
 
@@ -390,30 +376,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
               ),
 
               const SizedBox(height: 16),
-
-              // ------------------------------------------------
-              // MEDICAL INFORMATION BUTTON
-              // ------------------------------------------------
-
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: OutlinedButton.icon(
-                  onPressed: openMedicalInformation,
-                  icon: const Icon(
-                    Icons.medical_information,
-                  ),
-                  label: const Text(
-                    'Medical Information',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
 
               // ------------------------------------------------
               // ACTIVE SOS INFORMATION

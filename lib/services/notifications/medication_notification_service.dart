@@ -1,3 +1,4 @@
+
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -76,23 +77,40 @@ class MedicationNotificationService {
       return;
     }
 
-    await initialize();
+    try {
+      await initialize();
 
-    await _medicineSubscription?.cancel();
+      await _medicineSubscription?.cancel();
 
-    _medicineSubscription = FirebaseFirestore.instance
-        .collection('elders')
-        .doc(elderId)
-        .collection('medicines')
-        .snapshots()
-        .listen(
-      (snapshot) async {
-        await _syncMedicineNotifications(snapshot);
-      },
-      onError: (error) {
-        // Notification errors should not stop the Elder app.
-      },
-    );
+      _medicineSubscription = FirebaseFirestore.instance
+          .collection('elders')
+          .doc(elderId)
+          .collection('medicines')
+          .snapshots()
+          .listen(
+        (snapshot) async {
+          try {
+            await _syncMedicineNotifications(snapshot);
+          } catch (error, stackTrace) {
+            debugPrint(
+              'CareCircle medicine scheduling error: $error',
+            );
+            debugPrintStack(stackTrace: stackTrace);
+          }
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          debugPrint(
+            'CareCircle medicine listener error: $error',
+          );
+          debugPrintStack(stackTrace: stackTrace);
+        },
+      );
+    } catch (error, stackTrace) {
+      debugPrint(
+        'CareCircle notification initialization error: $error',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   Future<void> stop() async {
@@ -103,38 +121,57 @@ class MedicationNotificationService {
   Future<void> _syncMedicineNotifications(
     QuerySnapshot<Map<String, dynamic>> snapshot,
   ) async {
-    final pending = await _notifications.pendingNotificationRequests();
+    final pending =
+        await _notifications.pendingNotificationRequests();
 
-    // Remove previously scheduled CareCircle medicine reminders.
+    // Cancel existing CareCircle medicine reminders before rebuilding them.
     for (final notification in pending) {
       if (notification.id >= _notificationIdBase &&
           notification.id < _notificationIdBase + 1000000) {
-        await _notifications.cancel(
-          id: notification.id,
-        );
+        await _notifications.cancel(id: notification.id);
       }
     }
 
-    // Schedule reminders for the medicines currently in Firestore.
+    // Schedule reminders for all medicines currently in Firestore.
     for (final document in snapshot.docs) {
       final data = document.data();
 
-      final medicineName = data['name']?.toString() ?? '';
-      final dosage = data['dosage']?.toString() ?? '';
-      final medicineTime = data['time']?.toString() ?? '';
-      final frequency = data['frequency']?.toString() ?? '';
+      final medicineName = data['name']?.toString().trim() ?? '';
+      final dosage = data['dosage']?.toString().trim() ?? '';
 
-      if (medicineName.isEmpty || medicineTime.isEmpty) {
-        continue;
+      if (medicineName.isEmpty) continue;
+
+      // Current medicine records use doseTimes.
+      // Older records may still use time.
+      final rawDoseTimes = data['doseTimes'];
+      List<String> doseTimes = [];
+
+      if (rawDoseTimes is List) {
+        doseTimes = rawDoseTimes
+            .map((value) => value.toString().trim())
+            .where((value) => value.isNotEmpty)
+            .toList();
       }
 
-      await _scheduleMedicine(
-        medicineId: document.id,
-        medicineName: medicineName,
-        dosage: dosage,
-        medicineTime: medicineTime,
-        frequency: frequency,
-      );
+      if (doseTimes.isEmpty) {
+        final oldTime = data['time']?.toString().trim() ?? '';
+
+        if (oldTime.isNotEmpty) {
+          doseTimes = [oldTime];
+        }
+      }
+
+      // Create a separate reminder for every configured dose time.
+      for (var doseIndex = 0;
+          doseIndex < doseTimes.length;
+          doseIndex++) {
+        await _scheduleMedicine(
+          medicineId: '${document.id}-dose-$doseIndex',
+          medicineName: medicineName,
+          dosage: dosage,
+          medicineTime: doseTimes[doseIndex],
+        );
+      }
     }
   }
 
@@ -143,14 +180,15 @@ class MedicationNotificationService {
     required String medicineName,
     required String dosage,
     required String medicineTime,
-    required String frequency,
   }) async {
     final parsedTime = _parseMedicineTime(medicineTime);
 
-    if (parsedTime == null) return;
-
-    final hour = parsedTime.hour;
-    final minute = parsedTime.minute;
+    if (parsedTime == null) {
+      debugPrint(
+        'CareCircle: Could not parse medicine time: $medicineTime',
+      );
+      return;
+    }
 
     final now = tz.TZDateTime.now(tz.local);
 
@@ -159,16 +197,15 @@ class MedicationNotificationService {
       now.year,
       now.month,
       now.day,
-      hour,
-      minute,
+      parsedTime.hour,
+      parsedTime.minute,
     );
 
     var reminderDateTime =
         medicineDateTime.subtract(const Duration(minutes: 5));
 
-    // If today's reminder time has already passed,
-    // schedule it for tomorrow.
-    if (reminderDateTime.isBefore(now)) {
+    // If today's reminder time has passed, schedule it for tomorrow.
+    if (!reminderDateTime.isAfter(now)) {
       medicineDateTime = medicineDateTime.add(
         const Duration(days: 1),
       );
@@ -195,9 +232,7 @@ class MedicationNotificationService {
       android: androidDetails,
     );
 
-    final isDaily = _isDailyFrequency(frequency);
-
-    if (isDaily) {
+    try {
       await _notifications.zonedSchedule(
         id: notificationId,
         title: 'Medication Reminder',
@@ -209,17 +244,18 @@ class MedicationNotificationService {
         matchDateTimeComponents: DateTimeComponents.time,
         payload: medicineId,
       );
-    } else {
-      await _notifications.zonedSchedule(
-        id: notificationId,
-        title: 'Medication Reminder',
-        body: notificationBody,
-        scheduledDate: reminderDateTime,
-        notificationDetails: notificationDetails,
-        androidScheduleMode:
-            AndroidScheduleMode.inexactAllowWhileIdle,
-        payload: medicineId,
+
+      debugPrint(
+        'CareCircle: Scheduled $medicineName ($medicineTime) '
+        'for $reminderDateTime',
       );
+    } catch (error, stackTrace) {
+      debugPrint(
+        'CareCircle: Failed to schedule $medicineName '
+        '($medicineTime): $error',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+      rethrow;
     }
   }
 
@@ -259,14 +295,6 @@ class MedicationNotificationService {
     } catch (_) {
       return null;
     }
-  }
-
-  bool _isDailyFrequency(String frequency) {
-    final value = frequency.trim().toLowerCase();
-
-    return value == 'daily' ||
-        value == 'every day' ||
-        value == 'everyday';
   }
 
   int _createNotificationId(String medicineId) {

@@ -9,8 +9,7 @@ import '../models/user_model.dart';
 import 'messaging_service.dart';
 
 class AuthService {
-  final FirebaseAuth _auth =
-      FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore =
       FirebaseFirestore.instance;
@@ -51,18 +50,9 @@ class AuthService {
   // FCM TOKEN
   // ============================================================
 
-  Future<void> _saveDeviceToken(
-    String uid,
-  ) async {
+  Future<void> _saveDeviceToken(String uid) async {
     try {
-      // ----------------------------------------------------------
-      // FLUTTER WEB
-      // ----------------------------------------------------------
-      // FCM web requires firebase-messaging-sw.js.
-      // Web FCM is disabled for now so Chrome/Edge does not
-      // attempt to register the missing service worker.
-      // ----------------------------------------------------------
-
+      // Web FCM is disabled until the service worker is configured.
       if (kIsWeb) {
         debugPrint(
           'FCM token saving skipped on web platform.',
@@ -74,47 +64,70 @@ class AuthService {
         return;
       }
 
-      final User? currentUser =
-          _auth.currentUser;
+      final User? activeUser = _auth.currentUser;
 
-      if (currentUser == null ||
-          currentUser.uid != uid) {
+      if (activeUser == null || activeUser.uid != uid) {
         return;
       }
 
-      await FirebaseMessaging.instance
-          .requestPermission(
+      await FirebaseMessaging.instance.requestPermission(
         alert: true,
         badge: true,
         sound: true,
         provisional: false,
       );
 
-      final String? token =
-          await FirebaseMessaging.instance
-              .getToken();
+      // The user may have logged out while permission was requested.
+      if (_auth.currentUser?.uid != uid) {
+        return;
+      }
 
-      if (token != null &&
-          token.isNotEmpty) {
-        await _firestore
-            .collection('users')
-            .doc(uid)
-            .set(
+      final String? token =
+          await FirebaseMessaging.instance.getToken();
+
+      if (token != null && token.isNotEmpty) {
+        // Avoid writing a token after the account has changed.
+        if (_auth.currentUser?.uid != uid) {
+          return;
+        }
+
+        await _firestore.collection('users').doc(uid).set(
           {
             'fcmToken': token,
-            'lastActive':
-                FieldValue.serverTimestamp(),
+            'lastActive': FieldValue.serverTimestamp(),
           },
-          SetOptions(
-            merge: true,
-          ),
+          SetOptions(merge: true),
         );
       }
     } catch (e) {
-      // FCM failure must never prevent login/signup.
-      debugPrint(
-        'FCM token could not be saved: $e',
-      );
+      // Notification failures must not prevent authentication.
+      debugPrint('FCM token could not be saved: $e');
+    }
+  }
+
+  // ============================================================
+  // SAFE BACKGROUND NOTIFICATION SETUP
+  // ============================================================
+
+  Future<void> _initializeMessagingSafely(String uid) async {
+    try {
+      // Don't initialize messaging for a user who has signed out
+      // or switched accounts.
+      if (_auth.currentUser?.uid != uid) {
+        return;
+      }
+
+      await _messagingService.initialize(uid);
+    } catch (e) {
+      debugPrint('Messaging initialization failed: $e');
+    }
+  }
+
+  Future<void> _saveDeviceTokenSafely(String uid) async {
+    try {
+      await _saveDeviceToken(uid);
+    } catch (e) {
+      debugPrint('Device token setup failed: $e');
     }
   }
 
@@ -128,88 +141,47 @@ class AuthService {
     required String role,
     String? name,
   }) async {
-    final String cleanEmail =
-        email.trim();
-
-    final String cleanRole =
-        role.trim().toLowerCase();
-
-    // ----------------------------------------------------------
-    // VALIDATION
-    // ----------------------------------------------------------
+    final String cleanEmail = email.trim();
+    final String cleanRole = role.trim().toLowerCase();
 
     if (cleanEmail.isEmpty) {
-      throw Exception(
-        'Email is required.',
-      );
+      throw Exception('Email is required.');
     }
 
     if (password.isEmpty) {
-      throw Exception(
-        'Password is required.',
-      );
+      throw Exception('Password is required.');
     }
 
-    // Admin is a supported account role, but the current public
-    // signup screen only exposes Elder and Caregiver.
-    //
-    // Admin accounts should be provisioned/promoted through the
-    // administration system rather than being publicly selectable.
     if (cleanRole != 'elder' &&
-        cleanRole != 'caregiver' &&
-        cleanRole != 'admin') {
+        cleanRole != 'caregiver') {
       throw Exception(
-        'Invalid account role.',
+        'Only Elder and Caregiver accounts can sign up.',
       );
     }
-
-    // ----------------------------------------------------------
-    // CREATE FIREBASE AUTH ACCOUNT
-    // ----------------------------------------------------------
 
     UserCredential credential;
 
     try {
-      credential =
-          await _auth
-              .createUserWithEmailAndPassword(
+      credential = await _auth.createUserWithEmailAndPassword(
         email: cleanEmail,
         password: password,
       );
     } on FirebaseAuthException catch (e) {
-      throw Exception(
-        _getAuthErrorMessage(e),
-      );
+      throw Exception(_getAuthErrorMessage(e));
     } catch (e) {
-      throw Exception(
-        'Unable to create the account: $e',
-      );
+      throw Exception('Unable to create the account: $e');
     }
 
-    final User? user =
-        credential.user;
+    final User? user = credential.user;
 
     if (user == null) {
-      throw Exception(
-        'Account creation failed.',
-      );
+      throw Exception('Account creation failed.');
     }
 
-    // ----------------------------------------------------------
-    // ELDER INVITE CODE
-    // ----------------------------------------------------------
-
     final String? inviteCode =
-        cleanRole == 'elder'
-            ? _generateInviteCode()
-            : null;
+        cleanRole == 'elder' ? _generateInviteCode() : null;
 
-    // ----------------------------------------------------------
-    // USER PROFILE
-    // ----------------------------------------------------------
-
-    final UserModel userModel =
-        UserModel(
+    final UserModel userModel = UserModel(
       uid: user.uid,
       email: cleanEmail,
       role: cleanRole,
@@ -218,29 +190,10 @@ class AuthService {
       createdAt: DateTime.now(),
     );
 
-    // ----------------------------------------------------------
-    // CREATE FIRESTORE USER PROFILE
-    // ----------------------------------------------------------
-
     try {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(
-        userModel.toMap(),
-      );
-
-      // --------------------------------------------------------
-      // CREATE ELDER INVITE CODE DOCUMENT
-      // --------------------------------------------------------
-      //
-      // This is done only for elders.
-      //
-      // The signup Firestore rules allow the authenticated elder
-      // to create their own inviteCodes document.
-      //
-      // Caregiver and Admin signup do not create an invite code.
-      // --------------------------------------------------------
+      await _firestore.collection('users').doc(user.uid).set(
+            userModel.toMap(),
+          );
 
       if (cleanRole == 'elder' &&
           inviteCode != null &&
@@ -251,58 +204,58 @@ class AuthService {
             .set({
           'code': inviteCode,
           'elderId': user.uid,
-          'createdAt':
-              FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
         });
       }
 
-      // --------------------------------------------------------
-      // INITIALIZE NOTIFICATION SERVICE
-      // --------------------------------------------------------
-
-      try {
-        await _messagingService
-            .initialize(
-          user.uid,
-        );
-      } catch (e) {
-        debugPrint(
-          'Messaging initialization failed: $e',
-        );
-      }
-
-      // --------------------------------------------------------
-      // SAVE FCM TOKEN
-      // --------------------------------------------------------
-      //
-      // On Chrome/Edge this method immediately returns.
-      // On Android/iOS it saves the FCM token normally.
-      // --------------------------------------------------------
-
-      await _saveDeviceToken(
-        user.uid,
-      );
+      // Start notification setup without blocking account creation.
+      _initializeMessagingSafely(user.uid);
+      _saveDeviceTokenSafely(user.uid);
 
       return credential;
     } on FirebaseException catch (e) {
-      // If Firestore setup fails, remove the Firebase Auth
-      // account so we don't leave an incomplete account behind.
+      // Attempt to clean up an incomplete account if setup fails.
+      try {
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .delete();
+      } catch (cleanupError) {
+        debugPrint(
+          'Failed to clean up user profile: $cleanupError',
+        );
+      }
 
       try {
         await user.delete();
-      } catch (_) {}
+      } catch (cleanupError) {
+        debugPrint(
+          'Failed to clean up authentication account: $cleanupError',
+        );
+      }
 
-      throw Exception(
-        _getFirestoreErrorMessage(e),
-      );
+      throw Exception(_getFirestoreErrorMessage(e));
     } catch (e) {
       try {
-        await user.delete();
-      } catch (_) {}
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .delete();
+      } catch (cleanupError) {
+        debugPrint(
+          'Failed to clean up user profile: $cleanupError',
+        );
+      }
 
-      throw Exception(
-        'Account was created, but setup failed: $e',
-      );
+      try {
+        await user.delete();
+      } catch (cleanupError) {
+        debugPrint(
+          'Failed to clean up authentication account: $cleanupError',
+        );
+      }
+
+      throw Exception('Account was created, but setup failed: $e');
     }
   }
 
@@ -316,49 +269,24 @@ class AuthService {
   }) async {
     try {
       final UserCredential credential =
-          await _auth
-              .signInWithEmailAndPassword(
+          await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
 
-      final User? user =
-          credential.user;
+      final User? user = credential.user;
 
       if (user != null) {
-        // --------------------------------------------------------
-        // INITIALIZE MESSAGING
-        // --------------------------------------------------------
-
-        try {
-          await _messagingService
-              .initialize(
-            user.uid,
-          );
-        } catch (e) {
-          debugPrint(
-            'Messaging initialization failed: $e',
-          );
-        }
-
-        // --------------------------------------------------------
-        // SAVE DEVICE TOKEN
-        // --------------------------------------------------------
-
-        await _saveDeviceToken(
-          user.uid,
-        );
+        // These methods catch their own errors and do not block login.
+        _initializeMessagingSafely(user.uid);
+        _saveDeviceTokenSafely(user.uid);
       }
 
       return credential;
     } on FirebaseAuthException catch (e) {
-      throw Exception(
-        _getAuthErrorMessage(e),
-      );
+      throw Exception(_getAuthErrorMessage(e));
     } catch (e) {
-      throw Exception(
-        'Unable to sign in: $e',
-      );
+      throw Exception('Unable to sign in: $e');
     }
   }
 
@@ -366,18 +294,13 @@ class AuthService {
   // PASSWORD RESET
   // ============================================================
 
-  Future<void> sendPasswordResetEmail(
-    String email,
-  ) async {
+  Future<void> sendPasswordResetEmail(String email) async {
     try {
-      await _auth
-          .sendPasswordResetEmail(
+      await _auth.sendPasswordResetEmail(
         email: email.trim(),
       );
     } on FirebaseAuthException catch (e) {
-      throw Exception(
-        _getAuthErrorMessage(e),
-      );
+      throw Exception(_getAuthErrorMessage(e));
     }
   }
 
@@ -386,63 +309,43 @@ class AuthService {
   // ============================================================
 
   Future<void> signOut() async {
-    final User? user =
-        _auth.currentUser;
+    final User? user = _auth.currentUser;
+
+    // Sign out first so messaging cleanup cannot delay the
+    // authentication state change that returns the app to login.
+    await _auth.signOut();
 
     if (user != null) {
       try {
-        await _messagingService
-            .removeToken(
-          user.uid,
-        );
+        await _messagingService.removeToken(user.uid);
       } catch (e) {
-        debugPrint(
-          'Failed to remove messaging token: $e',
-        );
+        debugPrint('Failed to remove messaging token: $e');
       }
     }
 
     try {
-      await _messagingService
-          .dispose();
+      await _messagingService.dispose();
     } catch (e) {
-      debugPrint(
-        'Messaging dispose failed: $e',
-      );
+      debugPrint('Messaging dispose failed: $e');
     }
-
-    await _auth.signOut();
   }
 
   // ============================================================
   // GET USER PROFILE
   // ============================================================
 
-  Future<UserModel?> getUserProfile(
-    String uid,
-  ) async {
+  Future<UserModel?> getUserProfile(String uid) async {
     try {
-      final DocumentSnapshot<
-          Map<String, dynamic>> doc =
-          await _firestore
-              .collection('users')
-              .doc(uid)
-              .get();
+      final DocumentSnapshot<Map<String, dynamic>> doc =
+          await _firestore.collection('users').doc(uid).get();
 
-      if (doc.exists &&
-          doc.data() != null) {
-        return UserModel.fromMap(
-          doc.data()!,
-          uid,
-        );
+      if (doc.exists && doc.data() != null) {
+        return UserModel.fromMap(doc.data()!, uid);
       }
 
       return null;
     } catch (e) {
-      debugPrint(
-        'Failed to get user profile: $e',
-      );
-
+      debugPrint('Failed to get user profile: $e');
       rethrow;
     }
   }
@@ -451,9 +354,7 @@ class AuthService {
   // AUTH ERROR MESSAGES
   // ============================================================
 
-  String _getAuthErrorMessage(
-    FirebaseAuthException e,
-  ) {
+  String _getAuthErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':
         return 'An account already exists with this email address.';
@@ -498,9 +399,7 @@ class AuthService {
   // FIRESTORE ERROR MESSAGES
   // ============================================================
 
-  String _getFirestoreErrorMessage(
-    FirebaseException e,
-  ) {
+  String _getFirestoreErrorMessage(FirebaseException e) {
     switch (e.code) {
       case 'permission-denied':
         return 'Firestore denied permission. Check Firestore rules.';

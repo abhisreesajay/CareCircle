@@ -19,27 +19,46 @@ class CareAlert {
     this.createdAt,
   });
 
+  /// Converts a Firestore document into a CareAlert.
   factory CareAlert.fromMap(
     String id,
     Map<String, dynamic> map,
   ) {
+    final dynamic timestamp = map['createdAt'];
+
     DateTime? createdAt;
-
-    final dynamic timestamp =
-        map['createdAt'];
-
     if (timestamp is Timestamp) {
       createdAt = timestamp.toDate();
+    } else if (timestamp is DateTime) {
+      createdAt = timestamp;
     }
 
     return CareAlert(
       id: id,
-      title: map['title'] ?? '',
-      message: map['message'] ?? '',
-      date: map['date'] ?? '',
-      type: map['type'] ?? '',
-      status: map['status'] ?? 'ACTIVE',
+      title: map['title']?.toString() ?? '',
+      message: map['message']?.toString() ?? '',
+      date: map['date']?.toString() ?? '',
+      type: (map['type']?.toString() ?? '').trim().toLowerCase(),
+      status: (map['status']?.toString() ?? 'unknown')
+          .trim()
+          .toLowerCase(),
       createdAt: createdAt,
     );
   }
+
+  /// Normalized status for consistent comparisons.
+  String get normalizedStatus => status.trim().toLowerCase();
+
+  bool get isActive => normalizedStatus == 'active';
+
+  bool get isResolved =>
+      normalizedStatus == 'resolved' ||
+      normalizedStatus == 'resolved_by_admin';
+
+  bool get isCancelled =>
+      normalizedStatus == 'cancelled' ||
+      normalizedStatus == 'canceled';
+
+  /// Only active alerts require attention.
+  bool get needsAttention => isActive;
 }

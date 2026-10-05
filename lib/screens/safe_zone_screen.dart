@@ -372,7 +372,7 @@ class _SafeZoneScreenState
       } else {
         await _safeZoneService
             .createSafeZoneViolation(
-          elderId: user.uid,
+          elderId: widget.elderId ?? user.uid,
           safeZone: safeZone,
           latitude: position.latitude,
           longitude: position.longitude,
@@ -443,8 +443,10 @@ class _SafeZoneScreenState
       }
 
       final List<SafeZone> safeZones =
-          await _safeZoneService.getSafeZones(
-        user.uid,
+          await _safeZoneService.getSafeZonesOnce(
+        widget.elderId?.trim().isNotEmpty == true
+            ? widget.elderId!.trim()
+            : user.uid,
       );
 
       if (safeZones.isEmpty) {
@@ -501,7 +503,7 @@ class _SafeZoneScreenState
 
           await _safeZoneService
               .createSafeZoneViolation(
-            elderId: user.uid,
+            elderId: widget.elderId ?? user.uid,
             safeZone: safeZone,
             latitude: position.latitude,
             longitude: position.longitude,
