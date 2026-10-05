@@ -1,8 +1,20 @@
 import firebase_admin
-from firebase_admin import firestore, messaging
+from firebase_admin import credentials, firestore, messaging
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import json
+import os
 
+if not firebase_admin._apps:
+    service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
+
+    if service_account_json:
+        service_account_info = json.loads(service_account_json)
+        cred = credentials.Certificate(service_account_info)
+        firebase_admin.initialize_app(cred)
+    else:
+        # Allows Firebase Cloud Functions to use its default credentials.
+        firebase_admin.initialize_app()
 
 db = firestore.client()
 
