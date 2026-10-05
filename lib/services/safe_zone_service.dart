@@ -1,7 +1,7 @@
-
 import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/safe_zone.dart';
 import 'location_service.dart';
@@ -24,30 +24,42 @@ class SafeZoneService {
   ) =>
       _firestore.collection('elders').doc(elderId).collection('alerts');
 
+  // ------------------------------------------------------------
+  // CREATE SAFE ZONE
+  // ------------------------------------------------------------
+
   Future<String> createSafeZone(SafeZone safeZone) async {
     _validateZone(safeZone);
 
     final elderId = safeZone.elderId.trim();
     final name = safeZone.name.trim();
+    final createdBy = safeZone.createdBy.trim();
 
     final data = <String, dynamic>{
       ...safeZone.toMap(),
       'elderId': elderId,
       'name': name,
-      'createdBy': safeZone.createdBy.trim(),
+      'createdBy': createdBy,
     };
 
     final zoneId = safeZone.id.trim();
 
     if (zoneId.isNotEmpty) {
       await _safeZones.doc(zoneId).set(data);
+      debugPrint('SAFE ZONE: Saved zone $zoneId');
       return zoneId;
     }
 
     final doc = _safeZones.doc();
     await doc.set(data);
+
+    debugPrint('SAFE ZONE: Created zone ${doc.id}');
     return doc.id;
   }
+
+  // ------------------------------------------------------------
+  // GET SAFE ZONES
+  // ------------------------------------------------------------
 
   Stream<List<SafeZone>> getSafeZones(String elderId) {
     final id = elderId.trim();
@@ -83,6 +95,10 @@ class SafeZoneService {
         .toList();
   }
 
+  // ------------------------------------------------------------
+  // DELETE SAFE ZONE
+  // ------------------------------------------------------------
+
   Future<void> cancelSafeZone(String safeZoneId) async {
     final id = safeZoneId.trim();
 
@@ -91,7 +107,13 @@ class SafeZoneService {
     }
 
     await _safeZones.doc(id).delete();
+
+    debugPrint('SAFE ZONE: Deleted zone $id');
   }
+
+  // ------------------------------------------------------------
+  // CHECK CURRENT LOCATION AGAINST ALL ZONES
+  // ------------------------------------------------------------
 
   Future<void> checkCurrentLocation(String elderId) async {
     final id = elderId.trim();
@@ -100,21 +122,46 @@ class SafeZoneService {
       throw ArgumentError('Elder ID cannot be empty.');
     }
 
+    debugPrint('SAFE ZONE: Starting check for elder $id');
+
     final position = await LocationService.getCurrentLocation();
 
     if (position == null) {
+      debugPrint('SAFE ZONE: Current location is null');
       throw StateError('Could not get the current location.');
     }
 
+    debugPrint(
+      'SAFE ZONE: Current position = '
+      '${position.latitude}, ${position.longitude}',
+    );
+
     final zones = await getSafeZonesOnce(id);
 
+    debugPrint('SAFE ZONE: Zones found = ${zones.length}');
+
+    if (zones.isEmpty) {
+      debugPrint('SAFE ZONE: No configured zones for elder $id');
+      return;
+    }
+
     for (final zone in zones) {
+      debugPrint('SAFE ZONE: Checking zone "${zone.name}"');
+      debugPrint('SAFE ZONE: Zone ID = ${zone.id}');
+
       final distance = _calculateDistance(
         position.latitude,
         position.longitude,
         zone.latitude,
         zone.longitude,
       );
+
+      final outside = distance > zone.radiusInMeters;
+
+      debugPrint(
+        'SAFE ZONE: Distance = ${distance.toStringAsFixed(2)} m',
+      );
+      debugPrint('SAFE ZONE: Outside zone = $outside');
 
       await createSafeZoneViolation(
         elderId: id,
@@ -123,8 +170,18 @@ class SafeZoneService {
         longitude: position.longitude,
         distanceInMeters: distance,
       );
+
+      debugPrint(
+        'SAFE ZONE: Finished processing "${zone.name}"',
+      );
     }
+
+    debugPrint('SAFE ZONE: All zone checks completed');
   }
+
+  // ------------------------------------------------------------
+  // CREATE OR UPDATE A VIOLATION
+  // ------------------------------------------------------------
 
   Future<void> createSafeZoneViolation({
     required String elderId,
@@ -142,81 +199,158 @@ class SafeZoneService {
     _validateZone(safeZone);
     _validateCoordinates(latitude, longitude);
 
+    if (!distanceInMeters.isFinite || distanceInMeters < 0) {
+      throw ArgumentError('Distance must be a valid non-negative number.');
+    }
+
     if (safeZone.elderId.trim() != id) {
       throw StateError('Safe zone does not belong to this elder.');
     }
 
-    final outside = distanceInMeters > safeZone.radiusInMeters;
-    final violationId = _stableViolationId(id, safeZone.id);
-    final violationRef = _violations.doc(violationId);
+    final zoneId = safeZone.id.trim();
 
-    final existing = await violationRef.get();
-    final wasOutside =
-        existing.exists && existing.data()?['status'] == 'OUTSIDE';
-
-    if (!outside) {
-      if (wasOutside) {
-        await violationRef.update({
-          'status': 'SAFE',
-          'resolvedAt': FieldValue.serverTimestamp(),
-          'lastCheckedAt': FieldValue.serverTimestamp(),
-        });
-      }
-      return;
+    if (zoneId.isEmpty) {
+      throw ArgumentError('Safe zone ID cannot be empty.');
     }
 
-    if (wasOutside) {
-      await violationRef.update({
+    final outside = distanceInMeters > safeZone.radiusInMeters;
+    final violationId = _stableViolationId(id, zoneId);
+    final violationRef = _violations.doc(violationId);
+
+    debugPrint('SAFE ZONE: Violation path = ${violationRef.path}');
+    debugPrint('SAFE ZONE: Checking existing violation $violationId');
+
+    try {
+      // Use one deterministic document per elder and safe zone.
+      // This prevents repeated location checks from creating
+      // duplicate violation documents.
+      final existingSnapshot = await violationRef.get();
+
+      final existing = existingSnapshot.exists
+          ? existingSnapshot.data()
+          : null;
+
+      final existingStatus = existing?['status'] as String?;
+
+      debugPrint('SAFE ZONE: Existing violation = ${existing != null}');
+      debugPrint('SAFE ZONE: Existing status = $existingStatus');
+      debugPrint('SAFE ZONE: Current outside status = $outside');
+
+      // --------------------------------------------------------
+      // ELDER IS INSIDE THE SAFE ZONE
+      // --------------------------------------------------------
+
+      if (!outside) {
+        if (existingStatus == 'OUTSIDE') {
+          await violationRef.update({
+            'status': 'SAFE',
+            'resolvedAt': FieldValue.serverTimestamp(),
+            'lastCheckedAt': FieldValue.serverTimestamp(),
+          });
+
+          debugPrint('SAFE ZONE: Violation marked SAFE');
+        } else {
+          debugPrint('SAFE ZONE: No active violation to resolve');
+        }
+
+        return;
+      }
+
+      // --------------------------------------------------------
+      // ELDER IS OUTSIDE; UPDATE EXISTING ACTIVE VIOLATION
+      // --------------------------------------------------------
+
+      if (existingStatus == 'OUTSIDE') {
+        await violationRef.update({
+          'latitude': latitude,
+          'longitude': longitude,
+          'distanceInMeters': distanceInMeters,
+          'lastCheckedAt': FieldValue.serverTimestamp(),
+        });
+
+        debugPrint('SAFE ZONE: Existing violation location updated');
+        return;
+      }
+
+      // --------------------------------------------------------
+      // ELDER IS OUTSIDE; CREATE OR REOPEN VIOLATION
+      // --------------------------------------------------------
+
+      final alertRef = _elderAlerts(id).doc();
+      final batch = _firestore.batch();
+
+      final violationData = <String, dynamic>{
+        'violationId': violationId,
+        'elderId': id,
+        'safeZoneId': zoneId,
+        'safeZoneName': safeZone.name,
+        'latitude': latitude,
+        'longitude': longitude,
+        'zoneLatitude': safeZone.latitude,
+        'zoneLongitude': safeZone.longitude,
+        'distanceInMeters': distanceInMeters,
+        'timestamp': FieldValue.serverTimestamp(),
+        'status': 'OUTSIDE',
+        'createdAt': FieldValue.serverTimestamp(),
+        'lastCheckedAt': FieldValue.serverTimestamp(),
+      };
+
+      // If this document already exists with status SAFE, set()
+      // acts as an update. Firestore rules must allow the SAFE
+      // -> OUTSIDE transition and every field changed by this map.
+      batch.set(violationRef, violationData);
+
+      batch.set(alertRef, {
+        'elderId': id,
+        'title': 'Safe Zone Alert',
+        'message':
+            '${safeZone.name}: the elder is '
+            '${distanceInMeters.round()} meters from the zone center, '
+            'outside its ${safeZone.radiusInMeters.round()} meter radius.',
+        'date': DateTime.now().toIso8601String(),
+        'type': 'safe_zone',
+        'safeZoneId': zoneId,
+        'safeZoneName': safeZone.name,
         'latitude': latitude,
         'longitude': longitude,
         'distanceInMeters': distanceInMeters,
-        'lastCheckedAt': FieldValue.serverTimestamp(),
+        'status': 'active',
+        'createdAt': FieldValue.serverTimestamp(),
       });
-      return;
+
+      debugPrint(
+        'SAFE ZONE: Saving violation at ${violationRef.path}',
+      );
+      debugPrint('SAFE ZONE: Saving alert at ${alertRef.path}');
+
+      await batch.commit();
+
+      debugPrint('SAFE ZONE: Violation and alert saved successfully');
+    } on FirebaseException catch (error, stackTrace) {
+      debugPrint(
+        'SAFE ZONE FIREBASE ERROR: ${error.code} - ${error.message}',
+      );
+      debugPrint('SAFE ZONE: Violation path = ${violationRef.path}');
+      debugPrint('SAFE ZONE STACK TRACE: $stackTrace');
+
+      rethrow;
+    } catch (error, stackTrace) {
+      debugPrint('SAFE ZONE ERROR: $error');
+      debugPrint('SAFE ZONE STACK TRACE: $stackTrace');
+      rethrow;
     }
-
-    final alertRef = _elderAlerts(id).doc();
-    final batch = _firestore.batch();
-
-    batch.set(violationRef, {
-      'violationId': violationId,
-      'elderId': id,
-      'safeZoneId': safeZone.id,
-      'safeZoneName': safeZone.name,
-      'latitude': latitude,
-      'longitude': longitude,
-      'zoneLatitude': safeZone.latitude,
-      'zoneLongitude': safeZone.longitude,
-      'distanceInMeters': distanceInMeters,
-      'timestamp': FieldValue.serverTimestamp(),
-      'status': 'OUTSIDE',
-      'createdAt': FieldValue.serverTimestamp(),
-      'lastCheckedAt': FieldValue.serverTimestamp(),
-    });
-
-    batch.set(alertRef, {
-      'elderId': id,
-      'title': 'Safe Zone Alert',
-      'message':
-          '${safeZone.name}: the elder is '
-          '${distanceInMeters.round()} meters from the zone center, '
-          'outside its ${safeZone.radiusInMeters.round()} meter radius.',
-      'date': DateTime.now().toIso8601String(),
-      'type': 'safe_zone',
-      'safeZoneId': safeZone.id,
-      'safeZoneName': safeZone.name,
-      'latitude': latitude,
-      'longitude': longitude,
-      'distanceInMeters': distanceInMeters,
-      'status': 'active',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-
-    await batch.commit();
   }
+
+  // ------------------------------------------------------------
+  // STABLE VIOLATION DOCUMENT ID
+  // ------------------------------------------------------------
 
   String _stableViolationId(String elderId, String zoneId) =>
       '${elderId.length}_$elderId${zoneId.length}_$zoneId';
+
+  // ------------------------------------------------------------
+  // VALIDATION
+  // ------------------------------------------------------------
 
   void _validateZone(SafeZone zone) {
     if (zone.elderId.trim().isEmpty ||
@@ -236,8 +370,7 @@ class SafeZoneService {
       throw ArgumentError('Invalid safe zone coordinates.');
     }
 
-    if (!zone.radiusInMeters.isFinite ||
-        zone.radiusInMeters <= 0) {
+    if (!zone.radiusInMeters.isFinite || zone.radiusInMeters <= 0) {
       throw ArgumentError('Safe zone radius must be positive.');
     }
   }
@@ -252,6 +385,10 @@ class SafeZoneService {
       throw ArgumentError('Invalid latitude or longitude.');
     }
   }
+
+  // ------------------------------------------------------------
+  // HAVERSINE DISTANCE CALCULATION
+  // ------------------------------------------------------------
 
   double _calculateDistance(
     double lat1,
@@ -273,8 +410,12 @@ class SafeZoneService {
 
     return earthRadiusMeters *
         2 *
-        math.atan2(math.sqrt(clampedA), math.sqrt(1 - clampedA));
+        math.atan2(
+          math.sqrt(clampedA),
+          math.sqrt(1 - clampedA),
+        );
   }
 
-  double _degreesToRadians(double degrees) => degrees * math.pi / 180;
+  double _degreesToRadians(double degrees) =>
+      degrees * math.pi / 180;
 }

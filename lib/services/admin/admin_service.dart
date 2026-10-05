@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class AdminService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -13,21 +14,14 @@ class AdminService {
   /// For independently live alert counts, use streamActiveAlerts().
   Stream<Map<String, dynamic>> streamSystemMetrics() {
     return _db.collection('users').snapshots().asyncMap((usersSnap) async {
-      final alertsSnap = await _db
-          .collectionGroup('alerts')
-          .where('status', isEqualTo: 'active')
-          .get();
-
       int elders = 0;
       int caregivers = 0;
-      int admins = 0;
       int activeCircles = 0;
 
       for (final doc in usersSnap.docs) {
         final data = doc.data();
-        final role = data['role'];
 
-        switch (role) {
+        switch (data['role']) {
           case 'elder':
             elders++;
 
@@ -41,20 +35,28 @@ class AdminService {
           case 'caregiver':
             caregivers++;
             break;
-
-          case 'admin':
-            admins++;
-            break;
         }
       }
 
-      return {
-        'totalElders': elders,
-        'totalCaregivers': caregivers,
-        'totalAdmins': admins,
-        'activeCircles': activeCircles,
-        'pendingAlerts': alertsSnap.docs.length,
-      };
+      try {
+        final alertsSnap = await _db
+            .collectionGroup('alerts')
+            .where('status', isEqualTo: 'active')
+            .get();
+
+        return {
+          'totalElders': elders,
+          'totalCaregivers': caregivers,
+          'activeCircles': activeCircles,
+          'pendingAlerts': alertsSnap.docs.length,
+        };
+      } on FirebaseException catch (error) {
+        debugPrint(
+          'ADMIN METRICS ALERT QUERY FAILED: '
+          '${error.code} - ${error.message}',
+        );
+        rethrow;
+      }
     });
   }
 

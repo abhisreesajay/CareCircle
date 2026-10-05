@@ -344,23 +344,27 @@ service cloud.firestore {
 
     match /safeZones/{safeZoneId} {
 
-      allow read: if signedIn()
+      // Elders can read their own zones.
+      // Linked caregivers and admins can also read them.
+      allow get, list: if signedIn()
         && (
           resource.data.elderId == request.auth.uid
           || caregiverLinkedToElder(resource.data.elderId)
           || isAdmin()
         );
 
+      // Only a linked caregiver can create a safe zone.
       allow create: if isCaregiver()
+        && request.resource.data.elderId is string
         && caregiverLinkedToElder(request.resource.data.elderId)
         && request.resource.data.createdBy == request.auth.uid
-        && request.resource.data.elderId is string
         && request.resource.data.name is string
         && request.resource.data.latitude is number
         && request.resource.data.longitude is number
         && request.resource.data.radiusInMeters is number
         && request.resource.data.radiusInMeters > 0;
 
+      // Only the caregiver who created the zone can edit it.
       allow update: if isCaregiver()
         && resource.data.createdBy == request.auth.uid
         && caregiverLinkedToElder(resource.data.elderId)
@@ -380,11 +384,11 @@ service cloud.firestore {
         && request.resource.data.radiusInMeters is number
         && request.resource.data.radiusInMeters > 0;
 
+      // Only the caregiver who created the zone can delete it.
       allow delete: if isCaregiver()
         && resource.data.createdBy == request.auth.uid
         && caregiverLinkedToElder(resource.data.elderId);
     }
-
 
     // ============================================================
     // SAFE ZONE VIOLATIONS
@@ -392,77 +396,72 @@ service cloud.firestore {
 
     match /safeZoneViolations/{violationId} {
 
+      function canAccessElder(elderId) {
+        return signedIn()
+          && (
+            request.auth.uid == elderId
+            || caregiverLinkedToElder(elderId)
+            || isAdmin()
+          );
+      }
+
+      allow get, list: if canAccessElder(resource.data.elderId);
+
       allow create: if signedIn()
-        && (
-          request.resource.data.elderId == request.auth.uid
-          || caregiverLinkedToElder(request.resource.data.elderId)
-        )
         && request.resource.data.elderId is string
+        && canAccessElder(request.resource.data.elderId)
         && request.resource.data.safeZoneId is string
         && request.resource.data.status == 'OUTSIDE';
 
-      allow read: if signedIn()
-        && (
-          resource.data.elderId == request.auth.uid
-          || caregiverLinkedToElder(resource.data.elderId)
-          || isAdmin()
-        );
-
       allow update: if signedIn()
-        && (
-          resource.data.elderId == request.auth.uid
-          || caregiverLinkedToElder(resource.data.elderId)
-        )
+        && canAccessElder(resource.data.elderId)
         && request.resource.data.elderId == resource.data.elderId
         && request.resource.data.safeZoneId == resource.data.safeZoneId
         && (
-          // Repeated checks while the elder is outside.
           (
             resource.data.status == 'OUTSIDE'
             && request.resource.data.status == 'OUTSIDE'
             && request.resource.data.diff(resource.data)
-                .affectedKeys()
-                .hasOnly([
-                  'latitude',
-                  'longitude',
-                  'distanceInMeters',
-                  'lastCheckedAt'
-                ])
+              .affectedKeys()
+              .hasOnly([
+                'latitude',
+                'longitude',
+                'distanceInMeters',
+                'lastCheckedAt'
+              ])
           )
           ||
-          // Elder returns inside the safe zone.
           (
             resource.data.status == 'OUTSIDE'
             && request.resource.data.status == 'SAFE'
             && request.resource.data.diff(resource.data)
-                .affectedKeys()
-                .hasOnly([
-                  'status',
-                  'resolvedAt',
-                  'lastCheckedAt'
-                ])
+              .affectedKeys()
+              .hasOnly([
+                'status',
+                'resolvedAt',
+                'lastCheckedAt'
+              ])
           )
           ||
-          // Elder leaves again; service reuses the same document.
           (
             resource.data.status == 'SAFE'
             && request.resource.data.status == 'OUTSIDE'
             && request.resource.data.diff(resource.data)
-                .affectedKeys()
-                .hasOnly([
-                  'violationId',
-                  'safeZoneName',
-                  'latitude',
-                  'longitude',
-                  'zoneLatitude',
-                  'zoneLongitude',
-                  'distanceInMeters',
-                  'timestamp',
-                  'status',
-                  'createdAt',
-                  'lastCheckedAt',
-                  'resolvedAt'
-                ])
+              .affectedKeys()
+              .hasOnly([
+                'violationId',
+                'safeZoneName',
+                'latitude',
+                'longitude',
+                'zoneLatitude',
+                'zoneLongitude',
+                'distanceInMeters',
+                'timestamp',
+                'status',
+                'createdAt',
+                'lastCheckedAt',
+                'resolvedAt'
+              ])
           )
         );
 
@@ -557,7 +556,7 @@ service cloud.firestore {
     // ============================================================
 
     match /{path=**}/alerts/{alertId} {
-      allow read: if isAdmin();
+      allow get, list: if isAdmin();
     }
 
 

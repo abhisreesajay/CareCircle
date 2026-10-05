@@ -10,6 +10,7 @@ import 'nearby_services_screen.dart';
 import 'medical_information_screen.dart';
 import 'news_screen.dart';
 import 'elder_emergency_contacts_screen.dart';
+import '../../services/safe_zone_service.dart';
 
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
@@ -40,203 +41,248 @@ class ElderHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: background,
-      appBar: AppBar(
-        backgroundColor: white,
-        foregroundColor: black,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 72,
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [orange, yellow],
+    return _SafeZoneCheckOnOpen(
+      child: Scaffold(
+        backgroundColor: background,
+        appBar: AppBar(
+          backgroundColor: white,
+          foregroundColor: black,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          toolbarHeight: 72,
+          titleSpacing: 16,
+          title: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [orange, yellow],
+                  ),
+                  borderRadius: BorderRadius.circular(13),
                 ),
-                borderRadius: BorderRadius.circular(13),
+                child: const Icon(
+                  Icons.favorite_rounded,
+                  color: white,
+                  size: 24,
+                ),
               ),
-              child: const Icon(
-                Icons.favorite_rounded,
-                color: white,
-                size: 24,
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'CARE CIRCLE',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                        color: black,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Your care, all in one place',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: muted,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'CARE CIRCLE',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
-                      color: black,
-                    ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Your care, all in one place',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: muted,
-                    ),
-                  ),
-                ],
+            ],
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: IconButton(
+                tooltip: 'Logout',
+                onPressed: () => _showLogoutDialog(context),
+                icon: const Icon(
+                  Icons.logout_rounded,
+                  color: black,
+                  size: 23,
+                ),
               ),
             ),
           ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              tooltip: 'Logout',
-              onPressed: () => _showLogoutDialog(context),
-              icon: const Icon(
-                Icons.logout_rounded,
-                color: black,
-                size: 23,
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth >= 850;
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth >= 850;
 
-            return SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: isWide ? 28 : 14,
-                vertical: 14,
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1200),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildWelcomeBanner(isWide),
-                      const SizedBox(height: 22),
-                      const Text(
-                        'Your day',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: black,
+              return SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isWide ? 28 : 14,
+                  vertical: 14,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildWelcomeBanner(isWide),
+                        const SizedBox(height: 22),
+                        const Text(
+                          'Your day',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: black,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        'Quick ways to check in and stay connected.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: muted,
-                          fontWeight: FontWeight.w500,
+                        const SizedBox(height: 5),
+                        const Text(
+                          'Quick ways to check in and stay connected.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: muted,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 15),
+                        const SizedBox(height: 15),
 
-                      // Main actions
-                      if (isWide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: _buildCheckInCard(context)),
-                            const SizedBox(width: 12),
-                            Expanded(child: _buildSOSCard(context)),
-                            const SizedBox(width: 12),
-                            Expanded(child: _buildVoiceCheckInCard(context)),
-                          ],
-                        )
-                      else
-                        Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(child: _buildCheckInCard(context)),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: _buildVoiceCheckInCard(context),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            _buildSOSCard(context),
-                          ],
+                        // Main actions
+                        if (isWide)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: _buildCheckInCard(context)),
+                              const SizedBox(width: 12),
+                              Expanded(child: _buildSOSCard(context)),
+                              const SizedBox(width: 12),
+                              Expanded(child: _buildVoiceCheckInCard(context)),
+                            ],
+                          )
+                        else
+                          Column(
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(child: _buildCheckInCard(context)),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: _buildVoiceCheckInCard(context),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              _buildSOSCard(context),
+                            ],
+                          ),
+
+                        const SizedBox(height: 26),
+
+                        _buildSectionHeader(
+                          title: 'Everyday Care',
+                          subtitle: 'Your important health tools',
                         ),
+                        const SizedBox(height: 12),
+                        _buildFeatureGrid(context, isWide: isWide),
 
-                      const SizedBox(height: 26),
+                        // EMERGENCY CONTACTS
+                        const SizedBox(height: 18),
+                        _buildMoreCard(
+                          context,
+                          title: 'Emergency Contacts',
+                          subtitle: 'Call your family or trusted contacts',
+                          icon: Icons.contact_phone_rounded,
+                          iconColor: red,
+                          backgroundColor: const Color(0xFFFFE8E8),
+                          onTap: () {
+                            final uid =
+                                FirebaseAuth.instance.currentUser?.uid ?? '';
 
-                      _buildSectionHeader(
-                        title: 'Everyday Care',
-                        subtitle: 'Your important health tools',
-                      ),
-                      const SizedBox(height: 12),
-                      _buildFeatureGrid(context, isWide: isWide),
+                            if (uid.isEmpty) {
+                              _showMessage(
+                                context,
+                                'Unable to identify your account.',
+                              );
+                              return;
+                            }
 
-                      // EMERGENCY CONTACTS
-                      const SizedBox(height: 18),
-                      _buildMoreCard(
-                        context,
-                        title: 'Emergency Contacts',
-                        subtitle: 'Call your family or trusted contacts',
-                        icon: Icons.contact_phone_rounded,
-                        iconColor: red,
-                        backgroundColor: const Color(0xFFFFE8E8),
-                        onTap: () {
-                          final uid =
-                              FirebaseAuth.instance.currentUser?.uid ?? '';
-
-                          if (uid.isEmpty) {
-                            _showMessage(
+                            Navigator.push(
                               context,
-                              'Unable to identify your account.',
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    ElderEmergencyContactsScreen(elderId: uid),
+                              ),
                             );
-                            return;
-                          }
+                          },
+                        ),
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ElderEmergencyContactsScreen(elderId: uid),
-                            ),
-                          );
-                        },
-                      ),
+                        const SizedBox(height: 26),
 
-                      const SizedBox(height: 26),
+                        _buildSectionHeader(
+                          title: 'More for You',
+                          subtitle: 'Helpful things around you',
+                        ),
+                        const SizedBox(height: 12),
 
-                      _buildSectionHeader(
-                        title: 'More for You',
-                        subtitle: 'Helpful things around you',
-                      ),
-                      const SizedBox(height: 12),
-
-                      if (isWide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: _buildMoreCard(
+                        if (isWide)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: _buildMoreCard(
+                                  context,
+                                  title: 'Nearby Services',
+                                  subtitle:
+                                      'Hospitals, shops, restaurants and care',
+                                  icon: Icons.location_on_rounded,
+                                  iconColor: green,
+                                  backgroundColor: greenLight,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const ElderNearbyServicesScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildMoreCard(
+                                  context,
+                                  title: 'Caregiver',
+                                  subtitle: 'Connect with your caregiver',
+                                  icon: Icons.people_alt_rounded,
+                                  iconColor: pink,
+                                  backgroundColor: pinkLight,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const InviteCodeScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Column(
+                            children: [
+                              _buildMoreCard(
                                 context,
                                 title: 'Nearby Services',
                                 subtitle:
@@ -254,10 +300,8 @@ class ElderHome extends StatelessWidget {
                                   );
                                 },
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildMoreCard(
+                              const SizedBox(height: 10),
+                              _buildMoreCard(
                                 context,
                                 title: 'Caregiver',
                                 subtitle: 'Connect with your caregiver',
@@ -268,76 +312,35 @@ class ElderHome extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          const InviteCodeScreen(),
+                                      builder: (_) => const InviteCodeScreen(),
                                     ),
                                   );
                                 },
                               ),
-                            ),
-                          ],
-                        )
-                      else
-                        Column(
-                          children: [
-                            _buildMoreCard(
-                              context,
-                              title: 'Nearby Services',
-                              subtitle:
-                                  'Hospitals, shops, restaurants and care',
-                              icon: Icons.location_on_rounded,
-                              iconColor: green,
-                              backgroundColor: greenLight,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        const ElderNearbyServicesScreen(),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 10),
-                            _buildMoreCard(
-                              context,
-                              title: 'Caregiver',
-                              subtitle: 'Connect with your caregiver',
-                              icon: Icons.people_alt_rounded,
-                              iconColor: pink,
-                              backgroundColor: pinkLight,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const InviteCodeScreen(),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
 
-                      const SizedBox(height: 22),
-                      _buildHelpCard(),
-                      const SizedBox(height: 18),
-                      const Center(
-                        child: Text(
-                          'Care • Connect • Safe',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: muted,
+                        const SizedBox(height: 22),
+                        _buildHelpCard(),
+                        const SizedBox(height: 18),
+                        const Center(
+                          child: Text(
+                            'Care • Connect • Safe',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: muted,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
+                        const SizedBox(height: 10),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1016,4 +1019,60 @@ class _FeatureItem {
     required this.backgroundColor,
     required this.onTap,
   });
+}
+
+/// Checks the elder's location once when the dashboard opens.
+/// This is not continuous or background location monitoring.
+class _SafeZoneCheckOnOpen extends StatefulWidget {
+  final Widget child;
+
+  const _SafeZoneCheckOnOpen({
+    required this.child,
+  });
+
+  @override
+  State<_SafeZoneCheckOnOpen> createState() =>
+      _SafeZoneCheckOnOpenState();
+}
+
+class _SafeZoneCheckOnOpenState
+    extends State<_SafeZoneCheckOnOpen> {
+  bool _checkStarted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_checkStarted) return;
+    _checkStarted = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkSafeZone();
+    });
+  }
+
+  Future<void> _checkSafeZone() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null || uid.isEmpty) {
+      debugPrint('Safe zone check skipped: elder is not logged in.');
+      return;
+    }
+
+    try {
+      debugPrint('Safe zone check started for elder: $uid');
+
+      await SafeZoneService().checkCurrentLocation(uid);
+
+      debugPrint('Safe zone location check completed.');
+    } catch (error, stackTrace) {
+      debugPrint('Safe zone check failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }
