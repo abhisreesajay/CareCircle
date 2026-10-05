@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,7 @@ import 'invite_code_screen.dart';
 import 'nearby_services_screen.dart';
 import 'medical_information_screen.dart';
 import 'news_screen.dart';
+import 'elder_emergency_contacts_screen.dart';
 
 class ElderHome extends StatelessWidget {
   const ElderHome({super.key});
@@ -189,6 +191,37 @@ class ElderHome extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       _buildFeatureGrid(context, isWide: isWide),
+
+                      // EMERGENCY CONTACTS
+                      const SizedBox(height: 18),
+                      _buildMoreCard(
+                        context,
+                        title: 'Emergency Contacts',
+                        subtitle: 'Call your family or trusted contacts',
+                        icon: Icons.contact_phone_rounded,
+                        iconColor: red,
+                        backgroundColor: const Color(0xFFFFE8E8),
+                        onTap: () {
+                          final uid =
+                              FirebaseAuth.instance.currentUser?.uid ?? '';
+
+                          if (uid.isEmpty) {
+                            _showMessage(
+                              context,
+                              'Unable to identify your account.',
+                            );
+                            return;
+                          }
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ElderEmergencyContactsScreen(elderId: uid),
+                            ),
+                          );
+                        },
+                      ),
 
                       const SizedBox(height: 26),
 
