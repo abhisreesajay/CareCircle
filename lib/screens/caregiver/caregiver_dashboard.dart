@@ -15,8 +15,8 @@ import 'alerts_screen.dart';
 import 'hospital_documents_screen.dart';
 import '../safe_zone_screen.dart';
 import '../../services/auth_service.dart';
-import '../common/profile_screen.dart';
-import '../common/settings_screen.dart';
+import '../auth/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CaregiverDashboard extends StatefulWidget {
   final String elderId;
@@ -65,6 +65,20 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
 
   static const teal = Color(0xFF28A9A0);
   static const tealLight = Color(0xFFD2F2EF);
+
+  String get caregiverName {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) return 'Caregiver';
+
+  final name = user.displayName?.trim();
+
+  if (name != null && name.isNotEmpty) {
+    return name;
+  }
+
+  return user.email?.split('@').first ?? 'Caregiver';
+}
 
   // =====================================================================
   // LIFECYCLE
@@ -288,7 +302,6 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
     if (shouldLogout != true || !mounted) return;
 
     await AuthService().signOut();
-
   }
 
   // =====================================================================
@@ -373,12 +386,12 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
-                          'Better care. Brighter days.',
-                          style: TextStyle(
+                        Text(
+                          'Welcome, $caregiverName 👋',
+                          style: const TextStyle(
                             fontSize: 14,
                             color: mutedText,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -415,30 +428,6 @@ class _CaregiverDashboardState extends State<CaregiverDashboard> {
                         size: 23,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: 'Profile',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ProfileScreen(role: 'caregiver'),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.person_outline_rounded),
-                  ),
-                  IconButton(
-                    tooltip: 'Settings',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SettingsScreen(role: 'caregiver'),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.settings_outlined),
                   ),
                 ],
               ),
