@@ -70,19 +70,6 @@ class _ElderHomeState extends State<ElderHome> {
       return displayName;
     }
 
-    // If displayName is unavailable, use the first part of the email
-    // instead of showing the generic word "Elder".
-    final email = user?.email?.trim();
-
-    if (email != null && email.isNotEmpty) {
-      final emailName = email.split('@').first.trim();
-
-      if (emailName.isNotEmpty) {
-        return _formatName(emailName);
-      }
-    }
-
-    // This is only a final fallback when Firebase has no name/email.
     return 'there';
   }
 
@@ -586,33 +573,47 @@ class _ElderHomeState extends State<ElderHome> {
     required bool isDesktop,
     required bool isTablet,
   }) {
+    // --------------------------------------------------------------
+    // MOBILE
+    // Daily Check-in + Voice Check-in side by side
+    // Emergency SOS underneath in the middle
+    // --------------------------------------------------------------
     if (!isDesktop && !isTablet) {
       return Column(
         children: [
-          _buildMainActionCard(
-            title: 'Daily Check-in',
-            subtitle: 'How are you today?',
-            icon: Icons.calendar_month_rounded,
-            iconColor: green,
-            backgroundColor: greenLight,
-            buttonText: 'Check In',
-            onTap: () {
-              Navigator.pushNamed(context, '/checkin');
-            },
-          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildMainActionCard(
+                  title: 'Daily Check-in',
+                  subtitle: 'How are you today?',
+                  icon: Icons.calendar_month_rounded,
+                  iconColor: green,
+                  backgroundColor: greenLight,
+                  buttonText: 'Check In',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/checkin');
+                  },
+                ),
+              ),
 
-          const SizedBox(height: 12),
+              const SizedBox(width: 10),
 
-          _buildMainActionCard(
-            title: 'Voice Check-in',
-            subtitle: 'Speak with us',
-            icon: Icons.mic_rounded,
-            iconColor: orange,
-            backgroundColor: orangeLight,
-            buttonText: 'Start',
-            onTap: () {
-              Navigator.pushNamed(context, '/voice-checkin');
-            },
+              Expanded(
+                child: _buildMainActionCard(
+                  title: 'Voice Check-in',
+                  subtitle: 'Speak with us',
+                  icon: Icons.mic_rounded,
+                  iconColor: orange,
+                  backgroundColor: orangeLight,
+                  buttonText: 'Start',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/voice-checkin');
+                  },
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 12),
@@ -622,6 +623,10 @@ class _ElderHomeState extends State<ElderHome> {
       );
     }
 
+    // --------------------------------------------------------------
+    // TABLET / DESKTOP
+    // Daily Check-in | Emergency SOS | Voice Check-in
+    // --------------------------------------------------------------
     return LayoutBuilder(
       builder: (context, constraints) {
         final spacing = isDesktop ? 16.0 : 12.0;
@@ -650,6 +655,11 @@ class _ElderHomeState extends State<ElderHome> {
 
             SizedBox(
               width: cardWidth,
+              child: _buildSOSCard(context),
+            ),
+
+            SizedBox(
+              width: cardWidth,
               child: _buildMainActionCard(
                 title: 'Voice Check-in',
                 subtitle: 'Speak with us',
@@ -661,11 +671,6 @@ class _ElderHomeState extends State<ElderHome> {
                   Navigator.pushNamed(context, '/voice-checkin');
                 },
               ),
-            ),
-
-            SizedBox(
-              width: cardWidth,
-              child: _buildSOSCard(context),
             ),
           ],
         );
